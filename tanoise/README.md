@@ -4,8 +4,10 @@ Texture-assisted, extremely fast smooth multidimensional noise.
 
 tanoise -> Extremely fast noise that does repeat, but "feels" like perlin noise... Ok, not perlin but smooth noise.  It can be used like perlin noise in many applications. Rewritten to avoid license issues.
 
-Above is a picture of it in-use, with 4 layers are only 4 texture lookups and a handful of calls.  The above is shaded with:
 ![Demo Image](https://raw.githubusercontent.com/cnlohr/shadertrixx/main/tanoise/demo.png)
+
+Above is a picture of it in-use, with 4 layers are only 4 texture lookups and a handful of calls.  The above is shaded with:
+
 ```hlsl
 	col = tanoise3_1d( pos.xyz*20. ) * 0.5 +
 	tanoise3_1d( pos.xyz*40.1 ) * 0.25 +
