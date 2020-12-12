@@ -20,6 +20,11 @@
 //
 //  The texture should be the noise texture bound, standard as a 2D texture
 //  to _TANoiseTex and _TANoiseTex_TexelSize should be the texel size.
+//  NOTE: You must:
+//    * Disable compression (unless you want it muted)
+//    * Use bilinear filtering. 
+//    * Use repeat wrapping.
+//    * If you are using the single-texel lookups, disable sRGB.
 //
 //  Map Generation:
 //    * The C rand() function is insufficient for generation of this texture.
