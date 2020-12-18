@@ -2,7 +2,8 @@ fileFormatVersion: 2
 guid: e783ba138afa8dd4b9f454359613b1f1
 ShaderImporter:
   externalObjects: {}
-  defaultTextures: []
+  defaultTextures:
+  - _TANoiseTex: {fileID: 2800000, guid: 3c924368d7dfc8f4aac5fc4ab857015e, type: 3}
   nonModifiableTextures: []
   userData: 
   assetBundleName: 

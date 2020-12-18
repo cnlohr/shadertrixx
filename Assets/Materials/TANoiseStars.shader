@@ -1,6 +1,6 @@
 ﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "Custom/TANoiseMoon"
+Shader "Custom/TANoiseStars"
 {
     Properties
     {
@@ -61,17 +61,18 @@ Shader "Custom/TANoiseMoon"
 				float3 pos = i.worldspace;
 				float3 normal = normalize( i.normal.xyz );
 
-				col = tanoise4_1d( float4( pos.xyz*20., _Time.y/5. ) ) * 0.5 +
-				tanoise4_1d( float4( pos.xyz*40.1, _Time.y/5. ) ) * 0.3 +
-				tanoise4_1d( float4( pos.xyz*80.2, _Time.y/5. ) ) * 0.2 +
-				tanoise4_1d( float4( pos.xyz*320.5, _Time.y/5. ) ) * 0.1 +
-				tanoise4_1d( float4( pos.xyz*641., _Time.y/5. ) ) * .05 +
-				tanoise4_1d( float4( pos.xyz*1282., _Time.y/5. ) ) * .03;
-				col = pow( col, 1.8)+0.1;
-
-                return fixed4( col.xyz*(-i.normal.zzz*0.6+0.5), 1. );
+				float3 noisevec = normalize( normalize(i.worldspace.xyz - _WorldSpaceCameraPos.xyz) + normalize(normal.xyz)*.1 );
+				noisevec *= 8. * _ScreenParams.x;
+				col = tanoise3_1d( noisevec/200. ) * 0.3 +
+				//tanoise3_1d( noisevec/230. ) * 0.3 +
+				//tanoise3_1d( noisevec/100. ) * 0.3 +
+				tanoise3_1d( noisevec/30. ) * 1.5 +
+				tanoise3( noisevec/40. ) * .05;
+				return col*6-9.0;
             }
             ENDCG
+			
+			Cull Front
         }
     }
 }
