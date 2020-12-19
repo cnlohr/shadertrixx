@@ -15,6 +15,7 @@
 //  float tanoise4_1d( in float4 x )  //1 Texture Lookup
 //  float4 tanoise3( in float3 x )    //2 Texture Lookups
 //  float tanoise3_1d( in float3 x )  //1 Texture Lookup
+//	float tanoise3_1d_fast( in float3 x ) //1 Texture Lookup, No matrix scramble (Slightly poorer quality)
 //  float2 tanoise3_2d( in float3 x ) //1 Texture Lookup
 //  float4 tanoise2( in float2 x )    //1 Texture Lookup
 //
@@ -183,6 +184,24 @@ float tanoise3_1d( in float3 x )
 	float3 c = mul(tanoiseM,x );
 	float3 p = floor(c);
 	float3 f = frac(c);
+
+	// First level smoothing for nice interpolation between levels. This
+	// gets rid of the sharp artifacts that will come from the bilinear
+	// interpolation.
+	f = f * f * ( 3.0 - 2.0 * f );
+
+	// Compute a u,v coordinateback in
+	float2 uv = ( p.xy + p.z*tanoiseZOff ) + f.xy;
+
+	// Uncomment to debug final mnoise matrix.
+	fixed2 r = tex2Dlod( _TANoiseTex, float4( (uv+0.5)*_TANoiseTex_TexelSize, 0.0, 0.0 ) ).rg;
+	return lerp( r.r, r.g, f.z );
+}
+
+float tanoise3_1d_fast( in float3 x )
+{
+	float3 p = floor(x);
+	float3 f = frac(x);
 
 	// First level smoothing for nice interpolation between levels. This
 	// gets rid of the sharp artifacts that will come from the bilinear
