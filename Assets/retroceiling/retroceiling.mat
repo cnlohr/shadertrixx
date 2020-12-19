@@ -84,6 +84,8 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - brightness: 0.57
+    - intensity: 2.41
     - parallax: 0.43
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

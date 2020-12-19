@@ -5,6 +5,7 @@ Shader "Custom/retroceiling"
     Properties
     {
 		parallax ("Parallax", float) = 1.0
+		brightness( "Brightness", float) = 0.6
         _Imagery ("Texture", 2D) = "white" {}
     }	
     SubShader
@@ -43,6 +44,7 @@ Shader "Custom/retroceiling"
 			uniform half2 _Imagery_TexelSize; 
             float4 _NoiseTex_ST;
 			half parallax;
+			half brightness;
 
             v2f vert (appdata v)
             {
@@ -68,15 +70,15 @@ Shader "Custom/retroceiling"
 				half2 vaxy = i.viewangle.xy/i.viewangle.z*parallax;
 				
 				half intensity = 0.0;
-				intensity += tex2D( _Imagery, float3( i.uv, 0.0 ) ).r;
-				intensity += tex2D( _Imagery, float3( i.uv+vaxy, 0.0 ) ).g;
-				intensity += tex2D( _Imagery, float3( i.uv+vaxy*2., 0.0 ) ).b;
-				intensity += pattern1( i.uv+vaxy*3. );
+				intensity += tex2D( _Imagery, float3( i.uv, 0.0 ) ).r * 1.0;
+				intensity += tex2D( _Imagery, float3( i.uv+vaxy, 0.0 ) ).g * .5;
+				intensity += tex2D( _Imagery, float3( i.uv+vaxy*2., 0.0 ) ).b * .25;
+				intensity += pattern1( i.uv+vaxy*3. ) * .125;
 
 				//Create a pattern.
 				
 				col = pow( intensity, .4 );
-				col = fixed4(col.r*0.5, col.r*0.5-0.5, col.r*0.5-0.5, 1.0);
+				col = fixed4(col.r*brightness, col.r*0.5-0.5, col.r*0.5-0.5, 1.0);
                 return col;
             }
             ENDCG
