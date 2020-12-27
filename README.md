@@ -28,3 +28,11 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
  
+## Quick notes.
+
+From @Lyuma
+ * [flatten] (UNITY_FLATTEN macro) to force both cases of an if statement or
+ * force a branch with [branch] (UNITY_BRANCH macro);
+ * force loop to unroll with [unroll] (UNITY_UNROLL) or
+ * force a loop with [loop] (UNITY_LOOP)
+ * there's also [call] for if or switch statements I think, not sure exactly how it works.

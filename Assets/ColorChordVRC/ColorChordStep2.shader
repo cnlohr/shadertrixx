@@ -34,7 +34,7 @@
                 float4 vertex : SV_POSITION;
             };
 			
-			Texture2D<fixed4> _RawDFTData;
+			Texture2D<float> _RawDFTData;
 			uniform half2 _RawDFTData_TexelSize; 
 
             v2f vert (appdata v)
@@ -68,7 +68,7 @@
 					val += GetBinIntensity( bin, oct, bins, octaves );
 				}
 				//val = GetBinIntensity( bin, 1, bins, octaves );
-				fixed4 col = fixed4( val, 0, 0, 0 );
+				fixed4 col = fixed4( val*10., 0, 0, 0 );
                 return col;
             }
             ENDCG
