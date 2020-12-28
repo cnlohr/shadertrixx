@@ -22,7 +22,7 @@ Shader "Custom/retroceiling"
 
             #include "UnityCG.cginc"
 			
-			#define glsl_mod(x,y) abs(((x)-(y)*floor((x)/(y)))) 
+			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 
             struct appdata
             {

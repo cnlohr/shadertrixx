@@ -2,6 +2,14 @@
 
 CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  This largely contains stuff made by other people but I have kind of collected.
 
+## The most important trick
+
+```hlsl
+#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
+```
+
+Thanks, @d4rkpl4y3r
+
 ## tanoise
 
 Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/blob/main/Assets/tanoise/README.md

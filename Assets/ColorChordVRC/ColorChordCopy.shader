@@ -12,6 +12,9 @@
         Tags { "RenderType"="Opaque" }
         LOD 100
 
+		ZWrite Off
+		ZTest Always
+
         Pass
         {
             CGPROGRAM

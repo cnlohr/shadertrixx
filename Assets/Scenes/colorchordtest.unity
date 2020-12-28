@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 37069998}
   - component: {fileID: 37069997}
   - component: {fileID: 37069996}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step2Compute
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,7 +154,7 @@ MeshCollider:
   m_GameObject: {fileID: 37069994}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -169,7 +169,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_MotionVectors: 2
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -405,7 +405,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 7859767
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
@@ -530,7 +530,7 @@ GameObject:
   - component: {fileID: 378410490}
   - component: {fileID: 378410492}
   - component: {fileID: 378410491}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step2Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -568,7 +568,7 @@ Camera:
   m_GameObject: {fileID: 378410489}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
@@ -589,16 +589,16 @@ Camera:
   m_Depth: -8
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 524288
+    m_Bits: 4096
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 8400000, guid: ff4177291c221484fbb6180e01a3ccd5, type: 2}
   m_TargetDisplay: 5
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!1 &751321633
@@ -612,7 +612,7 @@ GameObject:
   - component: {fileID: 751321634}
   - component: {fileID: 751321636}
   - component: {fileID: 751321635}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step3ALTCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -650,7 +650,7 @@ Camera:
   m_GameObject: {fileID: 751321633}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
@@ -671,16 +671,16 @@ Camera:
   m_Depth: -7
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 524288
+    m_Bits: 4096
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 8400000, guid: 2de5c78bcf7a92d4183eb867efe9b4d5, type: 2}
   m_TargetDisplay: 5
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!1 &755874043
@@ -695,7 +695,7 @@ GameObject:
   - component: {fileID: 755874047}
   - component: {fileID: 755874046}
   - component: {fileID: 755874045}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step3ALTCompute
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -725,7 +725,7 @@ MeshCollider:
   m_GameObject: {fileID: 755874043}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -740,7 +740,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_MotionVectors: 2
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -895,7 +895,7 @@ GameObject:
   - component: {fileID: 873300544}
   - component: {fileID: 873300546}
   - component: {fileID: 873300545}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step1Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -933,7 +933,7 @@ Camera:
   m_GameObject: {fileID: 873300543}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
@@ -954,16 +954,16 @@ Camera:
   m_Depth: -9
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 524288
+    m_Bits: 4096
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 8400000, guid: 8aa1d0209427e984b9e0516939762d43, type: 2}
   m_TargetDisplay: 5
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!1 &904145948
@@ -978,7 +978,7 @@ GameObject:
   - component: {fileID: 904145952}
   - component: {fileID: 904145951}
   - component: {fileID: 904145950}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step1Compute
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1008,7 +1008,7 @@ MeshCollider:
   m_GameObject: {fileID: 904145948}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -1023,7 +1023,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_MotionVectors: 2
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -1111,7 +1111,7 @@ GameObject:
   - component: {fileID: 1072174260}
   - component: {fileID: 1072174259}
   - component: {fileID: 1072174258}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step3Compute
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1141,7 +1141,7 @@ MeshCollider:
   m_GameObject: {fileID: 1072174256}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -1156,7 +1156,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_MotionVectors: 2
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -1203,7 +1203,7 @@ GameObject:
   - component: {fileID: 1120603248}
   - component: {fileID: 1120603247}
   - component: {fileID: 1120603246}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step1Copy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1233,7 +1233,7 @@ MeshCollider:
   m_GameObject: {fileID: 1120603244}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -1248,7 +1248,7 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_MotionVectors: 2
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -1473,7 +1473,7 @@ GameObject:
   - component: {fileID: 1490502033}
   - component: {fileID: 1490502035}
   - component: {fileID: 1490502034}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step1CopyCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1511,7 +1511,7 @@ Camera:
   m_GameObject: {fileID: 1490502032}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
@@ -1532,16 +1532,16 @@ Camera:
   m_Depth: -10
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 524288
+    m_Bits: 4096
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 8400000, guid: c0a2cac3a7e33f44ea4943fc85df6e78, type: 2}
   m_TargetDisplay: 5
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!1 &1737827748
@@ -1555,7 +1555,7 @@ GameObject:
   - component: {fileID: 1737827749}
   - component: {fileID: 1737827751}
   - component: {fileID: 1737827750}
-  m_Layer: 19
+  m_Layer: 12
   m_Name: Step3Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1593,7 +1593,7 @@ Camera:
   m_GameObject: {fileID: 1737827748}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
@@ -1614,16 +1614,16 @@ Camera:
   m_Depth: -7
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 524288
+    m_Bits: 4096
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 8400000, guid: 08d403d68e2f87a459afbbba819cbe3e, type: 2}
   m_TargetDisplay: 5
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!1 &1845186578
