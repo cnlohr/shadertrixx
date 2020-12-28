@@ -8,7 +8,7 @@ public class TestUpdateRenderTexture : UdonSharpBehaviour
 {
     public Material mat;
    // public int toggle;
-    public RenderTexture rt;
+    public Texture2D test;
     public AudioSource aus;
    // public AudioClip auclip;
     //XXX Consider: Shader.SetGlobalFloatArray
@@ -30,6 +30,12 @@ public class TestUpdateRenderTexture : UdonSharpBehaviour
         //int place = aus.timeSamples;
         aus.GetOutputData(trunc, 0);
         mat.SetFloatArray("_AudioFrames", trunc);
+
+
+  //      float[] sound = new float[16384];
+  //      aus.GetOutputData(sound, 0);
+  //      test.LoadRawTextureData(BitConverter.ToByte(sound));
+
 //   mat.SetFloat("_SamplesPerSecond", aus.);
         //mat.SetFloat("_TestInt", place );
         //mat.SetFloat("_TestFloat", (toggle!=0)?10.0f:0.0f );

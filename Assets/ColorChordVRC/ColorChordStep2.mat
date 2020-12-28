@@ -87,11 +87,11 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PeakCloseEnough: 2.89
+    - _PeakCloseEnough: 1.35
     - _PeakDecay: 0.9
     - _PeakMinium: 0.006
     - _SmoothnessTextureChannel: 0
-    - _SortNotes: 0
+    - _SortNotes: 2.12
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0

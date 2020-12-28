@@ -83,7 +83,7 @@ Material:
     - _OcclusionStrength: 1
     - _OutputOctaves: 6
     - _Parallax: 0.02
-    - _RootNote: 2.76
+    - _RootNote: 0.02
     - _SamplesPerSecond: 48000
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

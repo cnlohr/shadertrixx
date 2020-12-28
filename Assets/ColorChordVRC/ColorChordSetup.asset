@@ -111,7 +111,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rt
+      Data: test
     - Name: $v
       Entry: 7
       Data: 6|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -123,7 +123,7 @@ MonoBehaviour:
       Data: 8|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.RenderTexture, UnityEngine.CoreModule
+      Data: UnityEngine.Texture2D, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 
@@ -135,13 +135,13 @@ MonoBehaviour:
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineRenderTexture
+      Data: UnityEngineTexture2D
     - Name: symbolOriginalName
       Entry: 1
-      Data: rt
+      Data: test
     - Name: symbolUniqueName
       Entry: 1
-      Data: rt
+      Data: test
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
