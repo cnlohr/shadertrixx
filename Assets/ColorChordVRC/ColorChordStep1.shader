@@ -67,8 +67,10 @@
 				phadelta /= _SamplesPerSecond;
 				phadelta *= 3.1415926 * 2.0;
 				float decay = 1.0;
+				
 				//Roll-off the time constant for higher frequencies.
-				float decaymux = 1.-phadelta*.05;
+				//This 0.08 if reduced
+				float decaymux = 1.-phadelta*.1;
 				float integraldec = 0.;
 				for( idx = 0; idx < SAMPHIST; idx++ )
 				{
