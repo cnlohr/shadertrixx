@@ -1,4 +1,4 @@
-﻿Shader "Custom/ColorChord/Step1"
+﻿Shader "Custom/ColorChord/Step1CRT"
 {
 
 	//X and Y of target texture are bins per octave, and octaves respectively.

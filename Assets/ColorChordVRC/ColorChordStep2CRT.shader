@@ -1,4 +1,4 @@
-﻿Shader "Custom/ColorChord/Step2"
+﻿Shader "Custom/ColorChord/Step2CRT"
 {
 
 	//X and Y of target texture are bins per octave, and octaves respectively.
@@ -12,37 +12,34 @@
 		_PeakCloseEnough ("Close Enough" , float) = 2.0
 		_PeakMinium ("Peak Minimum", float) = 0.005
 		_SortNotes ("Sort Notes", int) = 1
+		_OctaveMerge ("Octave Merge", int) = 1
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" }
         LOD 100
 
+
+		Cull Off
+        Lighting Off		
 		ZWrite Off
 		ZTest Always
 
         Pass
         {
             CGPROGRAM
-            #pragma vertex vert
+
+            #include "UnityCustomRenderTexture.cginc"
+            #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
 			#pragma target 5.0
 
 			#define SAMPHIST 1023
 
-            #include "UnityCG.cginc"
-			
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-            };
+
+            #include "UnityCG.cginc"
 			
 			Texture2D<float> _DFTData;
 			Texture2D<float3> _LastData;
@@ -53,33 +50,28 @@
 			float _PeakCloseEnough;
 			float _PeakMinium;
 			int _SortNotes;
+			int _OctaveMerge;
 		
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
-				return o;
-            }
 
 			#define EXPOCT   8
 			#define EXPBINS  48
 			#define MAXPEAKS 24
 			#define ETOTALBINS (EXPOCT*EXPBINS)			
 			
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
 				float3 Peaks[MAXPEAKS];
 				int NumPeaks = 0;
 
-				int notes = _ScreenParams.x;
-				int noteno = round( i.uv.x * ( notes - 1 ));
-
+				int notes = MAXPEAKS;
+				int noteno = round( (IN.localTexcoord.x) * ( notes - 1 ));
+				//return fixed4( (noteno == (((int)_Time.y)%24))?100:0, 0., 0., 1. );
+				
 				//Phase 3: find peaks
 				{
 					float bindata[ETOTALBINS];
-					int bins = round( 1./_DFTData_TexelSize.x );
-					int octs = round( 1./_DFTData_TexelSize.y );
+					int bins = EXPBINS;//round( 1./_DFTData_TexelSize.x );
+					int octs = EXPOCT;//round( 1./_DFTData_TexelSize.y );
 
 					int o;
 					int i;
@@ -100,6 +92,7 @@
 					int bestbin;
 					float bestbval;
 					//Fill out the Peaks structure.
+					[loop]
 					for( i = 0; i < MAXPEAKS; i++ )
 					{
 						float prev = bindata[0];
@@ -107,6 +100,7 @@
 						bestbin = ETOTALBINS;
 						bestbval = 0.;
 						int b;
+						[loop]
 						for( b = 1; b < ETOTALBINS-1; b++ )
 						{
 							float next = bindata[b+1];
@@ -168,16 +162,19 @@
 					float3 NewPeaks[MAXPEAKS];
 					int NumNewPeaks;
 					int p, np;
+					[loop]
 					for( p = 0; p < MAXPEAKS; p++ )
 					{
 						float3 Peak = _LastData.Load( int3( p, 0, 0 ) );
 						if( Peak.x >= 0 )
 						{
 							Peak.y *= _PeakDecay;
+							[loop]
 							for( np = 0; np < MAXPEAKS; np++ )
 							{
 								float3 ThisPeak = Peaks[np];
 								float diff = abs( ThisPeak.x - Peak.x );
+
 								if( diff < _PeakCloseEnough )
 								{
 									//Roll Peak[np] into last peak.
@@ -219,6 +216,36 @@
 						}
 					}
 					
+
+					if( !!_OctaveMerge )
+					{
+						[loop]
+						for( np = 0; np < MAXPEAKS; np++ )
+						{
+							float3 CheckPeak = NewPeaks[np];
+							if( CheckPeak.y < 0 ) continue;
+							
+							[loop]
+							for( p = np+1; p < MAXPEAKS; p++ )
+							{
+								float3 MergePeak = NewPeaks[p];
+								if( MergePeak.y < 0 ) continue;
+								float diff = abs( CheckPeak.x - MergePeak.x );
+								diff = glsl_mod( diff, EXPBINS );
+								if( diff < _PeakCloseEnough )
+								{
+									//Roll merge peak into CheckPeak
+									float percentage = MergePeak.y / (MergePeak.y + CheckPeak.y);
+									CheckPeak.y += MergePeak.y;
+									CheckPeak.x = lerp( CheckPeak.x, MergePeak.x, percentage );
+									CheckPeak.z = lerp( CheckPeak.z, MergePeak.z, percentage );
+									NewPeaks[p] = -1;
+									NewPeaks[np]= CheckPeak;
+								}
+							}
+						}
+					}
+
 					//We are no longer going to use "Peaks"
 
 					if( !!_SortNotes )
@@ -245,9 +272,9 @@
 
 					//We've now merged any of the peaks we could.
 					//Next, forget dead peaks.
-					
+
 					if( noteno >= NumPeaks )
-						return float4( -1, -1, 0, 1 );
+						return float4( -1, -1, -1, 1 );
 					else
 						return float4( NewPeaks[noteno], 1 );
 				}
