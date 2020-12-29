@@ -84,14 +84,14 @@ Material:
     - _OcclusionStrength: 1
     - _OutputOctaves: 6
     - _Parallax: 0.02
-    - _RootNote: -5
+    - _RootNote: 0
     - _SamplesPerSecond: 48000
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TestInt: 0
     - _UVSec: 0
-    - _Uniformitivity: 0.9
+    - _Uniformitivity: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
