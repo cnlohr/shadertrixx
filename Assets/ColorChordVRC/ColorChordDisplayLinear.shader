@@ -8,6 +8,7 @@
        _NotesData ("Texture", 2D) = "white" {}
 	   _RootNote ("RootNote", int ) = 0
 	   _Uniformitivity ("Uniformitivity", float) = 0.9
+   	   _Brightness ("Brightness",float) = 1.
     }
     SubShader
     {
@@ -42,6 +43,7 @@
             sampler2D _ToCopy;
 			int _RootNote;
 			float _Uniformitivity;
+			float _Brightness;
             float4 _ToCopy_ST;
 			Texture2D<float3> _NotesData;
 
@@ -139,7 +141,7 @@
 					PowerPlace += Power;
 					if( PowerPlace >= i.uv.x ) 
 					{
-						return fixed4( CCtoRGB( Peak.x, Peak.y ), 1.0 );
+						return fixed4( CCtoRGB( Peak.x, Peak.y * _Brightness ), 1.0 );
 					}
 				}
 				

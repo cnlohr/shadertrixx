@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ColorChordStep1
-  m_Shader: {fileID: 4800000, guid: 35257e40154717e4598a7e160b8189e4, type: 3}
-  m_ShaderKeywords: 
+  m_Name: ColorChordStep2CRT
+  m_Shader: {fileID: 4800000, guid: 8b6fd36c29d18b14385115bc859f8a9b, type: 3}
+  m_ShaderKeywords: _SORTNOTES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -19,12 +19,17 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _LastFrameData:
+    - _DFTData:
         m_Texture: {fileID: 8600000, guid: 8b3a9fa8784808e4eaa0a34f0f78c646, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _LastData:
+        m_Texture: {fileID: 8600000, guid: c9f516e8c8b23fb4495abacf0fce91fc, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _BottomFrequency: 55
-    - _IIRCoefficient: 0.9
-    - _SamplesPerSecond: 48000
+    - _PeakCloseEnough: 2
+    - _PeakDecay: 0.9
+    - _PeakMinium: 0.01
+    - _SortNotes: 0
     m_Colors: []
