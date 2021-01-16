@@ -36,11 +36,7 @@ Shader "Custom/TANoiseStars"
 				float3 normal : TEXCOORD3;
             };
 
-            sampler2D _TANoiseTex;
-			uniform half2 _TANoiseTex_TexelSize; 
-            float4 _NoiseTex_ST;
 			#include "../tanoise/tanoise.cginc"
-			
 
             v2f vert (appdata v)
             {
