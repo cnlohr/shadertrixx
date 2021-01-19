@@ -92,7 +92,7 @@
 // I experimentally found this combination to work better, and it seems to
 // cause less repeating when applied to a sphere and a cube.  Selection of
 // noise offset values is critical to avoid apparent repeating patterns.
-//
+// 
 
 #define tanoiseWOff float2(103.0,61.0)
 #define tanoiseZOff float2(51.0,111.0)
@@ -108,13 +108,8 @@ static const float4x4 tanoiseM =
   -0.071301, 0.494967, -0.757557, 0.372699,
   0.494967, 0.388720, 0.303345, 0.701985,
   -0.757557, 0.303345, 0.497523, -0.290552,
-  0.372699, 0.701985, -0.290552, -0.532815
+  0.372699, 0.701985, -0.290552, -0.532815,
 };
-
-
-sampler2D _TANoiseTex;
-uniform half2 _TANoiseTex_TexelSize; 
-float4 _NoiseTex_ST;
 
 float4 tanoise4( in float4 x )
 {
