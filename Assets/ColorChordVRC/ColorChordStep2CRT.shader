@@ -6,10 +6,16 @@
 	//   R: Peak Location (Note #)
 	//   G: Peak Intensity
 	//   B: Peak Q value (How pointy?)
-	//   A: 1.0
+	//   A: Uniformitvity-weighted output.
+	//
+	// NOTE: The last element is a little weird, it contains different data.
+	//   R: Overall peak intensity.
+	//   G: Number of peaks populated.
+	//   B: Unused
+	//   A: Sum of Uniformitivity-weighted outputs.
 	//
 	// If note is empty, value will be:
-	//  (-1, -1, -1, 1. )
+	//  (-1, -1, -1, -1. )
 	
     Properties
     {
@@ -21,6 +27,11 @@
 		_PeakMinium ("Peak Minimum", float) = 0.005
 		_SortNotes ("Sort Notes", int) = 1
 		_OctaveMerge ("Octave Merge", int) = 1
+		
+		_Uniformity( "Uniformitvity", float ) = 1.5
+		_UniCutoff( "Uniformitvity Cutoff", float) = 0.0
+		_UniAmp( "Uniformitvity Amplitude", float ) = 12.0
+		_UniMaxPeak( "Uniformitvity Peak Cutoff", float ) = 0.1
     }
     SubShader
     {
@@ -50,16 +61,17 @@
 			Texture2D<float3> _LastData;
 			float2 _DFTData_TexelSize;
 
-
 			float _PeakDecay;
 			float _PeakCloseEnough;
 			float _PeakMinium;
 			int _SortNotes;
 			int _OctaveMerge;
-		
-
-
-		
+			
+			float _Uniformity;
+			float _UniCutoff;
+			float _UniAmp;
+			float _UniMaxPeak;
+			
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
 				float3 Peaks[MAXPEAKS];
@@ -67,7 +79,6 @@
 
 				int notes = MAXPEAKS;
 				int noteno = round( (IN.localTexcoord.x) * ( notes - 1 ));
-				//return fixed4( (noteno == (((int)_Time.y)%24))?100:0, 0., 0., 1. );
 				
 				//Phase 3: find peaks
 				{
@@ -162,7 +173,7 @@
 				{
 					//OK! Now, we have NumPeaks in Peaks array.
 					//Next, we scour through last frame's array.
-
+					//In order to merge in the peaks.
 					float3 NewPeaks[MAXPEAKS];
 					int NumNewPeaks;
 					int p, np;
@@ -243,14 +254,51 @@
 							}
 						}
 					}
+					
+					//Find the most intense peak.
+					float maxpeak = 0.0;
+					for( np = 0; np <= MAXPEAKS-1; np++ )
+					{
+						float peakamp = NewPeaks[np].y;
+						if( peakamp > maxpeak )
+							maxpeak = peakamp;
+					}
+					
+					if( noteno == notes - 1 )
+					{
+						int peakqty = 0;
+						float peaktot = 0.0;
+						float unitot = 0.0;
+						for( np = 0; np < MAXPEAKS-1; np++ )
+						{
+							float peakamp = NewPeaks[np].y;
+							if( peakamp > 0.0 )
+							{
+								peaktot += peakamp;
+
+								peakqty++;
+
+								float pu = ( pow( peakamp, _Uniformity )) * _UniAmp  - _UniCutoff - maxpeak * _UniMaxPeak;
+								if( pu > 0. )
+									unitot += pu;
+							}
+						}
+						return float4( peaktot, peakqty, maxpeak, unitot );
+					}	
+
 
 					//We've now merged any of the peaks we could.
 					//Next, forget dead peaks.
+					
+					float3 thisNote =  NewPeaks[noteno];
 
-					if( noteno >= NumPeaks )
-						return float4( -1, -1, -1, 1 );
+					if( noteno >= NumPeaks || thisNote.y <= 0.0 )
+						return float4( -1, -1, -1, -1 );
 					else
-						return float4( NewPeaks[noteno], 1 );
+					{
+						float pu = ( pow( thisNote.y, _Uniformity )) * _UniAmp  - _UniCutoff - maxpeak * _UniMaxPeak;
+						return float4( thisNote, pu );
+					}
 				}
 			}
 
