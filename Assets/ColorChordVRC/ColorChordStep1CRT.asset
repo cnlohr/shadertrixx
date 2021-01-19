@@ -32,7 +32,7 @@ CustomRenderTexture:
     m_WrapW: 1
   m_Dimension: 2
   m_VolumeDepth: 1
-  m_Material: {fileID: 2100000, guid: 221258ac24481444f8c1a174a749be0e, type: 2}
+  m_Material: {fileID: 2100000, guid: 7b2d8f80cf35b6b4b8e285b02ef3de31, type: 2}
   m_InitSource: 0
   m_InitMaterial: {fileID: 2100000, guid: 42cb0776421a5b241909f30f04d62f25, type: 2}
   m_InitColor: {r: 1, g: 0, b: 0, a: 1}
