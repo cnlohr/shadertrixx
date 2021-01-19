@@ -23,8 +23,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CCStage1:
+        m_Texture: {fileID: 8600000, guid: 8b3a9fa8784808e4eaa0a34f0f78c646, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CCStage2:
+        m_Texture: {fileID: 8600000, guid: c9f516e8c8b23fb4495abacf0fce91fc, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DFTData:
-        m_Texture: {fileID: 8600000, guid: 49410ca70d80ff14aa55db8391bf784f, type: 2}
+        m_Texture: {fileID: 8600000, guid: 8b3a9fa8784808e4eaa0a34f0f78c646, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -71,6 +79,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _RootNote: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
