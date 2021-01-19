@@ -1,8 +1,16 @@
 ﻿Shader "Custom/ColorChord/Step2CRT"
 {
-
-	//X and Y of target texture are bins per octave, and octaves respectively.
-
+	//the output from this:
+	// Linear array, left-to-right of MAXPEAKS.
+	//  Each element:
+	//   R: Peak Location (Note #)
+	//   G: Peak Intensity
+	//   B: Peak Q value (How pointy?)
+	//   A: 1.0
+	//
+	// If note is empty, value will be:
+	//  (-1, -1, -1, 1. )
+	
     Properties
     {
 		_DFTData ("Step 1 Output", 2D) = "white" {}
@@ -34,10 +42,7 @@
             #pragma fragment frag
 			#pragma target 5.0
 
-			#define SAMPHIST 1023
-
-			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
-
+			#include "ColorChordVRC.cginc"
 
             #include "UnityCG.cginc"
 			
@@ -53,11 +58,8 @@
 			int _OctaveMerge;
 		
 
-			#define EXPOCT   8
-			#define EXPBINS  48
-			#define MAXPEAKS 24
-			#define ETOTALBINS (EXPOCT*EXPBINS)			
-			
+
+		
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
 				float3 Peaks[MAXPEAKS];
@@ -144,6 +146,8 @@
 							
 							float q = (tweakbinDown + tweakbinUp) / (bd*2);
 
+							if( !!_OctaveMerge ) analogbin = glsl_mod( analogbin, EXPBINS );
+
 							Peaks[i] = float3( analogbin, bestbval, q );
 							NumPeaks++;
 						}
@@ -211,36 +215,6 @@
 								if( NewPeaks[np].y < 0 )
 								{
 									NewPeaks[np] = ThisPeak;
-								}
-							}
-						}
-					}
-					
-
-					if( !!_OctaveMerge )
-					{
-						[loop]
-						for( np = 0; np < MAXPEAKS; np++ )
-						{
-							float3 CheckPeak = NewPeaks[np];
-							if( CheckPeak.y < 0 ) continue;
-							
-							[loop]
-							for( p = np+1; p < MAXPEAKS; p++ )
-							{
-								float3 MergePeak = NewPeaks[p];
-								if( MergePeak.y < 0 ) continue;
-								float diff = abs( CheckPeak.x - MergePeak.x );
-								diff = glsl_mod( diff, EXPBINS );
-								if( diff < _PeakCloseEnough )
-								{
-									//Roll merge peak into CheckPeak
-									float percentage = MergePeak.y / (MergePeak.y + CheckPeak.y);
-									CheckPeak.y += MergePeak.y;
-									CheckPeak.x = lerp( CheckPeak.x, MergePeak.x, percentage );
-									CheckPeak.z = lerp( CheckPeak.z, MergePeak.z, percentage );
-									NewPeaks[p] = -1;
-									NewPeaks[np]= CheckPeak;
 								}
 							}
 						}

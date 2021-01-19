@@ -29,8 +29,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _OctaveMerge: 1
-    - _PeakCloseEnough: 2.51
-    - _PeakDecay: 0.9
+    - _PeakCloseEnough: 2.5
+    - _PeakDecay: 0.8
     - _PeakMinium: 0.01
     - _SortNotes: 0
     m_Colors: []

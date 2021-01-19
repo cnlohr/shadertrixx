@@ -1,7 +1,9 @@
 ﻿Shader "Custom/ColorChord/Step1CRT"
 {
-
-	//X and Y of target texture are bins per octave, and octaves respectively.
+	//The output of this pass:
+	//	X: The intensity of the note within the octave.
+	//  Y: The and Y of target texture are bins per octave, and octaves respectively.
+	
 
     Properties
     {
@@ -28,16 +30,12 @@
             CGPROGRAM
 			
             #include "UnityCustomRenderTexture.cginc"
+			#include "ColorChordVRC.cginc"
+
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
 
-			#define SAMPHIST 1023
-
             #include "UnityCG.cginc"
-			
-			
-			#define EXPBINS 48
-			#define OCTAVES 8
 			
 			uniform float  _AudioFrames[1023];
 			float _BottomFrequency;
@@ -83,7 +81,7 @@
 				
 				ampl *= 2./integraldec;
 				
-				float mag = length( ampl )*length( ampl );
+				float mag = pow( length( ampl ), 2.0 );
 				mag = lerp( mag, last, _IIRCoefficient );
 				
 				fixed4 col = fixed4( mag, 0, 0, 1 );

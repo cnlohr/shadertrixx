@@ -24,8 +24,7 @@
             #pragma vertex vert
             #pragma fragment frag
 			
-			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
-
+			#include "ColorChordVRC.cginc"
             #include "UnityCG.cginc"
 
             struct appdata
@@ -56,9 +55,6 @@
                 return o;
             }
 			
-			#define EXPBINS  48
-			#define MAXPEAKS 24
-
 			float3 HSVtoRGB(float3 HSV)
 			{
 				float3 RGB = 0;
