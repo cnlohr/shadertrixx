@@ -1,4 +1,4 @@
-﻿Shader "Custom/ColorChord/Debug"
+﻿Shader "Custom/ColorChord/ColorChordStep1Debug"
 {
     Properties
     {
