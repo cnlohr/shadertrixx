@@ -6,6 +6,10 @@
     Properties
     {
         _LaplacianMap ("Last Frame's Data", 2D) = "white" {}
+		_OutputTextureIntensity ("Intensity", float ) = 0.06
+		_HUEVariance( "Hue Variance", float ) = .8
+		_HUETerm( "Hue Shift", float ) = 0.7
+		_ABSTerm( "ABS Term", float ) = .5
     }
     SubShader
     {
@@ -33,8 +37,12 @@
 			
 			Texture2D<float4> _LaplacianMap;
 			float2 _LaplacianMap_TexelSize;
-			
-			
+			float _OutputTextureIntensity;
+			float _HUEVariance;
+			float _HUETerm;
+			float _ABSTerm;
+
+
 			float3 HSVtoRGB(float3 HSV)
 			{
 				float3 RGB = 0;
@@ -59,15 +67,25 @@
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
 				int2 LaplacianCoord = IN.localTexcoord.xy / _LaplacianMap_TexelSize;
-                float4 Last =   _LaplacianMap.Load( int3( LaplacianCoord, 0 ) );
-                float4 Left1 =  _LaplacianMap.Load( int3( LaplacianCoord + int2(-1,0), 0 ) );
-                float4 Up1 =    _LaplacianMap.Load( int3( LaplacianCoord + int2(0,-1), 0 ) );
-                float4 Right1 = _LaplacianMap.Load( int3( LaplacianCoord + int2(1,0), 0 ) );
-                float4 Down1 =  _LaplacianMap.Load( int3( LaplacianCoord + int2(0,1), 0 ) );
 				
-				float4 Filtered = Last/10. + (Left1+Up1+Right1+Down1)/4.;
+				float Last = 0.;
+				int2 xy;
+				for( xy.x = -1; xy.x <=1; xy.x++ )
+				{
+					for( xy.y = -1; xy.y <=1; xy.y++ )
+					{
+						float4 v = _LaplacianMap.Load( int3( LaplacianCoord + xy, 0 ) );
+						Last += v / (length(xy)+1);
+					}
+				}
+			
+				float4 Filtered = Last*_OutputTextureIntensity;
 
-				return fixed4( HSVtoRGB( float3( Filtered.z*2.+.6+Filtered.x, 1., abs(Filtered.x)) ), 1.);
+				return fixed4( HSVtoRGB( 
+					float3( 
+						glsl_mod( Filtered.z*_HUEVariance+_HUETerm+Filtered.x + 600., 1.), 
+						1., abs(Filtered.x)*_ABSTerm
+					) ), 1.);
 			}
 
 
