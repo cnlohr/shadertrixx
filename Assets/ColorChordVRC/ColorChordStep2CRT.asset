@@ -12,7 +12,7 @@ CustomRenderTexture:
     Hash: 00000000000000000000000000000000
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
-  m_Width: 24
+  m_Width: 16
   m_Height: 1
   m_AntiAliasing: 1
   m_DepthFormat: 0
@@ -35,7 +35,7 @@ CustomRenderTexture:
   m_Material: {fileID: 2100000, guid: 1676b29d244967f489b81fe02bf3f1c5, type: 2}
   m_InitSource: 0
   m_InitMaterial: {fileID: 2100000, guid: 42cb0776421a5b241909f30f04d62f25, type: 2}
-  m_InitColor: {r: 1, g: 0, b: 0, a: 1}
+  m_InitColor: {r: 0, g: 0, b: 0, a: 1}
   m_InitTexture: {fileID: 0}
   m_UpdateMode: 1
   m_InitializationMode: 0
