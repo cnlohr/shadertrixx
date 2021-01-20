@@ -44,7 +44,7 @@ Shader "Custom/TANoiseMoon"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
 				o.pos = v.vertex.xyz/v.vertex.w;
-                o.uv = TRANSFORM_TEX(v.uv, _NoiseTex);
+                o.uv = TRANSFORM_TEX(v.uv, _TANoiseTex);
 				o.worldspace = mul( unity_ObjectToWorld, v.vertex );
 				o.normal = mul ((float4x4)unity_ObjectToWorld, v.normal );
                 return o;

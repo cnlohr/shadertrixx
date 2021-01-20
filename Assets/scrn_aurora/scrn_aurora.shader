@@ -27,8 +27,6 @@ Shader "SCRN_Aurora"
 			sampler2D _TexOut;
 			fixed2 varInput;
 
-            sampler2D _TANoiseTex;
-			uniform half2 _TANoiseTex_TexelSize; 
             float4 _NoiseTex_ST;
 			#include "../tanoise/tanoise.cginc"
 
