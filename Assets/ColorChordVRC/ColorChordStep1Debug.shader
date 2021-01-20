@@ -76,14 +76,25 @@
 					return fixed4( CCtoRGB(noteno, 1.0, _RootNote ), 1.0 );
 				else if( marker > 0.0 )
 					return float4( marker, 0., 0., 1. );
-				else if( iuv.y < 0.2 )
-				{
-					//Up top? Debug stage 2.
-					float4 ccpick = tex2D( _CCStage2, float2( iuv.x, 0.5 ) );
-					return ccpick;
-				}
 				else
 				{
+					//Debug stage 2.
+					float4 ccpick = tex2D( _CCStage2, float2( iuv.x, 0.5 ) );
+					if( (glsl_mod( iuv.x, 1./MAXPEAKS ) > 0.5/MAXPEAKS ) )
+					{
+						float vv = ccpick.g;
+						vv= sqrt(vv);
+						if( iuv.y < vv ) 
+							return fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+					}
+					else
+					{
+						float vv =(ccpick.a/10.);
+						vv= sqrt(vv);
+						if( iuv.y < vv && iuv.y > vv - 0.05 ) 
+							return fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+					}
+					
 					return 0.;
 				}
 

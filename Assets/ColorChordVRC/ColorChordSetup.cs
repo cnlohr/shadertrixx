@@ -8,7 +8,6 @@ public class TestUpdateRenderTexture : UdonSharpBehaviour
 {
     public Material mat;
    // public int toggle;
-    public Texture2D test;
     public AudioSource aus;
    // public AudioClip auclip;
     //XXX Consider: Shader.SetGlobalFloatArray

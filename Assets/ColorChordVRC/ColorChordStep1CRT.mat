@@ -25,6 +25,6 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BottomFrequency: 110
-    - _IIRCoefficient: 0.8
+    - _IIRCoefficient: 0.9
     - _SamplesPerSecond: 48000
     m_Colors: []

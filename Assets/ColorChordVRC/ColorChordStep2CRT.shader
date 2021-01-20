@@ -31,7 +31,9 @@
 		_Uniformity( "Uniformitvity", float ) = 1.5
 		_UniCutoff( "Uniformitvity Cutoff", float) = 0.0
 		_UniAmp( "Uniformitvity Amplitude", float ) = 12.0
-		_UniMaxPeak( "Uniformitvity Peak Cutoff", float ) = 0.1
+		_UniMaxPeak( "Uniformitvity Peak Reduction", float ) = 0.0
+		_UniSumPeak( "Uniformitvity Sum Reduction", float ) = 0.1
+		_UniNerfFromQ ("Uniformitvity Nerf from Bad Q", float ) = 0.05
     }
     SubShader
     {
@@ -58,7 +60,7 @@
             #include "UnityCG.cginc"
 			
 			Texture2D<float> _DFTData;
-			Texture2D<float3> _LastData;
+			Texture2D<float4> _LastData;
 			float2 _DFTData_TexelSize;
 
 			float _PeakDecay;
@@ -71,6 +73,8 @@
 			float _UniCutoff;
 			float _UniAmp;
 			float _UniMaxPeak;
+			float _UniSumPeak;
+			float _UniNerfFromQ;
 			
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
@@ -79,6 +83,7 @@
 
 				int notes = MAXPEAKS;
 				int noteno = round( (IN.localTexcoord.x) * ( notes - 1 ));
+				float4 LastPeaksSummary = _LastData.Load( int3( MAXPEAKS-1, 0, 0 ) );
 				
 				//Phase 3: find peaks
 				{
@@ -255,35 +260,38 @@
 						}
 					}
 					
-					//Find the most intense peak.
+					//Find the most intense peak + PEak totals.
 					float maxpeak = 0.0;
+					float peaktot = 0.0;
+					int peakqty = 0;
 					for( np = 0; np <= MAXPEAKS-1; np++ )
 					{
 						float peakamp = NewPeaks[np].y;
 						if( peakamp > maxpeak )
 							maxpeak = peakamp;
+						if( peakamp > 0.0 )
+						{
+							peaktot += peakamp;
+							peakqty++;
+						}
 					}
+					float peaktotrun = lerp( LastPeaksSummary.z, peaktot, 0.9 );
 					
 					if( noteno == notes - 1 )
 					{
-						int peakqty = 0;
-						float peaktot = 0.0;
 						float unitot = 0.0;
 						for( np = 0; np < MAXPEAKS-1; np++ )
 						{
 							float peakamp = NewPeaks[np].y;
 							if( peakamp > 0.0 )
 							{
-								peaktot += peakamp;
 
-								peakqty++;
-
-								float pu = ( pow( peakamp, _Uniformity )) * _UniAmp  - _UniCutoff - maxpeak * _UniMaxPeak;
+								float pu = ( pow( peakamp, _Uniformity )) * _UniAmp  - _UniCutoff - pow( maxpeak, _Uniformity ) * _UniMaxPeak + (1. - NewPeaks[np].z*_UniNerfFromQ) -  pow( peaktotrun, _Uniformity ) * _UniSumPeak;
 								if( pu > 0. )
 									unitot += pu;
 							}
 						}
-						return float4( peaktot, peakqty, maxpeak, unitot );
+						return float4( peaktot, peakqty, peaktotrun, unitot );
 					}	
 
 
@@ -296,7 +304,7 @@
 						return float4( -1, -1, -1, -1 );
 					else
 					{
-						float pu = ( pow( thisNote.y, _Uniformity )) * _UniAmp  - _UniCutoff - maxpeak * _UniMaxPeak;
+						float pu = ( pow( thisNote.y, _Uniformity )) * _UniAmp  - _UniCutoff - pow( maxpeak, _Uniformity ) * _UniMaxPeak  + (1. - thisNote.z*_UniNerfFromQ) - pow( peaktotrun, _Uniformity ) * _UniSumPeak;
 						return float4( thisNote, pu );
 					}
 				}
