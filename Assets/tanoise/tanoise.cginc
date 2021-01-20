@@ -103,6 +103,10 @@
 // 60 degree angles between axes.  The 60 degree mark seems to make for very
 // appealing noise.
 
+sampler2D _TANoiseTex;
+uniform half2 _TANoiseTex_TexelSize; 
+uniform half4 _TANoiseTex_ST; 
+
 static const float4x4 tanoiseM = 
 {
   -0.071301, 0.494967, -0.757557, 0.372699,
