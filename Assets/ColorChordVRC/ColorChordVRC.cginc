@@ -28,6 +28,10 @@ float3 CCHSVtoRGB(float3 HSV)
 	return RGB + M;
 }
 
+#ifndef CCclamp
+#define CCclamp(x,y,z) clamp( x, y, z )
+#endif
+
 
 float3 CCtoRGB( float bin, float intensity, int RootNote )
 {
@@ -56,5 +60,5 @@ float3 CCtoRGB( float bin, float intensity, int RootNote )
 		}
 	}
 	float val = intensity-.1;
-	return CCHSVtoRGB( float3( fmod(hue,1.0), 1.0, clamp( val, 0.0, 1.0 ) ) );
+	return CCHSVtoRGB( float3( fmod(hue,1.0), 1.0, CCclamp( val, 0.0, 1.0 ) ) );
 }

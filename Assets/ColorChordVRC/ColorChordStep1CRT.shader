@@ -3,8 +3,6 @@
 	//The output of this pass:
 	//	X: The intensity of the note within the octave.
 	//  Y: The and Y of target texture are bins per octave, and octaves respectively.
-	
-
     Properties
     {
 		//Not used; Not available on video streams.
@@ -26,7 +24,7 @@
 
         Pass
         {
-            Name "Step1"
+            Name "Step1CRT"
             CGPROGRAM
 			
             #include "UnityCustomRenderTexture.cginc"

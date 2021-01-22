@@ -68,9 +68,15 @@
 				inten = tex2D(_CCStage1, float2(readno/(float)EXPBINS, (EXPOCT - reado - 1 )/(float)EXPOCT ) );
 					//_DFTData.Load( int3( readno, EXPOCT-reado-1, 0 ) );
 					//return float4( inten*100., 0.,0.,1.);
-			
+		
+				inten *= 3.;
 		
 				float marker = (readno==0)?1.0:0.0;
+			
+				if( iuv.y > 0.98 )
+				{
+					return fixed4( CCtoRGB( iuv.x*48., 1.0, 1.0 ), 1.0);
+				}
 			
 				if( abs( inten - iuv.y ) < 0.02 )
 					return fixed4( CCtoRGB(noteno, 1.0, _RootNote ), 1.0 );
