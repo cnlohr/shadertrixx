@@ -10,8 +10,8 @@
 	//
 	// NOTE: The last element is a little weird, it contains different data.
 	//   R: Overall peak intensity.
-	//   G: Number of peaks populated.
-	//   B: Unused
+	//   G: Average Phase 1 Amplitude
+	//   B: Heavily filtered amplitude of loudest peak note.
 	//   A: Sum of Uniformitivity-weighted outputs.
 	//
 	// If note is empty, value will be:
@@ -263,7 +263,6 @@
 					//Find the most intense peak + PEak totals.
 					float maxpeak = 0.0;
 					float peaktot = 0.0;
-					int peakqty = 0;
 					for( np = 0; np <= MAXPEAKS-1; np++ )
 					{
 						float peakamp = NewPeaks[np].y;
@@ -272,13 +271,14 @@
 						if( peakamp > 0.0 )
 						{
 							peaktot += peakamp;
-							peakqty++;
 						}
 					}
 					float peaktotrun = lerp( LastPeaksSummary.z, peaktot, 0.9 );
 					
 					if( noteno == notes - 1 )
 					{
+						//This is the last, special pixel that gives metadata instead.
+						
 						float unitot = 0.0;
 						for( np = 0; np < MAXPEAKS-1; np++ )
 						{
@@ -291,7 +291,18 @@
 									unitot += pu;
 							}
 						}
-						return float4( peaktot, peakqty, peaktotrun, unitot );
+						
+						float avgphase1 = 0;
+
+						int o, b;
+						for( o = 0; o < OCTAVES; o++ )
+						for( b = 0; b < EXPBINS; b++ )
+						{
+							avgphase1 += _DFTData.Load( int3( b, EXPOCT-o-1, 0 ) );
+						}
+						avgphase1 /= (OCTAVES*EXPBINS);
+						
+						return float4( peaktot, avgphase1, peaktotrun, unitot );
 					}	
 
 

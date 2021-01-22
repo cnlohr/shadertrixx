@@ -5,10 +5,10 @@
 
     Properties
     {
-       _NotesData ("Texture", 2D) = "white" {}
-	   _RootNote ("RootNote", float ) = 0
-	   _Brightness ("Brightness",float) = 1.
-	   _Uniformitivity ("Uniformitivity", float) = 0.9
+		_NotesData ("Note Data (Phase 2 Output)", 2D) = "white" {}
+		_RootNote ("RootNote", float ) = 0
+		_Brightness ("Brightness",float) = 1.
+		_Uniformitivity ("Uniformitivity", float) = 0.9
     }
     SubShader
     {
