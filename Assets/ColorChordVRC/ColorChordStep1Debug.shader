@@ -58,18 +58,15 @@
                 return col;
 			#endif
 				float2 iuv = i.uv;
-				//iuv.x is the NOTE, iuv.y is the INTENSITY.
 
-				float inten = 0;
+				float4 inten = 0;
 
 				int noteno = iuv.x * EXPBINS * EXPOCT;
 				int readno = noteno % EXPBINS;
 				int reado = (noteno/EXPBINS);
 				inten = tex2D(_CCStage1, float2(readno/(float)EXPBINS, (EXPOCT - reado - 1 )/(float)EXPOCT ) );
-					//_DFTData.Load( int3( readno, EXPOCT-reado-1, 0 ) );
-					//return float4( inten*100., 0.,0.,1.);
-		
-				inten *= 3.;
+
+				inten.x *= 3.;
 		
 				float marker = (readno==0)?1.0:0.0;
 			
@@ -77,9 +74,11 @@
 				{
 					return fixed4( CCtoRGB( iuv.x*48., 1.0, 1.0 ), 1.0);
 				}
-			
-				if( abs( inten - iuv.y ) < 0.02 )
+
+				if( abs( inten.x - iuv.y ) < 0.02 )
 					return fixed4( CCtoRGB(noteno, 1.0, _RootNote ), 1.0 );
+				if( abs( inten.z - iuv.y*2.+1. )< 0.04 )
+					return 1.;
 				else if( marker > 0.0 )
 					return float4( marker, 0., 0., 1. );
 				else

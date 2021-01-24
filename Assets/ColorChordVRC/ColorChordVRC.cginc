@@ -4,7 +4,7 @@
 #define EXPOCT 8
 #define OCTAVES 8
 #define MAXPEAKS 16
-#define SAMPHIST 1023
+#define SAMPHIST 1018
 #define ETOTALBINS (EXPOCT*EXPBINS)			
 
 

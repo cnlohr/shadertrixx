@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: ColorChordSetup
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: aeaa7a9572be2e445b592d6454c49325,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 51f0a72285d5eb905944e9b535007f9e,
     type: 2}
   udonAssembly: 
   assemblyError: 
