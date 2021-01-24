@@ -54,6 +54,7 @@
 				
 				//vin is like depth
 				//This clamps depth.
+				if( vin > .999 ) vin = 0.0;
 				if( vin > 0.01 ) vin = 1.0;
 				else vin = 0;
 				
