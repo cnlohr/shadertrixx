@@ -11,6 +11,7 @@
 		_SamplesPerSecond ("SamplesPerSecond", float ) = 48000
 		_LastFrameData ("Last Frame", 2D) = "white" {}
 		_IIRCoefficient ("IIR Coefficient", float) = 0.35
+		_BaseAmplitude ("Base Amplitude Multiplier", float) = 4.0
     }
     SubShader
     {
@@ -30,16 +31,18 @@
             #include "UnityCustomRenderTexture.cginc"
 			#include "ColorChordVRC.cginc"
 
+			#pragma target 4.0
             #pragma vertex CustomRenderTextureVertexShader
             #pragma fragment frag
 
             #include "UnityCG.cginc"
 			
-			uniform float  _AudioFrames[1023];
+			uniform float  _AudioFrames[1018];
 			float _BottomFrequency;
 			float _SamplesPerSecond;
 			float _IIRCoefficient;
-			
+			float _BaseAmplitude;
+
 			sampler2D _LastFrameData;
 			uniform half2 _LastFrameData_TexelSize; 
 
@@ -77,13 +80,12 @@
 					decay *= decaymux;
 				}
 				
-				ampl *= 2./integraldec;
+				ampl *= _BaseAmplitude/integraldec;
 				
 				float mag = pow( length( ampl ), 2.0 );
 				mag = lerp( mag, last, _IIRCoefficient );
 				
-				fixed4 col = fixed4( mag, 0, 0, 1 );
-				//fixed4 col = fixed4( phadelta*2., 0, 0, 0 );
+				fixed4 col = fixed4( mag, 1.0, _AudioFrames[bin+octave*bins], 1 );
                 return col;
             }
             ENDCG
