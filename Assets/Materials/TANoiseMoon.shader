@@ -20,6 +20,8 @@ Shader "Custom/TANoiseMoon"
 
             #include "UnityCG.cginc"
 
+			#include "../tanoise/tanoise.cginc"
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -35,8 +37,6 @@ Shader "Custom/TANoiseMoon"
 				float3 worldspace : TEXCOORD2;
 				float3 normal : TEXCOORD3;
             };
-
-			#include "../tanoise/tanoise.cginc"
 			
 
             v2f vert (appdata v)
