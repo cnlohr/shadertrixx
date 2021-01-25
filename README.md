@@ -46,6 +46,8 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/aiya000/VRChat-Flya
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
+ 
+Lit vertex shader
  * https://github.com/Xiexe/Unity-Lit-Shader-Templates
 
 Interesting looking mesh tool (Still need to use)
