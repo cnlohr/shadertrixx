@@ -1,4 +1,21 @@
-﻿Shader "Custom/FlowingWater"
+﻿// Upgrade NOTE: replaced tex2D unity_Lightmap with UNITY_SAMPLE_TEX2D
+
+// Upgrade NOTE: commented out 'float4 unity_LightmapST', a built-in variable
+// Upgrade NOTE: commented out 'sampler2D unity_Lightmap', a built-in variable
+
+// Upgrade NOTE: replaced tex2D unity_Lightmap with UNITY_SAMPLE_TEX2D
+
+// Upgrade NOTE: replaced tex2D unity_Lightmap with UNITY_SAMPLE_TEX2D
+
+// Upgrade NOTE: commented out 'sampler2D unity_Lightmap', a built-in variable
+
+// Upgrade NOTE: commented out 'sampler2D unity_Lightmap', a built-in variable
+
+// could add UNITY_SHADER_NO_UPGRADE 
+
+//UNITY_SHADER_NO_UPGRADE 
+
+Shader "Custom/FlowingWater"
 {
     Properties
     {
@@ -13,40 +30,73 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType" = "Opaque" }
         LOD 100
-
-        Pass
+		Pass
         {
+            Tags {"LightMode"="ForwardBase"}
+			
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            
+            #pragma multi_compile _ _SHADOWS_SOFT
+			#pragma multi_compile _ LIGHTMAP_ON
+			#pragma multi_compile _ DYNAMICLIGHTMAP_ON
+			#pragma multi_compile_fwdbase
+			
+			
             #include "UnityCG.cginc"
+			#include "AutoLight.cginc"
+			#include "Lighting.cginc"
 
 			#include "../tanoise/tanoise.cginc"
 
+			#ifndef glsl_mod
+			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
+			#endif
+			
             struct appdata
             {
                 float4 vertex : POSITION;
 				float3 normal : NORMAL;
 				float3 tangent : TANGENT;
                 float2 uv : TEXCOORD0;
+				float2 uv1 : TEXCOORD1; //Lightmap
+				float2 uv2 : TEXCOORD2; //Lightmap
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-				float3 hitvlocal : TEXCOORD1;
+				float3 hitvlocal : TEXCOORD4;
 				float3 worldpos : TEXCOORD2;
 				float3 localnorm : NORMAL;
 				float3 localtangent : TANGENT;
 				
 				float4 lightpos : TEXCOORD3;
+				float4 debug : TEXCOORD5;
+				
+			
+				#if defined(LIGHTMAP_ON)
+					float2 uvLightStatic : TEXCOORD8;
+				#endif
+				#if defined( DYNAMICLIGHTMAP_ON )
+					float2 uvLightDynamic : TEXCOORD9;
+				#endif
             };
 
+			
+			// sampler2D unity_Lightmap;
+			// float4 unity_LightmapST;
+	        //half4 unity_Lightmap_ST; // Required by TRANSFORM_TEX macro
+           
+		   
 			sampler2D _WaterBottomTex;
+
             float4 _WaterBottomTex_ST;
             float _Vividity, _WaterScale;
 			float _VividitySurface;
@@ -67,11 +117,36 @@
 				o.localtangent = v.tangent;
 				o.lightpos = mul( unity_WorldToObject, _WorldSpaceLightPos0 );
                 UNITY_TRANSFER_FOG(o,o.vertex);
+				
+				
+				#if defined(LIGHTMAP_ON)
+				o.uvLightStatic = v.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+				#endif
+				#if defined( DYNAMICLIGHTMAP_ON )
+				o.uvLightDynamic = v.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+				#endif
+				o.debug = float4( v.uv2.xy, 0., 1. );
                 return o;
             }
-            
+			
+			#define MYtex2DMY tex2D 
+			#define MY2DLM unity_Lightmap
+			
+			//sampler2D MY2DLM;
+			
             fixed4 frag (v2f i) : SV_Target
             {
+				float4 lightmux = float4( 0., 0., 0., 1. );
+			#if defined(LIGHTMAP_ON)
+				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uvLightDynamic ));
+			#endif
+			#if defined( DYNAMICLIGHTMAP_ON )
+				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, i.uvLightDynamic ));
+			#endif
+			#if !defined( LIGHTMAP_ON ) && !defined( DYNAMICLIGHTMAP_ON )
+				lightmux = 1.;
+			#endif
+			
 				float3 localnorm = normalize( i.localnorm );
 				float3 localtangent = normalize(i.localtangent);                        //uv.x increase [verified]
 				float3 localbitangent = normalize( cross( localtangent, localnorm ) );  //uv.y increase [verified]
@@ -125,7 +200,7 @@
 
 				newuv += shift;
 
-				float4 bottomtexel = tex2D (_WaterBottomTex, newuv);
+				float4 bottomtexel = tex2D (_WaterBottomTex, newuv) * lightmux;
 
 				//Now add surface effects.
 				float2 tanoisesurface = tanoiseperturb;
@@ -136,7 +211,7 @@
 				float3 R = reflect( -normalize(L), normalize(N) );
 
 				float whitetips = pow( max( dot(R, V ), 0. ), _Shinyness );
-				return float4( bottomtexel.rgb + whitetips*0.8, 1. );
+				return float4( bottomtexel.rgb + whitetips*0.8*lightmux.rgb, 1. );
             }
             ENDCG
         }
