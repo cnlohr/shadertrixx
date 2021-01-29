@@ -27,6 +27,8 @@ Shader "Custom/FlowingWater"
 		_WaterSpeed( "Water Speed", float ) = 10.
 		_TANoiseTex ("TANoise", 2D) = "white" {}
 		_Shinyness( "Shinyness", float ) = 100.
+		_Brightness ("Brightness", float) = 1.5
+		_GIShift( "GI Perterbation Shift", float ) = 0.01
     }
     SubShader
     {
@@ -103,9 +105,57 @@ Shader "Custom/FlowingWater"
 			float _WaterSpeed;
 			float _Depth;
 			float _Shinyness;
+			float _Brightness;
 			uniform float4 _WaterBottomTex_TexelSize;
+			float _GIShift;
 				 
-				 
+					 
+			#include "../standardtrixx.cginc"
+
+			//Original code, Copyright © 2013 Inigo Quilez under the MIT/x11 license.
+			//But, basically rewritten.  License on new version: MIT/x11 <>< CNLohr
+
+			float4 voronoi( float2 x, float anim, inout float2 pertps )
+			{
+				float2 n = floor( x );
+				float2 f = frac( x );
+				
+				float mdist = 8.0;
+				float medge = 8.0;
+				float2 moffset = 0.;
+				for( int j=-1; j<=1; j++ )
+				for( int i=-1; i<=1; i++ )
+				{
+					float2 g = float2( float(i),float(j) );
+					float2 o = hash22( n + g );
+
+					// animate
+					o = 0.5+0.5*sin( _Time.y*anim + 6.2831*o );
+
+					float2 r = g - f + o;
+
+					float d = sqrt(dot(r,r));
+					
+					float pertam = max( 0.7-d, 0 );
+					pertps += pertam * o*.1;
+					
+					
+					if( d < mdist )
+					{
+						medge = mdist;
+						mdist = d;
+						moffset = r;
+					}
+					else if( d < medge )
+					{
+						//Edge trick from: https://www.shadertoy.com/view/MdSGRc
+						medge = d;
+					}
+				}
+				return float4( medge, mdist, moffset );
+			}
+
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -136,16 +186,7 @@ Shader "Custom/FlowingWater"
 			
             fixed4 frag (v2f i) : SV_Target
             {
-				float4 lightmux = float4( 0., 0., 0., 1. );
-			#if defined(LIGHTMAP_ON)
-				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uvLightDynamic ));
-			#endif
-			#if defined( DYNAMICLIGHTMAP_ON )
-				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, i.uvLightDynamic ));
-			#endif
-			#if !defined( LIGHTMAP_ON ) && !defined( DYNAMICLIGHTMAP_ON )
-				lightmux = 1.;
-			#endif
+
 			
 				float3 localnorm = normalize( i.localnorm );
 				float3 localtangent = normalize(i.localtangent);                        //uv.x increase [verified]
@@ -184,6 +225,8 @@ Shader "Custom/FlowingWater"
 				//return float4( tanoiseperturb, 0., 1. );
 				//return float4( newlocalnorm, 1. );
 				
+
+				
 				//Tricky: we want to permute the vector heading to the floor.
 
 				float2 newuv = i.uv;
@@ -200,6 +243,34 @@ Shader "Custom/FlowingWater"
 
 				newuv += shift;
 
+
+				//Update with caustics from GI.
+				
+				float4 lightmux = float4( 0., 0., 0., 1. );
+			#if defined(LIGHTMAP_ON)
+				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uvLightDynamic+shiftynoise*_GIShift ));
+			#endif
+			#if defined( DYNAMICLIGHTMAP_ON )
+				lightmux.rgb += DecodeLightmap (UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, i.uvLightDynamic+shiftynoise*_GIShift ));
+			#endif
+			#if !defined( LIGHTMAP_ON ) && !defined( DYNAMICLIGHTMAP_ON )
+				lightmux = 1.;
+			#endif
+
+
+				float2 pertps = 0.;
+				float4 v = voronoi( newuv*_WaterScale*10.+noisetime.xy, _WaterSpeed * _WaterScale, pertps );
+				float mux = pow( abs(v.xxxx )*1.0+0.25, 2. )*.5;//abs(pow(.5-pow( v.xxxx, 4 ), 2.))+.3;
+				//return mux;
+				lightmux *= mux;
+				
+				
+				
+				
+
+
+
+
 				float4 bottomtexel = tex2D (_WaterBottomTex, newuv) * lightmux;
 
 				//Now add surface effects.
@@ -211,7 +282,7 @@ Shader "Custom/FlowingWater"
 				float3 R = reflect( -normalize(L), normalize(N) );
 
 				float whitetips = pow( max( dot(R, V ), 0. ), _Shinyness );
-				return float4( bottomtexel.rgb + whitetips*0.8*lightmux.rgb, 1. );
+				return float4( (bottomtexel.rgb + whitetips*0.8*lightmux.rgb) * _Brightness, 1. );
             }
             ENDCG
         }
