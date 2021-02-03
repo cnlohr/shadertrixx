@@ -65,18 +65,22 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FlapSpeed: 2.11
+    - _FlapRand: 0.91
+    - _FlapSpeed: 3
     - _FlapSpeedMax: 4.56
-    - _FlyMuxX: 0.12
-    - _FlyMuxY: 0.15
-    - _FlyMuxZ: 0.12
-    - _FlySpeed: 0.8
+    - _FlyMuxX: 0.04
+    - _FlyMuxY: 0.04
+    - _FlyMuxZ: 0.04
+    - _FlySpeed: 0.5
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _GlowAmount: 0.07
+    - _GlowFlutterAmount: 2.37
+    - _GlowFlutterSpeed: 1.45
     - _Halftoney: 1
     - _HalftoneyIntensity: 0
-    - _HalftoneyPow: 0.69
+    - _HalftoneyPow: 0.5
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -86,7 +90,8 @@ Material:
     - _SrcBlend: 1
     - _TrackDownUp: 1
     - _UVSec: 0
-    - _WingAngle: 0.95
+    - _UseBaseColorness: 0
+    - _WingAngle: 5.39
     - _WingsSize: 2
     - _ZWrite: 1
     m_Colors:
