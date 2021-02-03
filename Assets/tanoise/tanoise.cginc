@@ -18,6 +18,7 @@
 //	float tanoise3_1d_fast( in float3 x ) //1 Texture Lookup, No matrix scramble (Slightly poorer quality)
 //  float2 tanoise3_2d( in float3 x ) //1 Texture Lookup
 //  float4 tanoise2( in float2 x )    //1 Texture Lookup
+//  float4 tanoise2_hq( in float2 x ) //4 Texture Lookup (For when hardware interpreters aren't good enough)
 //
 //  The texture should be the noise texture bound, standard as a 2D texture
 //  to _TANoiseTex and _TANoiseTex_TexelSize should be the texel size.
@@ -104,7 +105,7 @@
 // appealing noise.
 
 sampler2D _TANoiseTex;
-uniform half2 _TANoiseTex_TexelSize; 
+uniform half4 _TANoiseTex_TexelSize; 
 uniform half4 _TANoiseTex_ST; 
 
 static const float4x4 tanoiseM = 
@@ -114,6 +115,10 @@ static const float4x4 tanoiseM =
   -0.757557, 0.303345, 0.497523, -0.290552,
   0.372699, 0.701985, -0.290552, -0.532815
 };
+
+#ifndef glsl_mod
+	#define glsl_mod(x,y) abs(((x)-(y)*floor((x)/(y)))) 
+#endif
 
 float4 tanoise4( in float4 x )
 {
@@ -240,7 +245,7 @@ float2 tanoise3_2d( in float3 x )
 }
 
 
-//Even for a 4D result, we only need one textuer lookup for a 2D input.
+//Even for a 4D result, we only need one texture lookup for a 2D input.
 float4 tanoise2( in float2 x )
 {
 	float2 c = mul(tanoiseM,x );
@@ -257,6 +262,33 @@ float4 tanoise2( in float2 x )
 
 	// Uncomment to debug final mnoise matrix.
 	return tex2Dlod( _TANoiseTex, float4( (uv+0.5)*_TANoiseTex_TexelSize, 0.0, 0.0 ) );
+}
+
+//High quality version - we do our own lerping.
+float4 tanoise2_hq( in float2 x )
+{
+	float2 c = mul(tanoiseM,x );
+	float2 p = floor(c);
+	float2 f = frac(c);
+
+	// First level smoothing for nice interpolation between levels. This
+	// gets rid of the sharp artifacts that will come from the bilinear
+	// interpolation.
+	f = f * f * ( 3.0 - 2.0 * f );
+
+	// Compute a u,v coordinateback in
+	float2 uv = p.xy + f.xy;
+
+	float2 uvfloor = floor((uv))+0.5;
+	float2 uvmux =   uv-uvfloor+0.5;
+	float4 A = tex2Dlod( _TANoiseTex, float4( (uvfloor+float2(0.0, 0.0))*_TANoiseTex_TexelSize.xy, 0.0, 0.0 ) );
+	float4 B = tex2Dlod( _TANoiseTex, float4( (uvfloor+float2(1.0, 0.0))*_TANoiseTex_TexelSize.xy, 0.0, 0.0 ) );
+	float4 C = tex2Dlod( _TANoiseTex, float4( (uvfloor+float2(0.0, 1.0))*_TANoiseTex_TexelSize.xy, 0.0, 0.0 ) );
+	float4 D = tex2Dlod( _TANoiseTex, float4( (uvfloor+float2(1.0, 1.0))*_TANoiseTex_TexelSize.xy, 0.0, 0.0 ) );
+	return lerp(
+		lerp( A, B, uvmux.x ),
+		lerp( C, D, uvmux.x ),
+		uvmux.y);
 }
 
 
