@@ -6,12 +6,12 @@
 		_TANoiseTex ("TANoise", 2D) = "white" {}
 		_TrackDownUp ("Track Up Down", float) = 0.0
 		_BillboardSizeAdd ("Billboard Size", float ) = 0.25
-		_HalftoneyPow("Halftoney Pow", float) = 0.69
 		_Halftoney ("Halftoniness", int) = 1
 		_HalftoneyIntensity("Halftoney Intensity", float) = 0
 		
 		_FlySpeed("FlySpeed", float)=1.0
 		_FlapSpeed("FlapSpeed", float)=1.0
+		_FlapRand("Flap Randomize", float)=1.0
 		_FlyMuxX ("FlyMux X", float)=1.0
 		_FlyMuxY ("FlyMux Y", float)=1.0
 		_FlyMuxZ ("FlyMux Z", float)=1.0
@@ -21,6 +21,11 @@
 		_WingAngle("Wing Angle", float) = 1.
 		_FairyColor1 ("FairyColor1", Color) = (1,1,1,1)
 		_FairyColor2 ("FairyColor2", Color) = (1,1,1,1)
+		_UseBaseColorness ("Use Base Color (0..1)", float) = 1.
+		
+		_GlowFlutterSpeed ("Glow Flutter Speed", float) = 1.
+		_GlowFlutterAmount ("Glow Flutter Amount", float) = 1.
+		_GlowAmount ("Glow Base Amount", float) = 1.
 	}
 	SubShader
 	{
@@ -78,10 +83,16 @@
 			float _WingAngle;
 			float _FlySpeed;
 			float _FlyMuxX;
-			float _FlapSpeed;
 			float _FlyMuxY;
 			float _FlyMuxZ;
 			float _WingsSize;
+			float _FlapSpeed;
+			float _FlapRand;
+			float _UseBaseColorness;
+			float _GlowFlutterSpeed;
+			float _GlowFlutterAmount;
+			float _GlowAmount;
+
 
 			v2f vert (appdata v)
 			{
@@ -131,44 +142,41 @@
 					vout = mul( UNITY_MATRIX_VP, float4( BillboardVertex, 1.0 ) );
 					
 					//vout = 0.; //disable
-					o.rcuvmix = float4( rcuv, 1.0, 0.0 );
+					o.rcuvmix = float4( rcuv, 1.0, 
+						tanoise2( float2( _Time.w * _GlowFlutterSpeed, v.uv1.x*100 ) ).x*_GlowFlutterAmount+_GlowAmount
+					);
 					
 				}
 				else
 				{
-					float rotationangle = atan2(direction.x,direction.y)+3.14159;
+					float rotationangle = atan2(-direction.x,direction.z)+3.14159;
 					
 					float flutterdist = 0.5;
-					float flutterspeed = _FlapSpeed;
-					float flutter = _Time.w * flutterspeed + v.uv1.x*100; /*Add arbitrary phase offset*/
+					float flutter = tanoise2( float2( _Time.w * _FlapSpeed, v.uv1.x*100 ) )*_FlapRand;
+					flutter += (_Time.w * _FlapSpeed + v.uv1.x*100);
 					float wingrotation = ((v.uv1.y < 0.7)?-1:1)*(sin(flutter)+1.5)*flutterdist;
-						
 
-					float3 localVertBehind = float3(
-						v.uv.x*sin(rotationangle+wingrotation),
-						v.uv.x*cos(rotationangle+wingrotation),
-						( v.uv.y-0.4 ) )*.001;
-					float3 localVertUp = float3(
-						v.uv.x*cos(wingrotation),
-						(v.uv.y-0.4)*sin(wingrotation),
-						(v.uv.y-0.4)*sin(wingrotation)
-						)*.001;
-					float3 localVert = lerp( localVertBehind, localVertUp, 0.0 ) * _WingsSize;
+					float3 localVert = float3(
+						v.uv.x*sin(wingrotation),
+						( v.uv.y-0.4 ),
+						v.uv.x*cos(wingrotation) )*.001;
 
-/*					float c, s;
-					float wingangleX = 0;//cos(rotationangle)*_WingAngle;
-					float wingangleY = 0;//-sin(rotationangle)*_WingAngle;
-					c = cos(wingangleX);
-					s = sin(wingangleX);
+					float c, s;
+					c = cos(_WingAngle);
+					s = sin(_WingAngle);
 					localVert.yz = mul( localVert.yz, float2x2(c,s,-s,c) );
-					c = cos(wingangleY);
-					s = sin(wingangleY);
-					localVert.xz = mul( localVert.xz, float2x2(c,-s,s,c) );
-*/
+					c = cos(rotationangle);
+					s = sin(rotationangle);
+					localVert.xz = mul( localVert.xz, float2x2(c,s,-s,c) );
+
 					
 					vout = UnityObjectToClipPos(localOffset + localVert*_BillboardSizeAdd*20.);
 					
-					o.rcuvmix = float4( rcuv, 0.0, 0.0 );
+					o.rcuvmix = float4( 
+						rcuv,
+						0.0,
+						1. );
+					
 				}
 				
 				float phase = v.uv1.x*1000.+_Time.y;
@@ -189,15 +197,17 @@
 				fixed inten = tex2D(_MainTex, i.uv).r;
 
 				inten = lerp( inten, 0.9-length( i.rcuvmix.xy ), i.rcuvmix.z ); 
+				inten *= i.rcuvmix.w;
+				inten = sqrt( inten );
 				
-				inten = pow( inten, _HalftoneyPow);
-				
-				uint2 ss =  screenSpace.xy / _Halftoney;
+				//Tricky: add i.rcuvmix.zz so we can dither separately.
+				uint2 ss =  (screenSpace.xy+i.rcuvmix.zz) / _Halftoney;
 				uint sv = ( ss.x % 2 ) + ( ( ss.x ^ ss.y ) % 2 ) * 2;
 				float isp = sv / 4. + _HalftoneyIntensity;
+
 				float4 BaseColor = lerp(_FairyColor1, _FairyColor2, inten);
 				
-				BaseColor = i.thiscolor;
+				BaseColor = lerp( i.thiscolor, BaseColor, _UseBaseColorness );
 				
 				BaseColor = lerp( 1.,BaseColor,i.rcuvmix.z );
                 float4 col = BaseColor * float4( 1., 1., 1., inten>isp );

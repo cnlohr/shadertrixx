@@ -20,8 +20,12 @@
 //  float4 tanoise2( in float2 x )    //1 Texture Lookup
 //  float4 tanoise2_hq( in float2 x ) //4 Texture Lookup (For when hardware interpreters aren't good enough)
 //
-//  The texture should be the noise texture bound, standard as a 2D texture
-//  to _TANoiseTex and _TANoiseTex_TexelSize should be the texel size.
+//  The texture should be the noise texture bound. i.e. add this to properties
+//  Properties {
+//		_TANoiseTex ("TANoise", 2D) = "white" {}
+//        ...
+//  }
+//
 //  NOTE: You must:
 //    * Disable compression (unless you want it muted)
 //    * Use bilinear filtering. 
