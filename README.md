@@ -53,3 +53,16 @@ Lit vertex shader
 Interesting looking mesh tool (Still need to use)
  * https://github.com/lyuma/LyumaShader/blob/master/LyumaShader/Editor/LyumaMeshTools.cs
  
+ 
+ Convert detp function:
+ ```
+     //Convert to Corrected LinearEyeDepth by DJ Lukis
+     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
+
+     //Convert from Corrected Linear Eye Depth to Raw Depth 
+     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+
+     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
+     //Convert to Linear01Depth
+     depth = Linear01Depth(depth);
+```
