@@ -8,7 +8,7 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
-Thanks, @d4rkpl4y3r
+Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
 
 
 ## Additional tricks
@@ -53,6 +53,8 @@ Lit vertex shader
 Interesting looking mesh tool (Still need to use)
  * https://github.com/lyuma/LyumaShader/blob/master/LyumaShader/Editor/LyumaMeshTools.cs
  
+Basic global profiling scripts for Udon:
+ * https://gist.github.com/MerlinVR/2da80b29361588ddb556fd8d3f3f47b5
  
  Convert detp function:
  ```
