@@ -110,7 +110,7 @@ Shader "Custom/FlowingWater"
 			float _GIShift;
 				 
 					 
-			#include "../standardtrixx.cginc"
+			#include "../hashwithoutsine/hashwithoutsine.cginc"
 
 			//Original code, Copyright © 2013 Inigo Quilez under the MIT/x11 license.
 			//But, basically rewritten.  License on new version: MIT/x11 <>< CNLohr
