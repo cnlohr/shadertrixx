@@ -34,7 +34,7 @@
 
 		Pass
 		{
-			AlphaToMask True 
+			AlphaToMask On 
 			Cull Off
 			CGPROGRAM
 
@@ -194,11 +194,11 @@
 			fixed4 frag (v2f i, float4 screenSpace : SV_Position) : SV_Target
 			{
 				// sample the texture
-				fixed inten = tex2D(_MainTex, i.uv).r;
+				float inten = tex2D(_MainTex, i.uv).r;
 
 				inten = lerp( inten, 0.9-length( i.rcuvmix.xy ), i.rcuvmix.z ); 
 				inten *= i.rcuvmix.w;
-				inten = sqrt( inten );
+				inten = (inten>0.0)?sqrt( inten ):0.0;
 				
 				//Tricky: add i.rcuvmix.zz so we can dither separately.
 				uint2 ss =  (screenSpace.xy+i.rcuvmix.zz) / _Halftoney;
@@ -210,8 +210,10 @@
 				BaseColor = lerp( i.thiscolor, BaseColor, _UseBaseColorness );
 				
 				BaseColor = lerp( 1.,BaseColor,i.rcuvmix.z );
-                float4 col = BaseColor * float4( 1., 1., 1., inten>isp );
+                float4 col = BaseColor * float4( 1., 1., 1., (inten>isp)?1.0 : 0.0 );
 
+				//Todo: Fix for Quest.
+				if( col.a < 0.5 ) discard;
 
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
