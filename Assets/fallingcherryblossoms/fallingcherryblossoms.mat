@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FlowingWater
-  m_Shader: {fileID: 4800000, guid: a17c0bda091cc18489c7a939c28e07c5, type: 3}
+  m_Name: fallingcherryblossoms
+  m_Shader: {fileID: 4800000, guid: 78db473e21e614a44ad1d4b0d843f59a, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: b7a7076e37f89104faca7d295c6edb78, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -59,22 +59,22 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3c924368d7dfc8f4aac5fc4ab857015e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _WaterBottomTex:
-        m_Texture: {fileID: 2800000, guid: e5e324b4f62d07f4d860dc7d499d0897, type: 3}
-        m_Scale: {x: 0.5, y: 1}
-        m_Offset: {x: 0.2, y: -0.1}
-    - _WaterCalcTex:
-        m_Texture: {fileID: 2800000, guid: 252675587bd0e5841aa3c82a5098201c, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Brightness: 1.5
+    - _AlbedoBoost: 0.91
+    - _BillboardSize: 0.04
+    - _BillboardVariance: 0.02
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _Depth: 0.32
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _GIShift: 0.01
+    - _EmissionBoost: 0.44
+    - _FallDistance: 5
+    - _FallSpeed: 0.25
+    - _FlyMux: 0.65
+    - _FlyMuxX: 1
+    - _FlyMuxY: 1
+    - _FlyMuxZ: 9.63
+    - _FlySpeed: 0.78
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -82,17 +82,15 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Shinyness: 100
     - _SmoothnessTextureChannel: 0
+    - _SpawnMuxX: 2.8
+    - _SpawnMuxY: 0
+    - _SpawnMuxZ: 2.8
     - _SpecularHighlights: 1
+    - _SpinSpeed: 5
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Vividity: 0.41
-    - _VividitySurface: 1.21
-    - _WaterScale: 1.2
-    - _WaterSpeed: 2.36
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _UnderlyingColor: {r: 1, g: 1, b: 1, a: 1}
