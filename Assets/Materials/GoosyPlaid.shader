@@ -9,7 +9,7 @@
 		_WorldScale ("World Scale", Range(0,10)) = 1.0
 		_StippleMix ("Stippality", Range(0,1)) = 0.5
 		_StippleFreq( "Stipple Frequency", float ) = 10.
-		_PlaidWatch( "Which Plaid", int ) = 0
+		_PlaidWatch( "Which Plaid", float ) = 0
 		_Emission ("Emission", float) = 0.
 		_Albedo ("Albedo", float ) = 1.
     }
@@ -43,7 +43,7 @@
 		half _WorldScale;
 		half _Emission, _Albedo;
         fixed4 _Color;
-		int _PlaidWatch;
+		float _PlaidWatch;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -99,14 +99,17 @@
 				float4( 1.1, 1.1, 0.0, 1. ) };
 
 
-			float4 plaidoffset = plaidoffsets[_PlaidWatch];
-			float4 plaidmuxA = plaidmuxAs[_PlaidWatch];
-			float4 plaidmuxB = plaidmuxBs[_PlaidWatch];
-			float4 plaidscalA = plaidscalAs[_PlaidWatch];
-			float4 plaidscalB = plaidscalBs[_PlaidWatch];
-			float4 plaidoffsetA = plaidoffsetAs[_PlaidWatch];
-			float4 plaidoffsetB = plaidoffsetBs[_PlaidWatch];
-			float4 wildcardColor = wildcardColors[_PlaidWatch];
+			int fpi = floor( _PlaidWatch );//clamp( floor( _PlaidWatch ), 0, 1 );
+			float fpv = _PlaidWatch - fpi;
+
+			float4 plaidoffset   = lerp( plaidoffsets  [fpi], plaidoffsets  [fpi+1], fpv );
+			float4 plaidmuxA     = lerp( plaidmuxAs    [fpi], plaidmuxAs    [fpi+1], fpv );
+			float4 plaidmuxB     = lerp( plaidmuxBs    [fpi], plaidmuxBs    [fpi+1], fpv );
+			float4 plaidscalA    = lerp( plaidscalAs   [fpi], plaidscalAs   [fpi+1], fpv );
+			float4 plaidscalB    = lerp( plaidscalBs   [fpi], plaidscalBs   [fpi+1], fpv );
+			float4 plaidoffsetA  = lerp( plaidoffsetAs [fpi], plaidoffsetAs [fpi+1], fpv );
+			float4 plaidoffsetB  = lerp( plaidoffsetBs [fpi], plaidoffsetBs [fpi+1], fpv );
+			float4 wildcardColor = lerp( wildcardColors[fpi], wildcardColors[fpi+1], fpv );
 
 			//Next up is REDPLAD (lower frequency random bits)
 			float3 plaidred = 

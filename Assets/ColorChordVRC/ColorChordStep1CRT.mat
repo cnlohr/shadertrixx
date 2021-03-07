@@ -24,8 +24,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _BaseAmplitude: 4
+    - _BaseAmplitude: 6
     - _BottomFrequency: 110
-    - _IIRCoefficient: 0.93
+    - _IIRCoefficient: 0.9
     - _SamplesPerSecond: 48000
     m_Colors: []

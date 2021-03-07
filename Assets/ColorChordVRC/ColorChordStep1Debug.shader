@@ -37,6 +37,8 @@
 
             sampler2D _CCStage1;
             sampler2D _CCStage2;
+			uniform float4 _CCStage1_TexelSize;
+			uniform float4 _CCStage2_TexelSize;
 			int _RootNote;
 			
             v2f vert (appdata v)
@@ -47,6 +49,20 @@
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
+			
+			float4 forcefilt( sampler2D sample, float4 texelsize, float2 uv )
+			{
+				float4 A = tex2D( sample, uv );
+				float4 B = tex2D( sample, uv + float2(texelsize.x, 0 ) );
+				float4 C = tex2D( sample, uv + float2(0, texelsize.y ) );
+				float4 D = tex2D( sample, uv + float2(texelsize.x, texelsize.y ) );
+				float2 conv = frac(uv*texelsize.zw);
+				//return float4(uv, 0., 1.);
+				return lerp(
+					lerp( A, B, conv.x ),
+					lerp( C, D, conv.x ),
+					conv.y );
+			}
 			
             fixed4 frag (v2f i) : SV_Target
             {
@@ -62,26 +78,25 @@
 				float4 inten = 0;
 
 				int noteno = iuv.x * EXPBINS * EXPOCT;
+				float notenof = iuv.x * EXPBINS * EXPOCT;
 				int readno = noteno % EXPBINS;
+				float readnof = fmod( notenof, EXPBINS );
 				int reado = (noteno/EXPBINS);
-				inten = tex2D(_CCStage1, float2(readno/(float)EXPBINS, (EXPOCT - reado - 1 )/(float)EXPOCT ) );
+				float readof = notenof/EXPBINS;
+
+				inten = forcefilt(_CCStage1, _CCStage1_TexelSize, 
+					float2(readnof/(float)EXPBINS, (EXPOCT - reado - 1 )/(float)EXPOCT ) );
 
 				inten.x *= 3.;
 		
-				float marker = (readno==0)?1.0:0.0;
+				
 			
 				if( iuv.y > 0.98 )
 				{
 					return fixed4( CCtoRGB( iuv.x*48., 1.0, 1.0 ), 1.0);
 				}
 
-				if( abs( inten.x - iuv.y ) < 0.02 )
-					return fixed4( CCtoRGB(noteno, 1.0, _RootNote ), 1.0 );
-				if( abs( inten.z - iuv.y*2.+1. )< 0.04 )
-					return 1.;
-				else if( marker > 0.0 )
-					return float4( marker, 0., 0., 1. );
-				else
+				float4 coloro = 0.;
 				{
 					//Debug stage 2.
 					float4 ccpick = tex2D( _CCStage2, float2( iuv.x, 0.5 ) );
@@ -89,19 +104,34 @@
 					{
 						float vv = ccpick.g;
 						vv= sqrt(vv);
-						if( iuv.y < vv ) 
-							return fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+						if( iuv.y < vv && iuv.y > vv - 0.05 ) 
+							coloro += fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+						else if( iuv.y > vv - 0.055 && iuv.y < vv + 0.00 )
+							coloro += 1.;
 					}
 					else
 					{
 						float vv =(ccpick.a/10.);
 						vv= sqrt(vv);
 						if( iuv.y < vv && iuv.y > vv - 0.05 ) 
-							return fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+							coloro += fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
+						else if( iuv.y > vv - 0.05 && iuv.y < vv + 0.005 )
+							coloro += 1.;
 					}
-					
-					return 0.;
 				}
+
+				//The first-note-segmenters
+				coloro += float4( max(0.,1.3-length(readnof-1.3) ), 0., 0., 1. );
+				
+				//Sinewave
+				//If line has more significant slope, roll it extra wide.
+				float ddd = 1.+length(float2(ddx( inten.z ),ddy(inten.z)))*20;
+				coloro += max( 100.*((0.02*ddd)-abs( inten.z - iuv.y*2.+1. )), 0. );
+				
+				float rval = max( 0.01 - abs( inten.x - iuv.y ), 0. );
+				rval = min( 1., 1000*rval );
+				coloro = lerp( coloro, fixed4( CCtoRGB(noteno, 1.0, _RootNote ), 1.0 ), rval );
+				return coloro;
 
 				//Graph-based spectrogram.
             }
