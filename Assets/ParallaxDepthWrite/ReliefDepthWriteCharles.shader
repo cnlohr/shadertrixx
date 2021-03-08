@@ -18,6 +18,13 @@ Shader "Custom/ReliefDepthWriteCharles"
 		_ParallaxOffset("Parallax Offset", float ) = 0.5
 		[hdr] _Color("Albedo", Color) = (1,1,1,1)
 		
+		
+		_ZDeflection("Z Deflection", float ) = 0.1
+		_ParallaxRaymarchingSteps("Parallax Raymarching Steps", int)=10
+		_ParallaxRaymarchingSearch("Parallax Raymarching Steps", int)=3
+		_DepthMux("Depth Mux", float ) = 10.
+		_DepthShift("Depth Shift", float) = 10.
+		
 		[Gamma] _Metallic("Metallic", Range(0, 1)) = 0
 		_Smoothness("Smoothness", Range(0, 1)) = 0
     }
@@ -55,7 +62,10 @@ Shader "Custom/ReliefDepthWriteCharles"
 			uniform half3 _NormalMapScale, _NormalMapOffset;
 			uniform sampler2D _DisplacementMap;
 			uniform half _ParallaxStrength, _ParallaxOffset;
-
+			uniform half _ZDeflection;
+			uniform half _DepthMux;
+			uniform half _DepthShift;
+			
 			struct v2f
 			{
 				#ifndef UNITY_PASS_SHADOWCASTER
@@ -64,7 +74,7 @@ Shader "Custom/ReliefDepthWriteCharles"
 				float3 tangent : TANGENT;
 				float3 binormal : BINORMAL;
 				float3 wPos : TEXCOORD0;
-				float3 tangentViewDir : TEXCOORD3;
+				float3 tangentViewDir : TEXCOORD9;
 				SHADOW_COORDS(3)
 				#else
 				V2F_SHADOW_CASTER;
@@ -109,7 +119,7 @@ Shader "Custom/ReliefDepthWriteCharles"
 			
 			//From catlikecoding
 			float GetParallaxHeight (float2 uv) {
-				float height = tex2D(_DisplacementMap, uv).g;
+				float height = tex2D(_DisplacementMap, uv).r;
 				height -= _ParallaxOffset;
 				height *= _ParallaxStrength;
 				return height;
@@ -142,8 +152,12 @@ Shader "Custom/ReliefDepthWriteCharles"
 			
 			#define PARALLAX_BIAS 0
 			//	#define PARALLAX_OFFSET_LIMITING
-			#define PARALLAX_RAYMARCHING_STEPS 10
-			#define PARALLAX_RAYMARCHING_SEARCH_STEPS 10
+			//#define PARALLAX_RAYMARCHING_STEPS 10
+			//#define PARALLAX_RAYMARCHING_SEARCH_STEPS 10
+			uniform int _ParallaxRaymarchingSteps;
+			uniform int _ParallaxRaymarchingSearch;
+			#define PARALLAX_RAYMARCHING_STEPS _ParallaxRaymarchingSteps
+			#define PARALLAX_RAYMARCHING_SEARCH_STEPS _ParallaxRaymarchingSearch
 
 			#define PARALLAX_FUNCTION ParallaxRaymarching
 	
@@ -160,8 +174,10 @@ Shader "Custom/ReliefDepthWriteCharles"
 				float2 prevUVOffset = uvOffset;
 				float prevStepHeight = stepHeight;
 				float prevSurfaceHeight = surfaceHeight;
-	
-				for ( int i = 1; i < PARALLAX_RAYMARCHING_STEPS && stepHeight > surfaceHeight;i++ )
+				int i;
+				
+				[loop]
+				for ( i = 1; i < PARALLAX_RAYMARCHING_STEPS && stepHeight > surfaceHeight;i++ )
 				{
 					prevUVOffset = uvOffset;
 					prevStepHeight = stepHeight;
@@ -173,7 +189,8 @@ Shader "Custom/ReliefDepthWriteCharles"
 				}
 				
 				//XXX TODO: This part NOT VERIFIED.
-				for (int i = 0; i < PARALLAX_RAYMARCHING_SEARCH_STEPS; i++)
+				[loop]
+				for ( i = 0; i < PARALLAX_RAYMARCHING_SEARCH_STEPS; i++)
 				{
 					prevUVOffset = uvOffset;
 					prevStepHeight = stepHeight;
@@ -232,7 +249,7 @@ Shader "Custom/ReliefDepthWriteCharles"
 
 				float2 uv = i.uv;
 				float3 tvd = normalize( i.tangentViewDir );
-				float2 tvduv = tvd.xy / (tvd.z+.05); //This is equivelent to the standard .42, except that in VR, using .42 makes you sick.
+				float2 tvduv = tvd.xy / (tvd.z+_ZDeflection); //This is equivelent to the standard .42, except that in VR, using .42 makes you sick.
 				
 				//Do this for parallax mapping.
 				//#define PARALLAX_NOT_RELIEF
@@ -242,16 +259,15 @@ Shader "Custom/ReliefDepthWriteCharles"
 					depthDiff = -offset / (length( tvd.z )+1.);
 				#else
 					uv += ParallaxRaymarching( uv, tvduv, depthDiff );
-					depthDiff+=.1;
+					depthDiff = depthDiff * _DepthMux + _DepthShift;
+					//depthDiff+=.1;
 				#endif
 				depthDiff /= frustumDivide;
 				//----------------------------------------------------
 
-
 				float4 texCol = tex2D(_MainTex, uv) * _Color;
 				clip(texCol.a - _Cutoff);
-				
-								
+
 				//----------------------------------------------------
 				//ADDED: Get normal map.
 #ifdef UNITY_ENABLE_DETAIL_NORMALMAP
