@@ -1,7 +1,8 @@
 ﻿//Based off of Shader "d4rkpl4y3r/BRDF PBS Macro"
 //
-//  THIS IS THE ONE YOU WANT TO WORK FROM.
+//  THIS IS THE ONE YOU WANT TO WORK FROM.  Mostly based on catlikecoding's parallax mapping example.
 //
+//Also note: https://forum.unity.com/threads/a-simple-relief-shader.10267/
 
 Shader "Custom/ReliefDepthWriteCharles"
 {
@@ -129,6 +130,7 @@ Shader "Custom/ReliefDepthWriteCharles"
 				float height = GetParallaxHeight(uv);
 				return viewDir * height;
 			}
+				
 				
 			void ApplyParallax (inout v2f i) {
 				#if defined(_PARALLAX_MAP)
