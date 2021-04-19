@@ -57,7 +57,7 @@ Basic global profiling scripts for Udon:
  * https://gist.github.com/MerlinVR/2da80b29361588ddb556fd8d3f3f47b5
  
  Convert detp function:
- ```
+ ```c
      //Convert to Corrected LinearEyeDepth by DJ Lukis
      float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
 
@@ -67,4 +67,21 @@ Basic global profiling scripts for Udon:
      depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
      //Convert to Linear01Depth
      depth = Linear01Depth(depth);
+```
+
+
+This SLERP function, found by ACiiL,
+```c
+        ////============================================================
+        //// blend between two directions by %
+        //// https://www.shadertoy.com/view/4sV3zt
+        //// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+        float3 slerp(float3 start, float3 end, float percent)
+        {
+            float d     = dot(start, end);
+            d           = clamp(d, -1.0, 1.0);
+            float theta = acos(d)*percent;
+            float3 RelativeVec  = normalize(end - start*d);
+            return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
+        }
 ```
