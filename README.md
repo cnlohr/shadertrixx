@@ -46,7 +46,7 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/aiya000/VRChat-Flya
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
- 
+
 Lit vertex shader
  * https://github.com/Xiexe/Unity-Lit-Shader-Templates
 
@@ -55,7 +55,10 @@ Interesting looking mesh tool (Still need to use)
  
 Basic global profiling scripts for Udon:
  * https://gist.github.com/MerlinVR/2da80b29361588ddb556fd8d3f3f47b5
- 
+
+This explaination of how the fallback system works (Linked by GenesisAria)
+ * https://pastebin.com/92gwQqCM
+
  Convert detp function:
  ```c
      //Convert to Corrected LinearEyeDepth by DJ Lukis
