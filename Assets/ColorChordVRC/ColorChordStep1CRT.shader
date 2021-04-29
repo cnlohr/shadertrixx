@@ -8,9 +8,9 @@
 		//Not used; Not available on video streams.
 		//_PlaceInSound ("PlaceInSound", int) = 0.0
 		_BottomFrequency ("BottomFrequency", float ) = 55
-		_SamplesPerSecond ("SamplesPerSecond", float ) = 48000
+		//_SamplesPerSecond ("SamplesPerSecond", float ) = 48000
 		_LastFrameData ("Last Frame", 2D) = "white" {}
-		_IIRCoefficient ("IIR Coefficient", float) = 0.35
+		_IIRCoefficient ("IIR Coefficient", float) = 0.85
 		_BaseAmplitude ("Base Amplitude Multiplier", float) = 4.0
     }
     SubShader
@@ -37,9 +37,9 @@
 
             #include "UnityCG.cginc"
 			
-			uniform float  _AudioFrames[1018];
+			uniform float  _AudioFrames[1023];
 			float _BottomFrequency;
-			float _SamplesPerSecond;
+			#define  _SamplesPerSecond 48000
 			float _IIRCoefficient;
 			float _BaseAmplitude;
 
@@ -65,7 +65,7 @@
 				phadelta *= _BottomFrequency;
 				phadelta /= _SamplesPerSecond;
 				phadelta *= 3.1415926 * 2.0;
-				float decay = 1.0;
+				float decay = .5;
 				
 				//Roll-off the time constant for higher frequencies.
 				//This 0.08 if reduced
@@ -85,7 +85,7 @@
 				float mag = pow( length( ampl ), 2.0 );
 				mag = lerp( mag, last, _IIRCoefficient );
 				
-				fixed4 col = fixed4( mag, 1.0, _AudioFrames[bin+octave*bins], 1 );
+				fixed4 col = fixed4( mag, 1.0, _AudioFrames[bin+octave*bins+512], 1 );
                 return col;
             }
             ENDCG

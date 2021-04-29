@@ -18,7 +18,7 @@ public class TestUpdateRenderTexture : UdonSharpBehaviour
     void Update()
     {
         if (!aus.isPlaying) aus.Play();
-        float[] trunc = new float[1018];
+        float[] trunc = new float[1023];
         aus.GetOutputData(trunc, 0);
         mat.SetFloatArray("_AudioFrames", trunc);
     }

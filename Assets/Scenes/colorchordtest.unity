@@ -153,8 +153,7 @@ AudioSource:
   m_GameObject: {fileID: 95692360}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: cde4d23386718384db3801a408152687,
-    type: 2}
+  OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 964ff6e0a4aa52b4ebe2476fbdfed7db, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
@@ -1391,6 +1390,7 @@ MonoBehaviour:
   blueprintId: wrld_ff4c56e1-3b75-425c-b429-6d63077daaa8
   contentType: 1
   assetBundleUnityVersion: 
+  fallbackStatus: 0
 --- !u!114 &1385854241
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -41,7 +41,12 @@ CustomRenderTexture:
   m_InitializationMode: 2
   m_UpdateZoneSpace: 0
   m_CurrentUpdateZoneSpace: 0
-  m_UpdateZones: []
+  m_UpdateZones:
+  - updateZoneCenter: {x: 0.5, y: 0.5, z: 0.5}
+    updateZoneSize: {x: 1, y: 1, z: 1}
+    rotation: 0
+    passIndex: -1
+    needSwap: 0
   m_UpdatePeriod: 0
   m_ShaderPass: 0
   m_CubemapFaceMask: 4294967295
