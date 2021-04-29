@@ -65,18 +65,33 @@
 				phadelta *= _BottomFrequency;
 				phadelta /= _SamplesPerSecond;
 				phadelta *= 3.1415926 * 2.0;
-				float decay = .5;
-				
+
 				//Roll-off the time constant for higher frequencies.
-				//This 0.08 if reduced
-				float decaymux = 1.-phadelta*.1;
+				//This 0.08 if reduced, 0.1 normally.
+				const float decay_coefficient = 0.08;
+				float decaymux = 1.-phadelta*decay_coefficient;
 				float integraldec = 0.;
+
+				//The decay starts at 1.0, but will be reduced by decaymux.
+				float decay = 1;
+
+
+
 				for( idx = 0; idx < SAMPHIST; idx++ )
 				{
 					float af = _AudioFrames[idx];
-					ampl += float2( sin( pha ) * af, cos( pha ) * af ) * decay;
-					integraldec += decay;
+					float2 sc; //Sin and cosine components to convolve.
+					sincos( pha, sc.x, sc.y );
+					
+					// Step through, one sample at a time, multiplying the sin
+					// and cos values by the incoming signal.
+					ampl += sc * af * decay;
+					
+					// Advance phase
 					pha += phadelta;
+					
+					// Handle decay for higher frequencies.
+					integraldec += decay;
 					decay *= decaymux;
 				}
 				
@@ -85,7 +100,7 @@
 				float mag = pow( length( ampl ), 2.0 );
 				mag = lerp( mag, last, _IIRCoefficient );
 				
-				fixed4 col = fixed4( mag, 1.0, _AudioFrames[bin+octave*bins+512], 1 );
+				fixed4 col = fixed4( mag, _AudioFrames[bin+octave*bins], _AudioFrames[bin+octave*bins+EXPBINS*EXPOCT], 1 );
                 return col;
             }
             ENDCG
