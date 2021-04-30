@@ -1,5 +1,9 @@
 ﻿Shader "Custom/ReadAndWriteCRTTest"
 {
+	//Example CRT with multiple passed, used to read its own texture and write into another place.
+	//Example of usage is in colorchord scene.
+	//This shows how to read from other coordiantes within the CRT texture when using multiple passes.
+
     Properties
     {
     }
