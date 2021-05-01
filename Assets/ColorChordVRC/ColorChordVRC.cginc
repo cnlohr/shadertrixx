@@ -1,6 +1,6 @@
 
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
-#define EXPBINS 48
+#define EXPBINS 64
 #define EXPOCT 8
 #define OCTAVES 8
 #define MAXPEAKS 16

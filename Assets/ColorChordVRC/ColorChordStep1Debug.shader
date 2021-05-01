@@ -2,8 +2,7 @@
 {
     Properties
     {
-        _CCStage1 ("Texture", 2D) = "white" {}
-        _CCStage2 ("Texture", 2D) = "white" {}
+		_AudioLinkTexture ("Texture", 2D) = "white" {}
 		_RootNote ("RootNote", int ) = 0
     }
     SubShader
@@ -35,10 +34,8 @@
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _CCStage1;
-            sampler2D _CCStage2;
-			uniform float4 _CCStage1_TexelSize;
-			uniform float4 _CCStage2_TexelSize;
+            sampler2D _AudioLinkTexture;
+			uniform float4 _AudioLinkTexture_TexelSize;
 			int _RootNote;
 			
             v2f vert (appdata v)
@@ -84,22 +81,21 @@
 				int reado = (noteno/EXPBINS);
 				float readof = notenof/EXPBINS;
 
-				inten = forcefilt(_CCStage1, _CCStage1_TexelSize, 
-					float2(readnof/(float)EXPBINS, (EXPOCT - reado - 1 )/(float)EXPOCT ) );
-
-				inten.x *= 3.;
-		
+				inten = forcefilt(_AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+					 float2((fmod(notenof,128))/128.,((noteno/128)/64.+4./64.)) );
 				
+				inten.x *= 3.;				
 			
 				if( iuv.y > 0.98 )
 				{
 					return fixed4( CCtoRGB( iuv.x*48., 1.0, 1.0 ), 1.0);
 				}
-
 				float4 coloro = 0.;
+#if 0
 				{
-					//Debug stage 2.
-					float4 ccpick = tex2D( _CCStage2, float2( iuv.x, 0.5 ) );
+					//Debug stage 2 (notes)
+					float4 ccpick = tex2D( _AudioLinkTexture, float2( iuv.x, 0.5 ) );
+					
 					if( (glsl_mod( iuv.x, 1./MAXPEAKS ) > 0.5/MAXPEAKS ) )
 					{
 						float vv = ccpick.g;
@@ -119,14 +115,17 @@
 							coloro += 1.;
 					}
 				}
-
+#endif
 				//The first-note-segmenters
 				coloro += float4( max(0.,1.3-length(readnof-1.3) ), 0., 0., 1. );
 				
 				//Sinewave
+				float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+					 float2((fmod(notenof,128))/128.,((noteno/128)/64.+8./64.)) );
+					 
 				//If line has more significant slope, roll it extra wide.
-				float ddd = 1.+length(float2(ddx( inten.z ),ddy(inten.z)))*20;
-				coloro += max( 100.*((0.02*ddd)-abs( inten.z - iuv.y*2.+1. )), 0. );
+				float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
+				coloro += max( 100.*((0.02*ddd)-abs( sinewaveval - iuv.y*2.+1. )), 0. );
 				
 				float rval = max( 0.01 - abs( inten.x - iuv.y ), 0. );
 				rval = min( 1., 1000*rval );
