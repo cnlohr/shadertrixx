@@ -9,7 +9,7 @@ Shader "Custom/AudioLinkAlpha"
 		// Phase 1 (Audio DFT)
 		_BottomFrequency ("BottomFrequency", float ) = 27.5
 		_IIRCoefficient ("IIR Coefficient", float) = 0.85
-		_BaseAmplitude ("Base Amplitude Multiplier", float) = 4.0
+		_BaseAmplitude ("Base Amplitude Multiplier", float) = 2.0
 
 		// Phase 2 (Waveform Data)
 		// This has no parameters.
@@ -18,7 +18,7 @@ Shader "Custom/AudioLinkAlpha"
 		_PeakDecay ("Peak Decay", float) = 0.7
 		_PeakCloseEnough ("Close Enough" , float) = 2.0
 		_PeakMinium ("Peak Minimum", float) = 0.005
-		_SortNotes ("Sort Notes", int) = 1
+		_SortNotes ("Sort Notes", int) = 0
 		_OctaveMerge ("Octave Merge", int) = 1
 		
 		_Uniformity( "Uniformitvity", float ) = 1.5
@@ -50,7 +50,7 @@ Shader "Custom/AudioLinkAlpha"
 			#define PASS_FOUR_OFFSET   int2(1,0)  //Pass 4: History from 4 bands of AudioLink
 
 			#define PASS_FIVE_OFFSET   int2(0,16) //Pass 5: VU Meter
-			#define PASS_SIX_OFFSET    int2(1,16) //Pass 6: ColorChord Notes Note: This is reserved to 19,16.
+			#define PASS_SIX_OFFSET    int2(4,16) //Pass 6: ColorChord Notes Note: This is reserved to 32,16.
 
 			#define SAMPHIST 1023
 			#define EXPBINS 64
@@ -216,7 +216,17 @@ Shader "Custom/AudioLinkAlpha"
 					peak = max( peak, af );
 					peak = max( peak, -af );
 				}
-				return float4( sqrt( total / 1023. ), peak, 0., 1. );
+
+				if( coordinateLocal.x == 0 )
+				{
+					//First pixel: Current value.
+					return float4( sqrt( total / 1023. ), peak, 0., 1. );
+				}
+				else
+				{
+					//XXX TODO: Finish VU meter!
+					return 0;
+				}
 			}
 			ENDCG
 		}
@@ -267,7 +277,17 @@ Shader "Custom/AudioLinkAlpha"
 							bindata[o*EXPBINS+b] = GetSelfPixelData( PASS_ONE_OFFSET + int2( (o%2)*64 + b, o/2 ) ).r;
 						}
 					}
-
+				
+#if 0
+					if( noteno == 0 )
+					{
+						int besti = -1;
+						float bb = 0;
+						for( i = 0; i < 64*8; i++ )
+							if(  bindata[i] > bb ) { bb = bindata[i]; besti = i; }
+						return float4( besti, 10, 0, 1 );
+					}
+#endif
 					int check[ETOTALBINS];
 					for( i = 0; i < ETOTALBINS; i++ )
 					{
