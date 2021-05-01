@@ -27,7 +27,7 @@ Shader "Custom/AudioLinkAlpha"
 		Pass
 		{
 			CGINCLUDE
-						
+
 			#define PHASE_ONE_OFFSET 4 //Y-Coordinate of Phase 1.
 			#define PHASE_TWO_OFFSET 8 //Y-Coordinate of Phase 2.
 
@@ -58,27 +58,35 @@ Shader "Custom/AudioLinkAlpha"
 			#include "UnityCustomRenderTexture.cginc"
 			#include "UnityCG.cginc"
 			uniform half4 _SelfTexture2D_TexelSize; 
+
+			uniform float  _AudioFrames[1023];
+			
+			// This pulls data from this texture.
+			float4 GetSelfPixelData( int2 pixelcoord )
+			{
+				return tex2D( _SelfTexture2D, float2( pixelcoord*_SelfTexture2D_TexelSize.xy) );
+			}
 			ENDCG
 
 			Name "Pass1AudioDFT"
+			
 			CGPROGRAM
+			
 			// The structure of the output is:
 			// RED CHANNEL: Intensity of given frequency.
 			// GREEN/BLUE Reserved.
 			//   4 Rows, each row contains two octaves. 
 			//   Each octave contains 64 bins.
 
-			uniform float  _AudioFrames[1023];
 			float _BottomFrequency;
 			float _IIRCoefficient;
 			float _BaseAmplitude;
 
-
 			fixed4 frag (v2f_customrendertexture IN) : SV_Target
 			{
 				AUDIO_LINK_ALPHA_START( PHASE_ONE_OFFSET )
-
-				float4 last = tex2D( _SelfTexture2D, float2( coordinateGlobal*_SelfTexture2D_TexelSize.xy) );
+				
+				float4 last = GetSelfPixelData( coordinateGlobal );
 
 				int bin = coordinateLocal.x % EXPBINS;
 				int octave = coordinateLocal.y * 2 + coordinateLocal.x / EXPBINS;
@@ -142,7 +150,6 @@ Shader "Custom/AudioLinkAlpha"
 			// GREEN/BLUE: Reserved (may be left/right)
 			//   8 Rows, each row contains 128 samples. Note: The last sample may be repeated.
 
-			uniform float  _AudioFrames[1023];
 			float _BaseAmplitude;
 
 			fixed4 frag (v2f_customrendertexture IN) : SV_Target
