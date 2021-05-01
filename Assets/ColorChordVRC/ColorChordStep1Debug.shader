@@ -61,6 +61,11 @@
 					conv.y );
 			}
 			
+			float4 GetAudioPixelData( int2 pixelcoord )
+			{
+				return tex2D( _AudioLinkTexture, float2( pixelcoord*_AudioLinkTexture_TexelSize.xy) );
+			}
+			
             fixed4 frag (v2f i) : SV_Target
             {
 			#if 0
@@ -91,14 +96,14 @@
 					return fixed4( CCtoRGB( iuv.x*48., 1.0, 1.0 ), 1.0);
 				}
 				float4 coloro = 0.;
-#if 0
+
 				{
 					//Debug stage 2 (notes)
-					float4 ccpick = tex2D( _AudioLinkTexture, float2( iuv.x, 0.5 ) );
+					float4 ccpick = GetAudioPixelData( uint2( 2 + floor(iuv.x*16), 16 ) );
 					
 					if( (glsl_mod( iuv.x, 1./MAXPEAKS ) > 0.5/MAXPEAKS ) )
 					{
-						float vv = ccpick.g;
+						float vv = ccpick.g/4;
 						vv= sqrt(vv);
 						if( iuv.y < vv && iuv.y > vv - 0.05 ) 
 							coloro += fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
@@ -107,7 +112,7 @@
 					}
 					else
 					{
-						float vv =(ccpick.a/10.);
+						float vv =(ccpick.a/40.);
 						vv= sqrt(vv);
 						if( iuv.y < vv && iuv.y > vv - 0.05 ) 
 							coloro += fixed4( CCtoRGB( ccpick.r, 1.0, _RootNote ), 1.);
@@ -115,7 +120,7 @@
 							coloro += 1.;
 					}
 				}
-#endif
+
 				//The first-note-segmenters
 				coloro += float4( max(0.,1.3-length(readnof-1.3) ), 0., 0., 1. );
 				
