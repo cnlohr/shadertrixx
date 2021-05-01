@@ -99,7 +99,7 @@
 
 				{
 					//Debug stage 2 (notes)
-					float4 ccpick = GetAudioPixelData( uint2( 2 + floor(iuv.x*16), 16 ) );
+					float4 ccpick = GetAudioPixelData( uint2( 5 + floor(iuv.x*16), 16 ) );
 					
 					if( (glsl_mod( iuv.x, 1./MAXPEAKS ) > 0.5/MAXPEAKS ) )
 					{
