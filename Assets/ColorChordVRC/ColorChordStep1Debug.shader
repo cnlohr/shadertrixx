@@ -120,8 +120,10 @@
 				coloro += float4( max(0.,1.3-length(readnof-1.3) ), 0., 0., 1. );
 				
 				//Sinewave
+				// Get whole waveform would be / 1.
+				float sinpull = notenof / 2.;
 				float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
-					 float2((fmod(notenof,128))/128.,((noteno/128)/64.+8./64.)) );
+					 float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+8./64.)) );
 					 
 				//If line has more significant slope, roll it extra wide.
 				float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
