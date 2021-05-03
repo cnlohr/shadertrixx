@@ -88,3 +88,8 @@ This SLERP function, found by ACiiL,
             return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
         }
 ```
+
+Thanks, error.mdl for telling me how to disable batching.  This fixes issues where shaders need to get access to their local coordinates.
+```
+            Tags {  "DisableBatching"="true"}
+```
