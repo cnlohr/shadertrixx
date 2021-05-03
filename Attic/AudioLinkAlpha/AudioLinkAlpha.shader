@@ -16,11 +16,12 @@ Shader "Custom/AudioLinkAlpha"
 		
 		// ColorChord Notes (Pass 6)
 		_PeakDecay ("Peak Decay", float) = 0.7
-		_PeakCloseEnough ("Close Enough" , float) = 2.0
+		_PeakCloseEnough ("Close Enough" , float) = 4.0  //IN USE
 		_PeakMinium ("Peak Minimum", float) = 0.005
 		_SortNotes ("Sort Notes", int) = 0
-		_OctaveMerge ("Octave Merge", int) = 1
+		_MergeDrag( "MergeDrag", float ) = .3 //When a peak is being assigned to a note, how much should that drag the note's frequency?
 		
+
 		_Uniformity( "Uniformitvity", float ) = 1.5
 		_UniCutoff( "Uniformitvity Cutoff", float) = 0.0
 		_UniAmp( "Uniformitvity Amplitude", float ) = 12.0
@@ -73,6 +74,12 @@ Shader "Custom/AudioLinkAlpha"
 				uint2 coordinateGlobal = round( guv/_SelfTexture2D_TexelSize.xy - 0.5 ); \
 				uint2 coordinateLocal = uint2( coordinateGlobal.x - BASECOORDY.x, coordinateGlobal.y - BASECOORDY.y );
 			#endif
+
+			//GLSL's mod is better than HLSL's mod in this case.
+			//As a note, writing it exactly this way incurs no speed penalty.
+			//the compiler will identify it and use the appropriate assembly instruction.
+			//Tested on Unity 2018.4.20f1 + Windows 10 December 14, 2020
+			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 
 			#pragma target 4.0
 			#pragma vertex CustomRenderTextureVertexShader
@@ -235,12 +242,13 @@ Shader "Custom/AudioLinkAlpha"
 		{
 			Name "Pass6ColorChord-Notes"
 			CGPROGRAM
-			float _PeakDecay;
 			float _PeakCloseEnough;
-			float _PeakMinium;
 			int _SortNotes;
 			int _OctaveMerge;
-			
+			float _MergeDrag;
+			float _PeakDecay;
+			float _PeakMinium;
+
 			float _Uniformity;
 			float _UniCutoff;
 			float _UniAmp;
@@ -248,20 +256,220 @@ Shader "Custom/AudioLinkAlpha"
 			float _UniSumPeak;
 			float _UniNerfFromQ;
 			
+			// Compute difference in bin number between bins
+			// irrespective of octave.  It actually shows the
+			// distance from bin A to bin B.  If you would
+			// have to travel down from A to B it would be negative.
+			float bindiff( float bina, float binb )
+			{
+				float diff = glsl_mod( binb-bina, EXPBINS );
+				if( diff > EXPBINS/2. )
+					return diff - EXPBINS;
+				else
+					return diff;
+			}
+			
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
 				AUDIO_LINK_ALPHA_START( PASS_SIX_OFFSET )
 
-				#define MAXPEAKS 16
-				float3 Peaks[MAXPEAKS];
+				#define MAXNOTES 16
+				float3 Notes[MAXNOTES];
 				int NumPeaks = 0;
-
-				int notes = MAXPEAKS;
+				uint i;
+				uint j;
 				int noteno = coordinateLocal.x-1;
 				float4 LastPeaksSummary = GetSelfPixelData( PASS_SIX_OFFSET );
 				
-				// This finds the peaks and assigns them to notes.
+				//Output is:
+				//  Summary: <peaktot, avgphase1, peaktotrun, unitot>
+				//  Regular: <Bin No, Intensity 1, intensity2, "pu" power.>
+				//		float pu = ( pow( thisNote.y, _Uniformity )) * _UniAmp  - _UniCutoff - pow( maxpeak, _Uniformity ) * _UniMaxPeak  + (1. - thisNote.z*_UniNerfFromQ) - pow( peaktotrun, _Uniformity ) * _UniSumPeak;
+				//		return float4( thisNote, pu );
+				//	}
+				// The "Peaks" Array here is <This Note, Power, Power , PU Power>
 				
+				uint NumNotes = 0;
+				
+				//Part 1, read all peaks back in.
+				for( i = 0; i < MAXNOTES; i++ )
+				{
+					float3 na = GetSelfPixelData( PASS_SIX_OFFSET + uint2( i+1, 0 ) ); 
+					na = -1; //For right now, ditch every frame.
+					Notes[i] = na;
+					if( na.y > 0 )
+						NumNotes++;
+				}
+
+				//Correlate any found peaks with known peaks.
+				float binNext;
+				float binThis = GetSelfPixelData( PASS_ONE_OFFSET + int2( 1, 0 ) ).r;
+				float binLast = GetSelfPixelData( PASS_ONE_OFFSET + int2( 0, 0 ) ).r;
+				
+				uint bin;
+				[loop]
+				for( bin = 1; bin < EXPBINS*EXPOCT-1; bin++ )
+				{
+					uint binn = bin+1;
+					binNext = GetSelfPixelData( PASS_ONE_OFFSET + int2( binn%128, binn/128 ) ).r;
+					
+					if( binThis > binLast && binThis > binNext )
+					{
+						float bindragL = (binThis - binLast);
+						float bindragU = (binThis - binNext);
+						float exactbin = binThis;
+						if( bindragU > bindragL )
+						{
+							exactbin += (1.-(bindragL-bindragU))*0.5;
+						}
+						else
+						{
+							exactbin -= (1.-(bindragU-bindragL))*0.5;
+						}
+
+						//We found a peak!
+						//See if it correlates to a note.
+						uint n;
+						uint closest_note = -1;
+						float closest_note_dist = _PeakCloseEnough;
+						
+						for( n = 0; n < MAXNOTES; n++ )
+						{
+							float3 nt = Notes[n];
+							float diff = abs( bindiff( exactbin, nt.x ) );
+							
+							if( nt.y > 0 && diff < closest_note_dist )
+							{
+								closest_note = n;
+								closest_note_dist = diff;
+							}
+						}
+
+						if( closest_note >= 0 )
+						{
+							//We have the same peak, merge peaks.
+							float3 nt = Notes[closest_note];
+							
+							// careful - when mixing notes, be sure to obey octave looping.
+							float diff = bindiff( nt.x, exactbin );
+							nt.x = glsl_mod( nt.x+diff*_MergeDrag, EXPBINS );
+							nt.y += binThis;
+							Notes[closest_note] = nt;
+						}
+						else
+						{
+							//Could not find note associated with peak, so make a new bin.
+							uint k;
+							for( k = 0; k < MAXNOTES; k++ )
+							{
+								float3 nt = Notes[k];
+								if( nt.y <= 0 )
+								{
+									nt.x = exactbin;
+									nt.y = binThis;
+									Notes[k] = nt;
+									break;
+								}
+							}
+						}
+					}
+					
+					binLast = binThis;
+					binThis = binNext;
+				}
+				
+				float maxpeak = 0.0;
+				float peaktot = 0.0;
+
+				if( noteno >= 0 )
+					return float4( Notes[noteno]*1000., 1 );
+				else
+					return 1.;
+
+
+				[loop]
+				for( i = 0; i < MAXNOTES; i++ )
+				{
+
+					//Combine like notes.
+					float3 nti = Notes[i];					
+					[loop]
+					for( j = 1; j < MAXNOTES; j++ )
+					{
+						if( j <= i ) continue; //HISSSS Compiler is dumb.
+						float3 ntj = Notes[j];
+						float diff = bindiff( nti.x, ntj.x );
+						if( abs(diff) < _PeakCloseEnough && nti.y > 0 && ntj.y > 0 )
+						{
+							//Similar notes: Merge J into I
+							float newfreq = nti.x + bindiff( nti.x, ntj.x )/2;
+							newfreq = glsl_mod( newfreq, EXPBINS );
+							nti = float3( newfreq, nti.y + ntj.y, nti.z + ntj.z );
+						}
+					}
+				
+					//Cull notes
+					nti.y *= _PeakDecay;
+					if( nti.y < _PeakMinium )
+					{
+						nti = -1;
+					}
+					
+					//Check for max values.
+					maxpeak = max( maxpeak, nti.y );
+					peaktot += max( 0.0, nti.y );
+
+					Notes[i] = nti;
+				}
+				float peaktotrun = lerp( LastPeaksSummary.z, peaktot, 0.9 );
+				
+				//Potentially sort
+				
+				//Update nt.z slackily.				
+				//  Summary: <peaktot, avgphase1, peaktotrun, unitot>
+				//  Regular: <Bin No, Intensity 1, intensity2, "pu" power.>
+				//	}
+				// The "Peaks" Array here is <This Note, Power, Power , PU Power>
+
+				//Summarize?
+				if( noteno == -1 )
+				{
+					//Summarize
+					float unitot = 0.0;
+					for( i = 0; i < MAXNOTES; i++ )
+					{
+						float peakamp = Notes[i].y;
+						if( peakamp > 0.0 )
+						{
+
+							float pu = ( pow( peakamp, _Uniformity )) * _UniAmp  - _UniCutoff - pow( maxpeak, _Uniformity ) * _UniMaxPeak + (1. - /*NOTE: This was last frame's notes before the rewrite*/Notes[i].z*_UniNerfFromQ) -  pow( peaktotrun, _Uniformity ) * _UniSumPeak;
+							if( pu > 0. )
+								unitot += pu;
+						}
+					}
+					
+					float avgphase1 = 0;
+
+					uint o, b;
+					for( o = 0; o < EXPOCT; o++ )
+					for( b = 0; b < EXPBINS; b++ )
+					{
+						avgphase1 += GetSelfPixelData( PASS_ONE_OFFSET + uint2( (o%2)*64 + b, o/2 ) ).r;
+					}
+					avgphase1 /= (EXPOCT*EXPBINS);
+					
+					return float4( peaktot, avgphase1, peaktotrun, unitot );				}
+				else
+				{
+					//Pick out the note.
+					float3 thisNote = Notes[noteno];
+					float pu = ( pow( thisNote.y, _Uniformity )) * _UniAmp  - _UniCutoff - pow( maxpeak, _Uniformity ) * _UniMaxPeak  + (1. - thisNote.z*_UniNerfFromQ) - pow( peaktotrun, _Uniformity ) * _UniSumPeak;
+					return float4( thisNote, pu );
+				}
+
+				
+#if 0
+				// This finds the peaks and assigns them to notes.
 				{
 					float bindata[ETOTALBINS];
 					int bins = EXPBINS;//round( 1./_DFTData_TexelSize.x );
@@ -346,7 +554,6 @@ Shader "Custom/AudioLinkAlpha"
 								analogbin += 0.5*(1.-diff);
 							}
 							
-							#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 							
 							float q = (tweakbinDown + tweakbinUp) / (bd*2);
 
@@ -507,6 +714,7 @@ Shader "Custom/AudioLinkAlpha"
 						return float4( thisNote, pu );
 					}
 				}
+#endif
 			}
 			ENDCG
 		}
