@@ -1,0 +1,209 @@
+Shader "Custom/AudioLinkDebug"
+{
+    Properties
+    {
+        _AudioLinkTexture ("Texture", 2D) = "white" {}
+        _SpectrumGain ("Spectrum Gain", Float) = 1.
+        _SampleGain ("Sample Gain", Float) = 1.
+        _SeparatorColor ("Seperator Color", Color) = (.5,.5,0.,1.)
+
+        _SpectrumColorMix ("Spectrum Color Mix", Range(0, 1)) = 0
+
+        _SampleColor ("Sample Color", Color) = (.9, .9, .9,1.)
+        _SpectrumFixedColor ("Spectrum Fixed color", Color) = (.9, .9, .9,1.)
+        _BaseColor ("Base Color", Color) = (0, 0, 0, 0)
+        _UnderSpectrumColor ("Under-Spectrum Color", Color) = (1, 1, 1, .1)
+
+        _SampleVertOffset( "Sample Vertical OFfset", Float ) = 0.0
+        _SpectrumVertOffset( "Spectrum Vertical OFfset", Float ) = 0.0
+        _SampleThickness ("Sample Thickness", Float) = .02
+        _SpectrumThickness ("Spectrum Thickness", Float) = .01
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+        LOD 100
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            // make fog work
+            #pragma multi_compile_fog
+
+            #include "UnityCG.cginc"
+            
+            #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
+            #define EXPBINS 64
+            #define EXPOCT 8
+            #define ETOTALBINS (EXPOCT*EXPBINS)         
+
+            #define _RootNote 0
+
+            float3 CCHSVtoRGB(float3 HSV)
+            {
+                float3 RGB = 0;
+                float C = HSV.z * HSV.y;
+                float H = HSV.x * 6;
+                float X = C * (1 - abs(fmod(H, 2) - 1));
+                if (HSV.y != 0)
+                {
+                    float I = floor(H);
+                    if (I == 0) { RGB = float3(C, X, 0); }
+                    else if (I == 1) { RGB = float3(X, C, 0); }
+                    else if (I == 2) { RGB = float3(0, C, X); }
+                    else if (I == 3) { RGB = float3(0, X, C); }
+                    else if (I == 4) { RGB = float3(X, 0, C); }
+                    else { RGB = float3(C, 0, X); }
+                }
+                float M = HSV.z - C;
+                return RGB + M;
+            }
+
+
+
+            float3 CCtoRGB( float bin, float intensity, int RootNote )
+            {
+                float note = bin / EXPBINS;
+
+                float hue = 0.0;
+                note *= 12.0;
+                note = glsl_mod( 4.-note + RootNote, 12.0 );
+                {
+                    if( note < 4.0 )
+                    {
+                        //Needs to be YELLOW->RED
+                        hue = (note) / 24.0;
+                    }
+                    else if( note < 8.0 )
+                    {
+                        //            [4]  [8]
+                        //Needs to be RED->BLUE
+                        hue = ( note-2.0 ) / 12.0;
+                    }
+                    else
+                    {
+                        //             [8] [12]
+                        //Needs to be BLUE->YELLOW
+                        hue = ( note - 4.0 ) / 8.0;
+                    }
+                }
+                float val = intensity-.1;
+                return CCHSVtoRGB( float3( fmod(hue,1.0), 1.0, clamp( val, 0.0, 1.0 ) ) );
+            }
+
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                UNITY_FOG_COORDS(1)
+                float4 vertex : SV_POSITION;
+            };
+
+            sampler2D _AudioLinkTexture;
+            uniform float4 _AudioLinkTexture_TexelSize;
+            
+            float _SpectrumGain;
+            float _SampleGain;
+            float _SpectrumColorMix;
+            float4 _SeparatorColor;
+            float _SampleThickness;
+            float _SpectrumThickness;
+        
+            float _SampleVertOffset;
+            float4 _SampleColor;
+            float4 _SpectrumFixedColor;
+            float4 _BaseColor;
+            float4 _UnderSpectrumColor;
+            
+            float _SpectrumVertOffset;
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                UNITY_TRANSFER_FOG(o,o.vertex);
+                return o;
+            }
+            
+            float4 forcefilt( sampler2D sample, float4 texelsize, float2 uv )
+            {
+                float4 A = tex2D( sample, uv );
+                float4 B = tex2D( sample, uv + float2(texelsize.x, 0 ) );
+                float4 C = tex2D( sample, uv + float2(0, texelsize.y ) );
+                float4 D = tex2D( sample, uv + float2(texelsize.x, texelsize.y ) );
+                float2 conv = frac(uv*texelsize.zw);
+                //return float4(uv, 0., 1.);
+                return lerp(
+                    lerp( A, B, conv.x ),
+                    lerp( C, D, conv.x ),
+                    conv.y );
+            }
+            
+            float4 GetAudioPixelData( int2 pixelcoord )
+            {
+                return tex2D( _AudioLinkTexture, float2( pixelcoord*_AudioLinkTexture_TexelSize.xy) );
+            }
+            
+            fixed4 frag (v2f i) : SV_Target
+            {
+                float2 iuv = i.uv;
+
+                float4 inten = 0;
+
+                int noteno = iuv.x * EXPBINS * EXPOCT;
+                float notenof = iuv.x * EXPBINS * EXPOCT;
+                int readno = noteno % EXPBINS;
+                float readnof = fmod( notenof, EXPBINS );
+                int reado = (noteno/EXPBINS);
+                float readof = notenof/EXPBINS;
+
+                inten = forcefilt(_AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+                     float2((fmod(notenof,128))/128.,((noteno/128)/64.+4./64.)) ) * _SpectrumGain;
+                
+                inten.x *= 1.;
+                inten.y *= 1.;
+            
+                float4 coloro = _BaseColor;
+
+                //The first-note-segmenters
+                float3 vertical_bars = max(0.,1.3-length(readnof-1.3) );
+                coloro += float4( vertical_bars * _SeparatorColor, 1. );
+                
+                //Sinewave
+                // Get whole waveform would be / 1.
+                float sinpull = notenof / 2.; //2. zooms into the first half.
+                float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+                     float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+8./64.)) ) * _SampleGain;
+                     
+                //If line has more significant slope, roll it extra wide.
+                float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
+                coloro += _SampleColor * max( 100.*((_SampleThickness*ddd)-abs( sinewaveval - iuv.y*2.+1. + _SampleVertOffset )), 0. );
+                
+                //Under-spectrum first
+                float rval = clamp( _SpectrumThickness - iuv.y + inten.x + _SpectrumVertOffset, 0., 1. );
+                rval = min( 1., 1000*rval );
+                coloro = lerp( coloro, _UnderSpectrumColor, rval * _UnderSpectrumColor.a );
+                
+                //Spectrum-Line second
+                rval = max( _SpectrumThickness - abs( inten.x - iuv.y + _SpectrumVertOffset), 0. );
+                rval = min( 1., 1000*rval );
+                coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColor, _SpectrumColorMix ), 1.0 ), rval );
+
+                
+                return coloro;
+
+                //Graph-based spectrogram.
+            }
+            ENDCG
+        }
+    }
+}

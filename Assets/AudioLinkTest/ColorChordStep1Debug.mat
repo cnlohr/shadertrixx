@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ColorChordStep1Debug
-  m_Shader: {fileID: 4800000, guid: 9dd10be0ab07dec49a68fbb796fbb61b, type: 3}
+  m_Shader: {fileID: 4800000, guid: 42ea7772b10b6ee468360045353ed8f3, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -84,11 +84,25 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RootNote: 0
+    - _SampleGain: 1
+    - _SampleThickness: 0.02
+    - _SampleVertOffset: 0
     - _SmoothnessTextureChannel: 0
+    - _SpectrumColorMix: 1
+    - _SpectrumGain: 1
+    - _SpectrumThickness: 0.01
+    - _SpectrumVertOffset: 0
+    - _SpectrumVisMode: 3
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
+    - _BaseColor: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SampleColor: {r: 1, g: 0, b: 0, a: 1}
+    - _SeparatorColor: {r: 0.5, g: 0.5, b: 0, a: 1}
+    - _Spectrum23Color: {r: 1, g: 1, b: 0, a: 1}
+    - _SpectrumFixedColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+    - _UnderSpectrumColor: {r: 1, g: 1, b: 1, a: 0.1}

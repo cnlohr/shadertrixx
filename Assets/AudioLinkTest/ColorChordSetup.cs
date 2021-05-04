@@ -3,6 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using System;
 
 public class TestUpdateRenderTexture : UdonSharpBehaviour
 {
