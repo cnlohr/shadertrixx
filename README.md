@@ -59,6 +59,10 @@ Basic global profiling scripts for Udon:
 This explaination of how the fallback system works (Linked by GenesisAria)
  * https://pastebin.com/92gwQqCM
 
+Making procedural things like grids that behave correctly for going off in the distance.
+ * https://www.iquilezles.org/www/articles/filterableprocedurals/filterableprocedurals.htm
+ * https://www.iquilezles.org/www/articles/bandlimiting/bandlimiting.htm
+
  Convert detp function:
  ```c
      //Convert to Corrected LinearEyeDepth by DJ Lukis
