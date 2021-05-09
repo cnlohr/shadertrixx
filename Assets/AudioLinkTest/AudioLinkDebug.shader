@@ -18,6 +18,11 @@ Shader "Custom/AudioLinkDebug"
         _SpectrumVertOffset( "Spectrum Vertical OFfset", Float ) = 0.0
         _SampleThickness ("Sample Thickness", Float) = .02
         _SpectrumThickness ("Spectrum Thickness", Float) = .01
+		
+		_VUOpacity( "VU Opacity", Float) = 0.5
+		
+		[Toggle] _ShowVUInMain("Show VU In Main", Float) = 0
+
     }
     SubShader
     {
@@ -124,7 +129,10 @@ Shader "Custom/AudioLinkDebug"
             float4 _UnderSpectrumColor;
             
             float _SpectrumVertOffset;
-
+			
+			float _VUOpacity;
+			float _ShowVUInMain;
+			
             v2f vert (appdata v)
             {
                 v2f o;
@@ -159,9 +167,9 @@ Shader "Custom/AudioLinkDebug"
 
                 float4 inten = 0;
 
-                int noteno = iuv.x * EXPBINS * EXPOCT;
+                uint noteno = iuv.x * EXPBINS * EXPOCT;
                 float notenof = iuv.x * EXPBINS * EXPOCT;
-                int readno = noteno % EXPBINS;
+                uint readno = noteno % EXPBINS;
                 float readnof = fmod( notenof, EXPBINS );
                 int reado = (noteno/EXPBINS);
                 float readof = notenof/EXPBINS;
@@ -174,29 +182,121 @@ Shader "Custom/AudioLinkDebug"
             
                 float4 coloro = _BaseColor;
 
-                //The first-note-segmenters
-                float3 vertical_bars = max(0.,1.3-length(readnof-1.3) );
-                coloro += float4( vertical_bars * _SeparatorColor, 1. );
-                
-                //Sinewave
-                // Get whole waveform would be / 1.
-                float sinpull = notenof / 2.; //2. zooms into the first half.
-                float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
-                     float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+8./64.)) ) * _SampleGain;
-                     
-                //If line has more significant slope, roll it extra wide.
-                float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
-                coloro += _SampleColor * max( 100.*((_SampleThickness*ddd)-abs( sinewaveval - iuv.y*2.+1. + _SampleVertOffset )), 0. );
-                
-                //Under-spectrum first
-                float rval = clamp( _SpectrumThickness - iuv.y + inten.x + _SpectrumVertOffset, 0., 1. );
-                rval = min( 1., 1000*rval );
-                coloro = lerp( coloro, _UnderSpectrumColor, rval * _UnderSpectrumColor.a );
-                
-                //Spectrum-Line second
-                rval = max( _SpectrumThickness - abs( inten.x - iuv.y + _SpectrumVertOffset), 0. );
-                rval = min( 1., 1000*rval );
-                coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColor, _SpectrumColorMix ), 1.0 ), rval );
+				if( iuv.x < 1. )
+				{
+					//The first-note-segmenters
+					float3 vertical_bars = max(0.,1.3-length(readnof-1.3) );
+					coloro += float4( vertical_bars * _SeparatorColor, 1. );
+					
+					//Sinewave
+					// Get whole waveform would be / 1.
+					float sinpull = notenof / 2.; //2. zooms into the first half.
+					float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+						 float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+8./64.)) ) * _SampleGain;
+						 
+					//If line has more significant slope, roll it extra wide.
+					float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
+					coloro += _SampleColor * max( 100.*((_SampleThickness*ddd)-abs( sinewaveval - iuv.y*2.+1. + _SampleVertOffset )), 0. );
+					
+					//Under-spectrum first
+					float rval = clamp( _SpectrumThickness - iuv.y + inten.y + _SpectrumVertOffset, 0., 1. );
+					rval = min( 1., 1000*rval );
+					coloro = lerp( coloro, _UnderSpectrumColor, rval * _UnderSpectrumColor.a );
+					
+					//Spectrum-Line second
+					rval = max( _SpectrumThickness - abs( inten.y - iuv.y + _SpectrumVertOffset), 0. );
+					rval = min( 1., 1000*rval );
+					coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColor, _SpectrumColorMix ), 1.0 ), rval );
+				}
+				
+				//Potentially draw 
+				if( _ShowVUInMain > 0.5 && iuv.x > 1-1/8. && iuv.x < 1. && iuv.y > 0.5 )
+				{
+					iuv.x = (((iuv.x * 8.)-7) + 1.);
+					iuv.y = (iuv.y*2.) -1.;
+				}
+
+				if( iuv.x >= 1 && iuv.x < 2. )
+				{
+					float UVy = iuv.y;
+					float UVx = iuv.x-1.;
+					
+					
+					float Marker = 0.;
+					float Value = 0.;
+					float4 Marker4 = GetAudioPixelData( int2( 1, 16 ) );
+					float4 Value4 = GetAudioPixelData( int2( 0, 16 ) );
+					if( UVx < 0.5 )
+					{
+						//P-P
+						Marker = Marker4.x;
+						Value = Value4.x;
+					}
+					else
+					{
+						//RMS
+						Marker = Marker4.y;
+						Value = Value4.y;
+					}
+
+					Marker = log( Marker ) * 10.;
+					Value  = log( Value  ) * 10.;
+					
+					float4 VUColor = 0.;
+					
+					int c = floor( UVy * 20 );
+					float cp = glsl_mod( UVy * 20, 1. );
+
+					float guard_separator = 0.02;
+					float gsx = guard_separator * (.8-100.*length( float2( ddx(UVx), ddy(UVx))) )*1.;
+					float gsy = guard_separator * (.8-100.*length( float2( ddx(UVy), ddy(UVy))) )*1.;
+
+					if( UVx > 0.50 + gsx )
+					{
+						if( c > 18 )
+							VUColor = float4( 1., 0., 0., 1. );
+						else if( c > 15 )
+							VUColor = float4( 0.8, 0.8, 0., 1. );
+						else
+							VUColor = float4( 0., 1., 0., 1. );
+					}
+					else if( UVx <= 0.50 - gsx )
+					{
+						if( c > 15 )
+							VUColor = float4( 1., 0., 0., 1. );
+						else if( c > 12 )
+							VUColor = float4( 0.8, 0.8, 0., 1. );
+						else
+							VUColor = float4( 0., 1., 0., 1. );
+					}
+					
+					float thisdb = (-1+UVy) * 30;
+					
+					float VUColorIntensity = 0.;
+					
+					//Historical Peak
+					if( abs( thisdb - Marker ) < 0.2 ) 
+					{
+						VUColorIntensity = 1.;
+					}
+					else
+					{
+						if( cp > gsy*20. )
+						{
+							if( thisdb < Value )
+							{
+								VUColorIntensity = 0.4;
+							}
+						}
+						else
+						{
+								VUColorIntensity = 0.02;
+						}
+					}
+					VUColor *= VUColorIntensity;
+
+					coloro = lerp( VUColor, coloro, _VUOpacity );
+				}
 
                 
                 return coloro;
