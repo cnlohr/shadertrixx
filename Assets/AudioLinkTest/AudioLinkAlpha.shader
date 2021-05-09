@@ -102,6 +102,17 @@ Shader "AudioLink/AudioLinkAlpha"
                 return _SelfTexture2D[pixelcoord];
             }
 
+            // AudioLink
+            uniform float _FadeLength;
+            uniform float _FadeExpFalloff;
+            uniform float _Gain;
+            uniform float _Bass;
+            uniform float _Treble;
+            uniform float _Bands;
+            uniform float _LogAttenuation;
+            uniform float _ContrastSlope;
+            uniform float _ContrastOffset;
+            uniform float _TrebleCorrection;
 
             ENDCG
 
@@ -138,7 +149,8 @@ Shader "AudioLink/AudioLinkAlpha"
 
                 //Roll-off the time constant for higher frequencies.
                 //This 0.08 if reduced, 0.1 normally.  Consider altering this value.
-                const float decay_coefficient = 0.15;
+                const float decay_coefficient = 0.01;
+				const float phi_delta_correction = 4.; 				//XXX TODO: Understand this better.
                 
                 float decaymux = 1.-phadelta*decay_coefficient;
                 float integraldec = 0.;
@@ -165,13 +177,28 @@ Shader "AudioLink/AudioLinkAlpha"
                 }
                 
                 ampl *= _BaseAmplitude/integraldec;
+				
+				ampl *= phadelta*phi_delta_correction+1.;
                 
                 float mag = pow( length( ampl ), 2.0 );
-                mag = lerp( mag, last, _IIRCoefficient );
+                float mag2 = mag;
+                mag = saturate(lerp( mag, last.r, _IIRCoefficient ));
+                
+                // Treble compensation
+                uint spectrumElement = (octave * EXPBINS) + bin;
+                float lastMagnitude = last.g;
+                //mag2 *= 1 + pow(((float)spectrumElement / 768.) * pow(_TrebleCorrection, 2), 3);
+                mag2 *= 1 + (pow((float)spectrumElement / 768., 8) * _TrebleCorrection);
+                // Fade
+                lastMagnitude -= -1.0 * pow(_FadeLength-1.0, 3);
+                // FadeExpFalloff
+                lastMagnitude = lastMagnitude * (1.0 + ( pow(lastMagnitude-1.0, 4.0) * _FadeExpFalloff ) - _FadeExpFalloff);
+                // Do the fade
+                mag2 = saturate(max(lastMagnitude, mag2));
                 
                 return float4( 
                     mag,    //Red:   Spectrum power
-                    0,      //Green: Reserved
+                    mag2,      //Green: Reserved
                     0,      //Blue:  Reserved
                     1 );
             }
@@ -210,17 +237,8 @@ Shader "AudioLink/AudioLinkAlpha"
             Name "Pass3AudioLink4Band"
             CGPROGRAM
 
-            // AudioLink
-            uniform float _FadeLength;
-            uniform float _FadeExpFalloff;
-            uniform float _Gain;
-            uniform float _Bass;
-            uniform float _Treble;
-            uniform float _Bands;
-            uniform float _LogAttenuation;
-            uniform float _ContrastSlope;
-            uniform float _ContrastOffset;
-            uniform float _TrebleCorrection;
+            
+            
             uniform float _Lut[4];
             uniform float _Chunks[4];
 
@@ -260,7 +278,7 @@ Shader "AudioLink/AudioLinkAlpha"
                         uint spectrumElement = pointer + i;
                         int2 spectrumCoord = int2(spectrumElement % 128, spectrumElement / 128);
                         float rawMagnitude = _SelfTexture2D[PASS_ONE_OFFSET + spectrumCoord].r;
-                        rawMagnitude *= ((float)spectrumElement / 1023.) * _TrebleCorrection;
+                        rawMagnitude *= ((float)spectrumElement / 1023.) * pow(_TrebleCorrection, 2);
                         rawMagnitude *= saturate(LinearEQ(_Gain, _Bass, _Treble, (float)spectrumElement / 1023.));
                         total += rawMagnitude;
                     }
@@ -324,35 +342,65 @@ Shader "AudioLink/AudioLinkAlpha"
 
             fixed4 frag (v2f_customrendertexture IN) : SV_Target
             {
-                AUDIO_LINK_ALPHA_START( PASS_THREE_OFFSET )
-
+                AUDIO_LINK_ALPHA_START( PASS_FIVE_OFFSET )
                 int i;
                 
                 float total = 0;
-                float peak = 0;
+                float Peak = 0;
                 for( i = 0; i < 1023; i++ )
                 {
                     float af = _AudioFrames[i];
                     total += af*af;
-                    peak = max( peak, af );
-                    peak = max( peak, -af );
+                    Peak = max( Peak, af );
+                    Peak = max( Peak, -af );
                 }
+
+				float PeakRMS = sqrt( total / 1023. );
+				float4 MarkerValue = GetSelfPixelData( PASS_FIVE_OFFSET + int2( 1, 0 ) );
+				float4 MarkerTimes = GetSelfPixelData( PASS_FIVE_OFFSET + int2( 2, 0 ) );
+				float Time = _Time.y;
+				
+				if( Time - MarkerTimes.x > 1.0 ) MarkerValue.x = -1;
+				if( Time - MarkerTimes.y > 1.0 ) MarkerValue.y = -1;
+				
+				if( MarkerValue.x < PeakRMS )
+				{
+					MarkerValue.x = PeakRMS;
+					MarkerTimes.x = Time;
+				}
+
+				if( MarkerValue.y < Peak )
+				{
+					MarkerValue.y = Peak;
+					MarkerTimes.y = Time;
+				}
+
 
                 if( coordinateLocal.x == 0 )
                 {
                     //First pixel: Current value.
-                    return float4( sqrt( total / 1023. ), peak, 0., 1. );
+                    return float4( PeakRMS, Peak, 0., 1. );
                 }
+                else if( coordinateLocal.x == 1 )
+				{
+					//Second pixel: Limit Output
+					return MarkerValue;
+				}
+                else if( coordinateLocal.x == 2 )
+				{
+					//Second pixel: Limit Time
+					return MarkerTimes;
+				}
                 else
                 {
-                    //XXX TODO: Finish VU meter!
+					//Reserved
                     return 0;
                 }
             }
             ENDCG
         }
 
-        /*Pass
+        Pass
         {
             Name "Pass6ColorChord-Notes"
             CGPROGRAM
@@ -630,7 +678,7 @@ Shader "AudioLink/AudioLinkAlpha"
                 }
             }
             ENDCG
-        }*/
+        }
 
         Pass 
         {
