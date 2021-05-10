@@ -99,6 +99,9 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
 ```
 
 ## Getting big buffers
+
+From @lox9973
+
 ```c
 cbuffer SampleBuffer {
     float _Samples[1023*4] : packoffset(c0);  
@@ -170,3 +173,7 @@ cbuffer FingerBuffer {
 }
 ENDCG
 ```
+
+## Making audio play
+
+Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
