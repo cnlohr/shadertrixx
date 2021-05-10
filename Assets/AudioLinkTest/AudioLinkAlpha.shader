@@ -157,40 +157,44 @@ Shader "AudioLink/AudioLinkAlpha"
                 phadelta *= _BottomFrequency;
                 phadelta /= _SamplesPerSecond;
                 phadelta *= 3.1415926 * 2.0;
-
                 float integraldec = 0.;
+				float totalwindow = 0;
+				float HalfWindowSize;
 
-				
+				// Align phase so 0 phaseis center of window.
 				pha = -phadelta * SAMPHIST/2;
-				
-				float HalfWindowSize = 1000.;
-				
-				float compsum = 0;
 
-				HalfWindowSize = (80./3.14159)/phadelta;
+				// This determines the narrowness of our peaks.
+				float Q = 4.;
 
-                for( idx = 0; idx < SAMPHIST; idx++ )
-                {
+				HalfWindowSize = (Q)/(phadelta/(3.1415926*2.0));
+
+				int windowrange = floor(HalfWindowSize)+1;
+
+				// For ??? reason, this is faster than doing a clever
+				// indexing which only searches the space that will be used.
+
+				for( idx = 0; idx < SAMPHIST; idx++ )
+				{
 					float window = max( 0, HalfWindowSize - abs(idx - SAMPHIST/2) );
-				
-                    float af = _AudioFrames[idx];
-					
+
+					float af = _AudioFrames[idx];
+
 					//Sin and cosine components to convolve.
-                    float2 sc; sincos( pha, sc.x, sc.y );
-                    
-                    // Step through, one sample at a time, multiplying the sin
-                    // and cos values by the incoming signal.
-                    ampl += sc * af * window;
+					float2 sc; sincos( pha, sc.x, sc.y );
 
-                    compsum += window;
-					
-                    // Advance PASS
-                    pha += phadelta;
-                }
+					// Step through, one sample at a time, multiplying the sin
+					// and cos values by the incoming signal.
+					ampl += sc * af * window;
 
-                ampl *= _BaseAmplitude;
-                float mag =  length( ampl );
-				mag/=compsum;
+					totalwindow += window;
+
+					pha += phadelta;
+				}
+
+				float mag = length( ampl );
+				mag /= totalwindow;
+				mag *= _BaseAmplitude;
 
 
 #if 0
