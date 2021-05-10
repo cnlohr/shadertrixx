@@ -97,3 +97,39 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
 ```
             Tags {  "DisableBatching"="true"}
 ```
+
+## Getting big buffers
+```c
+cbuffer SampleBuffer {
+    float _Samples[1023*4] : packoffset(c0);  
+    float _Samples0[1023] : packoffset(c0);
+    float _Samples1[1023] : packoffset(c1023);
+    float _Samples2[1023] : packoffset(c2046);
+    float _Samples3[1023] : packoffset(c3069);
+};
+float frag(float2 texcoord : TEXCOORD0) : SV_Target {
+    uint k = floor(texcoord.x * _CustomRenderTextureInfo.x);
+    float sum = 0;
+    for(uint i=k; i<4092; i++)
+        sum += _Samples[i] * _Samples[i-k];
+    if(texcoord.x < 0)
+        sum = _Samples0[0] + _Samples1[0] + _Samples2[0] + _Samples3[0]; // slick
+    return sum;
+}
+```
+and
+```c
+void Update() {
+    source.GetOutputData(samples, 0);
+    System.Array.Copy(samples, 4096-1023*4, samples0, 0, 1023);
+    System.Array.Copy(samples, 4096-1023*3, samples1, 0, 1023);
+    System.Array.Copy(samples, 4096-1023*2, samples2, 0, 1023);
+    System.Array.Copy(samples, 4096-1023*1, samples3, 0, 1023);
+    target.SetFloatArray("_Samples0", samples0);
+    target.SetFloatArray("_Samples1", samples1);
+    target.SetFloatArray("_Samples2", samples2);
+    target.SetFloatArray("_Samples3", samples3);
+}
+```
+https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants
+
