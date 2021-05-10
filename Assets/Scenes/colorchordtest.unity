@@ -154,7 +154,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: efff1df873e6c374ead7a309c8b0dffd, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 9e474c445fd7c9f429f6c3deb428658b, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -1384,7 +1384,6 @@ GameObject:
   - component: {fileID: 1385854236}
   - component: {fileID: 1385854241}
   - component: {fileID: 1385854240}
-  - component: {fileID: 1385854242}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -1551,19 +1550,6 @@ MonoBehaviour:
   RenderSkybox: {fileID: 0}
   portraitCameraPositionOffset: {x: 0, y: 0, z: 0}
   portraitCameraRotationOffset: {x: 0, y: 1, z: 0, w: -0.00000004371139}
---- !u!114 &1385854242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1385854235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 229740497, guid: 4ecd63eff847044b68db9453ce219299, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  contentType: 1
 --- !u!1 &1447083097
 GameObject:
   m_ObjectHideFlags: 0

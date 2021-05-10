@@ -76,7 +76,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _IIRCoefficient: 0.9
+    - _IIRCoefficient: 0.6
     - _LogAttenuation: 0
     - _MergeDrag: 0.3
     - _Metallic: 0
