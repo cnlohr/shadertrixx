@@ -11,6 +11,7 @@ Shader "Custom/AudioLinkDebug"
 
         _SampleColor ("Sample Color", Color) = (.9, .9, .9,1.)
         _SpectrumFixedColor ("Spectrum Fixed color", Color) = (.9, .9, .9,1.)
+        _SpectrumFixedColorForSlow ("Spectrum Fixed color for slow", Color) = (.9, .9, .9,1.)
         _BaseColor ("Base Color", Color) = (0, 0, 0, 0)
         _UnderSpectrumColor ("Under-Spectrum Color", Color) = (1, 1, 1, .1)
 
@@ -125,6 +126,7 @@ Shader "Custom/AudioLinkDebug"
             float _SampleVertOffset;
             float4 _SampleColor;
             float4 _SpectrumFixedColor;
+            float4 _SpectrumFixedColorForSlow;
             float4 _BaseColor;
             float4 _UnderSpectrumColor;
             
@@ -207,6 +209,11 @@ Shader "Custom/AudioLinkDebug"
 					rval = max( _SpectrumThickness - abs( inten.y - iuv.y + _SpectrumVertOffset), 0. );
 					rval = min( 1., 1000*rval );
 					coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColor, _SpectrumColorMix ), 1.0 ), rval );
+
+					//Other Spectrum-Line second
+					rval = max( _SpectrumThickness - abs( inten.x - iuv.y + _SpectrumVertOffset), 0. );
+					rval = min( 1., 1000*rval );
+					coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColorForSlow, _SpectrumColorMix ), 1.0 ), rval );
 				}
 				
 				//Potentially draw 

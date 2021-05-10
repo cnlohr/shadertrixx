@@ -64,7 +64,7 @@ Shader "AudioLink/AudioLinkAlpha"
             #define PASS_FIVE_OFFSET   int2(0,16) //Pass 5: VU Meter
             #define PASS_SIX_OFFSET    int2(4,16) //Pass 6: ColorChord Notes Note: This is reserved to 32,16.
 
-            #define SAMPHIST 1023
+            #define SAMPHIST 2046
             #define EXPBINS 64
             #define EXPOCT 8
             #define ETOTALBINS ((EXPBINS)*(EXPOCT))
@@ -93,8 +93,15 @@ Shader "AudioLink/AudioLinkAlpha"
             #include "UnityCG.cginc"
             uniform half4 _SelfTexture2D_TexelSize; 
 
-            uniform float  _AudioFrames[1023];
-            
+			// uniform float  _AudioFrames[1023];
+			
+			cbuffer SampleBuffer {
+				float _AudioFrames[1023*2] : packoffset(c0);  
+				float _Samples0[1023] : packoffset(c0);
+				float _Samples1[1023] : packoffset(c1023);
+			};
+			
+			
             // This pulls data from this texture.
             float4 GetSelfPixelData( int2 pixelcoord )
             {
@@ -134,6 +141,10 @@ Shader "AudioLink/AudioLinkAlpha"
             {
                 AUDIO_LINK_ALPHA_START( PASS_ONE_OFFSET )
                 
+								
+				if(guv.x < 0)
+					return _Samples0[0] + _Samples1[0]; // slick, thanks @lox9973
+		
                 float4 last = GetSelfPixelData( coordinateGlobal );
 
                 int bin = coordinateLocal.x % EXPBINS;
@@ -147,26 +158,91 @@ Shader "AudioLink/AudioLinkAlpha"
                 phadelta /= _SamplesPerSecond;
                 phadelta *= 3.1415926 * 2.0;
 
-                //Roll-off the time constant for higher frequencies.
-                //This 0.08 if reduced, 0.1 normally.  Consider altering this value.
-                const float decay_coefficient = 0.01;
-				const float phi_delta_correction = 4.; 				//XXX TODO: Understand this better.
-                
-                float decaymux = 1.-phadelta*decay_coefficient;
                 float integraldec = 0.;
 
-                //The decay starts at 1.0, but will be reduced by decaymux.
-                float decay = 1;
+				
+				pha = -phadelta * SAMPHIST/2;
+				
+				float HalfWindowSize = 1000.;
+				
+				float compsum = 0;
+
+				HalfWindowSize = (80./3.14159)/phadelta;
 
                 for( idx = 0; idx < SAMPHIST; idx++ )
                 {
+					float window = max( 0, HalfWindowSize - abs(idx - SAMPHIST/2) );
+				
                     float af = _AudioFrames[idx];
-                    float2 sc; //Sin and cosine components to convolve.
-                    sincos( pha, sc.x, sc.y );
+					
+					//Sin and cosine components to convolve.
+                    float2 sc; sincos( pha, sc.x, sc.y );
+                    
+                    // Step through, one sample at a time, multiplying the sin
+                    // and cos values by the incoming signal.
+                    ampl += sc * af * window;
+
+                    compsum += window;
+					
+                    // Advance PASS
+                    pha += phadelta;
+                }
+
+                ampl *= _BaseAmplitude;
+                float mag =  length( ampl );
+				mag/=compsum;
+
+
+#if 0
+                //The decay starts at 1.0, but will be reduced by decaymux.
+                float decay = 1;
+
+				float2 normalizecomp = 0.;
+				
+				float2 sctotal = 0.;
+
+				float2 scoffset = 0.;
+				decay = 1;
+				pha = 0;
+				sctotal = 0;
+
+				
+				int adds = 0;
+				float convtotal = 0;
+				float mag = 0;
+				int frames = 0;
+				
+				for( idx = 0; idx < SAMPHIST; idx++ )
+				{
+				    float2 sc; sincos( pha, sc.x, sc.y );
+					sc += scoffset;
+					sctotal += sc * decay;
+					
+                    pha += phadelta;
+                    integraldec += decay;
+                    decay *= decaymux;
+					frames++;
+					if( decay < 0.1 ) break;
+				}
+				
+				decay = 1.;
+				integraldec = 0.;
+				scoffset = -sctotal/frames;
+				
+                for( idx = 0; idx < SAMPHIST; idx++ )
+                {
+                    float af = _AudioFrames[idx];
+					
+					//Sin and cosine components to convolve.
+                    float2 sc; sincos( pha, sc.x, sc.y );
+					sc += scoffset;
+					
+					sctotal += sc * decay;
                     
                     // Step through, one sample at a time, multiplying the sin
                     // and cos values by the incoming signal.
                     ampl += sc * af * decay;
+					normalizecomp += sc * decay;
                     
                     // Advance PASS
                     pha += phadelta;
@@ -174,31 +250,41 @@ Shader "AudioLink/AudioLinkAlpha"
                     // Handle decay for higher frequencies.
                     integraldec += decay;
                     decay *= decaymux;
+					
+					if( decay < 0.1 )
+					{
+		                ampl *= _BaseAmplitude;
+						mag +=  length( ampl );
+
+						ampl = 0;
+						convtotal += length( sctotal );
+						sctotal = 0.;
+						decay = 1.;
+						pha = 0.;
+						adds++;
+						//break;
+					}
                 }
                 
-                ampl *= _BaseAmplitude/integraldec;
+                ampl *= _BaseAmplitude;
+                mag +=  length( ampl );
+				convtotal += length( sctotal );
+				sctotal = 0.;
+				mag *= sqrt(phadelta);
+				adds++;
+
+				mag *= .01;
 				
-				ampl *= phadelta*phi_delta_correction+1.;
-                
-                float mag = pow( length( ampl ), 2.0 );
+				//mag = mag * 0.00001 + adds*.1;
+#endif
+
+
                 float mag2 = mag;
-                mag = saturate(lerp( mag, last.r, _IIRCoefficient ));
-                
-                // Treble compensation
-                uint spectrumElement = (octave * EXPBINS) + bin;
-                float lastMagnitude = last.g;
-                //mag2 *= 1 + pow(((float)spectrumElement / 768.) * pow(_TrebleCorrection, 2), 3);
-                mag2 *= 1 + (pow((float)spectrumElement / 768., 8) * _TrebleCorrection);
-                // Fade
-                lastMagnitude -= -1.0 * pow(_FadeLength-1.0, 3);
-                // FadeExpFalloff
-                lastMagnitude = lastMagnitude * (1.0 + ( pow(lastMagnitude-1.0, 4.0) * _FadeExpFalloff ) - _FadeExpFalloff);
-                // Do the fade
-                mag2 = saturate(max(lastMagnitude, mag2));
-                
+                mag = (lerp( mag, last.r, _IIRCoefficient ));
+				
                 return float4( 
                     mag,    //Red:   Spectrum power
-                    mag2,      //Green: Reserved
+                    mag2,      //Green: Instantaneous power.
                     0,      //Blue:  Reserved
                     1 );
             }
