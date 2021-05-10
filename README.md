@@ -133,3 +133,40 @@ void Update() {
 ```
 https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants
 
+CBuffers:
+```
+Properties {
+...
+
+    _Spread00 ("Spine",     Vector) = (40, 40, 40, 1)
+    _Spread01 ("Head",        Vector) = (40, 40, 80, 1)
+    ...
+    _Spread50 ("IndexProximal",    Vector) = (45, 20,  9, 1)
+    _Spread51 ("IndexDistal",    Vector) = (45,  9,  9, 1)
+
+    _Finger00 ("LeftThumb",        Vector) = (0, 0, 0, 0)
+    _Finger01 ("RightThumb",    Vector) = (0, 0, 0, 0)
+    ...
+    _Finger40 ("LeftLittle",    Vector) = (0, 0, 0, 0)
+    _Finger41 ("RightLittle",    Vector) = (0, 0, 0, 0)
+}
+
+CGPROGRAM
+...
+cbuffer SpreadBuffer {
+    float4 _Spread[6][2] : packoffset(c0);  
+    float4 _Spread00 : packoffset(c0);
+    float4 _Spread01 : packoffset(c1);
+    ...
+    float4 _Spread50 : packoffset(c10);
+    float4 _Spread51 : packoffset(c11);
+};
+cbuffer FingerBuffer {
+    float4 _Finger[10] : packoffset(c0);  
+    float4 _Finger00 : packoffset(c0);
+    ...
+    float4 _Finger40 : packoffset(c8);
+    float4 _Finger41 : packoffset(c9);
+}
+ENDCG
+```
