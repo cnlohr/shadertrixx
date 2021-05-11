@@ -42,7 +42,7 @@ Shader "Custom/AudioLinkDebug"
             
             #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
             #define EXPBINS 64
-            #define EXPOCT 8
+            #define EXPOCT 10
             #define ETOTALBINS (EXPOCT*EXPBINS)         
 
             #define _RootNote 0
@@ -69,7 +69,7 @@ Shader "Custom/AudioLinkDebug"
 
 
 
-            float3 CCtoRGB( float bin, float intensity, int RootNote )
+            float3 CCtoRGB( float bin, float spectrum_valuesity, int RootNote )
             {
                 float note = bin / EXPBINS;
 
@@ -95,7 +95,7 @@ Shader "Custom/AudioLinkDebug"
                         hue = ( note - 4.0 ) / 8.0;
                     }
                 }
-                float val = intensity-.1;
+                float val = spectrum_valuesity-.1;
                 return CCHSVtoRGB( float3( fmod(hue,1.0), 1.0, clamp( val, 0.0, 1.0 ) ) );
             }
 
@@ -167,7 +167,7 @@ Shader "Custom/AudioLinkDebug"
             {
                 float2 iuv = i.uv;
 
-                float4 inten = 0;
+                float4 spectrum_value = 0;
 
                 uint noteno = iuv.x * EXPBINS * EXPOCT;
                 float notenof = iuv.x * EXPBINS * EXPOCT;
@@ -176,11 +176,11 @@ Shader "Custom/AudioLinkDebug"
                 int reado = (noteno/EXPBINS);
                 float readof = notenof/EXPBINS;
 
-                inten = forcefilt(_AudioLinkTexture, _AudioLinkTexture_TexelSize, 
+                spectrum_value = forcefilt(_AudioLinkTexture, _AudioLinkTexture_TexelSize, 
                      float2((fmod(notenof,128))/128.,((noteno/128)/64.+4./64.)) ) * _SpectrumGain;
                 
-                inten.x *= 1.;
-                inten.y *= 1.;
+                spectrum_value.x *= 1.;
+                spectrum_value.y *= 1.;
             
                 float4 coloro = _BaseColor;
 
@@ -194,24 +194,24 @@ Shader "Custom/AudioLinkDebug"
 					// Get whole waveform would be / 1.
 					float sinpull = notenof / 2.; //2. zooms into the first half.
 					float sinewaveval = forcefilt( _AudioLinkTexture, _AudioLinkTexture_TexelSize, 
-						 float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+8./64.)) ) * _SampleGain;
+						 float2((fmod(sinpull,128))/128.,((floor(sinpull/128.))/64.+10./64.)) ) * _SampleGain;
 						 
 					//If line has more significant slope, roll it extra wide.
 					float ddd = 1.+length(float2(ddx( sinewaveval ),ddy(sinewaveval)))*20;
 					coloro += _SampleColor * max( 100.*((_SampleThickness*ddd)-abs( sinewaveval - iuv.y*2.+1. + _SampleVertOffset )), 0. );
 					
 					//Under-spectrum first
-					float rval = clamp( _SpectrumThickness - iuv.y + inten.y + _SpectrumVertOffset, 0., 1. );
+					float rval = clamp( _SpectrumThickness - iuv.y + spectrum_value.z + _SpectrumVertOffset, 0., 1. );
 					rval = min( 1., 1000*rval );
 					coloro = lerp( coloro, _UnderSpectrumColor, rval * _UnderSpectrumColor.a );
 					
 					//Spectrum-Line second
-					rval = max( _SpectrumThickness - abs( inten.y - iuv.y + _SpectrumVertOffset), 0. );
+					rval = max( _SpectrumThickness - abs( spectrum_value.z - iuv.y + _SpectrumVertOffset), 0. );
 					rval = min( 1., 1000*rval );
 					coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColor, _SpectrumColorMix ), 1.0 ), rval );
 
 					//Other Spectrum-Line second
-					rval = max( _SpectrumThickness - abs( inten.x - iuv.y + _SpectrumVertOffset), 0. );
+					rval = max( _SpectrumThickness - abs( spectrum_value.x - iuv.y + _SpectrumVertOffset), 0. );
 					rval = min( 1., 1000*rval );
 					coloro = lerp( coloro, fixed4( lerp( CCtoRGB(noteno, 1.0, _RootNote ), _SpectrumFixedColorForSlow, _SpectrumColorMix ), 1.0 ), rval );
 				}
@@ -279,12 +279,12 @@ Shader "Custom/AudioLinkDebug"
 					
 					float thisdb = (-1+UVy) * 30;
 					
-					float VUColorIntensity = 0.;
+					float VUColorspectrum_valuesity = 0.;
 					
 					//Historical Peak
 					if( abs( thisdb - Marker ) < 0.2 ) 
 					{
-						VUColorIntensity = 1.;
+						VUColorspectrum_valuesity = 1.;
 					}
 					else
 					{
@@ -292,15 +292,15 @@ Shader "Custom/AudioLinkDebug"
 						{
 							if( thisdb < Value )
 							{
-								VUColorIntensity = 0.4;
+								VUColorspectrum_valuesity = 0.4;
 							}
 						}
 						else
 						{
-								VUColorIntensity = 0.02;
+								VUColorspectrum_valuesity = 0.02;
 						}
 					}
-					VUColor *= VUColorIntensity;
+					VUColor *= VUColorspectrum_valuesity;
 
 					coloro = lerp( VUColor, coloro, _VUOpacity );
 				}
