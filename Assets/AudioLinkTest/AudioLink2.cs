@@ -64,9 +64,11 @@ public class AudioLink2 : MonoBehaviour
 
     float[] _spectrumValues = new float[1024];
     float[] _spectrumValuesTrim = new float[1023];
-    float[] _audioFrames = new float[2046];
+    float[] _audioFrames = new float[1023*4];
 	float[] _samples0 = new float[1023];
 	float[] _samples1 = new float[1023];
+	float[] _samples2 = new float[1023];
+	float[] _samples3 = new float[1023];
 		
     float[] _lut;
     float[] _chunks;
@@ -89,10 +91,14 @@ public class AudioLink2 : MonoBehaviour
     {
         if (audioSource == null) return;
         audioSource.GetOutputData(_audioFrames, 0);
-		System.Array.Copy(_audioFrames, 2048-1023*2, _samples0, 0, 1023);
-		System.Array.Copy(_audioFrames, 2048-1023*1, _samples1, 0, 1023);
+		System.Array.Copy(_audioFrames, 4092-1023*4, _samples0, 0, 1023);
+		System.Array.Copy(_audioFrames, 4092-1023*3, _samples1, 0, 1023);
+		System.Array.Copy(_audioFrames, 4092-1023*2, _samples2, 0, 1023);
+		System.Array.Copy(_audioFrames, 4092-1023*1, _samples3, 0, 1023);
 		audioMaterial.SetFloatArray("_Samples0", _samples0);
 		audioMaterial.SetFloatArray("_Samples1", _samples1);
+		audioMaterial.SetFloatArray("_Samples2", _samples2);
+		audioMaterial.SetFloatArray("_Samples3", _samples3);
 
         #if UNITY_EDITOR
         audioMaterial.SetFloatArray("_Lut", _lut);

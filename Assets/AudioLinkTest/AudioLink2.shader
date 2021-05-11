@@ -59,16 +59,16 @@ Shader "AudioLink/AudioLink2"
 
             // This determines the bottom-left corner of the various passes.
             #define PASS_ONE_OFFSET    int2(0,4)   //Pass 1: DFT: 4,5,6,7,8 (5x2 (10) Octaves)
-			//Row 9: Reserved.
+            //Row 9: Reserved.
             #define PASS_TWO_OFFSET    int2(0,10)  //Pass 2: Sample Data 10->19 10x128 samples = 1280 samples total.
 
             #define PASS_THREE_OFFSET  int2(0,0)  //Pass 3: Traditional 4 bands of AudioLink
             #define PASS_FOUR_OFFSET   int2(1,0)  //Pass 4: History from 4 bands of AudioLink
 
-            #define PASS_FIVE_OFFSET   int2(0,20) //Pass 5: VU Meter
-            #define PASS_SIX_OFFSET    int2(4,20) //Pass 6: ColorChord Notes Note: This is reserved to 32,16.
+            #define PASS_FIVE_OFFSET   int2(0,32) //Pass 5: VU Meter
+            #define PASS_SIX_OFFSET    int2(4,32) //Pass 6: ColorChord Notes Note: This is reserved to 32,16.
 
-            #define SAMPHIST 2046
+            #define SAMPHIST 4092
             #define EXPBINS 64
             #define EXPOCT 8
             #define ETOTALBINS ((EXPBINS)*(EXPOCT))
@@ -98,9 +98,11 @@ Shader "AudioLink/AudioLink2"
             uniform half4 _SelfTexture2D_TexelSize; 
 
             cbuffer SampleBuffer {
-                float _AudioFrames[1023*2] : packoffset(c0);  
+                float _AudioFrames[1023*4] : packoffset(c0);  
                 float _Samples0[1023] : packoffset(c0);
                 float _Samples1[1023] : packoffset(c1023);
+                float _Samples2[1023] : packoffset(c2046);
+                float _Samples3[1023] : packoffset(c3069);
             };
             
             // This pulls data from this texture.
@@ -145,13 +147,13 @@ Shader "AudioLink/AudioLink2"
             {
                 AUDIO_LINK_ALPHA_START( PASS_ONE_OFFSET )
 
-				//XXX Hack: Force the compiler to keep Samples0 and Samples1.
-				if(guv.x < 0)
-					return _Samples0[0] + _Samples1[0]; // slick, thanks @lox9973
+                //XXX Hack: Force the compiler to keep Samples0 and Samples1.
+                if(guv.x < 0)
+                    return _Samples0[0] + _Samples1[0] + _Samples2[0] + _Samples3[0]; // slick, thanks @lox9973
 
 
-				//Uncomment to enable debugging of where on the CRT this pass is.
-				//return float4( coordinateLocal, 0., 1. );
+                //Uncomment to enable debugging of where on the CRT this pass is.
+                //return float4( coordinateLocal, 0., 1. );
 
                 if(guv.x < 0)
                     return _Samples0[0] + _Samples1[0]; // slick, thanks @lox9973
@@ -172,8 +174,12 @@ Shader "AudioLink/AudioLink2"
                 float totalwindow = 0;
                 float HalfWindowSize;
 
+				//Don't use full wave data, otherwise this would go a little slow.
+				//This can be up to SAMPHIST but it seems fine down at 2048.
+				#define USE_SAMPHIST 2048
+
                 // Align phase so 0 phaseis center of window.
-                pha = -phadelta * SAMPHIST/2;
+                pha = -phadelta * USE_SAMPHIST/2;
 
                 // This determines the narrowness of our peaks.
                 float Q = 4.;
@@ -185,9 +191,9 @@ Shader "AudioLink/AudioLink2"
                 // For ??? reason, this is faster than doing a clever
                 // indexing which only searches the space that will be used.
 
-                for( idx = 0; idx < SAMPHIST; idx++ )
+                for( idx = 0; idx < USE_SAMPHIST; idx++ )
                 {
-                    float window = max( 0, HalfWindowSize - abs(idx - SAMPHIST/2) );
+                    float window = max( 0, HalfWindowSize - abs(idx - USE_SAMPHIST/2) );
 
                     float af = _AudioFrames[idx];
 
@@ -209,8 +215,8 @@ Shader "AudioLink/AudioLink2"
 
                 float mag2 = mag;
 
-				//Z component contains filtered output.
-				float magfilt = (lerp(mag, last.z, _IIRCoefficient ));
+                //Z component contains filtered output.
+                float magfilt = (lerp(mag, last.z, _IIRCoefficient ));
 
 
                 // Treble compensation
@@ -249,15 +255,15 @@ Shader "AudioLink/AudioLink2"
             {
                 AUDIO_LINK_ALPHA_START( PASS_TWO_OFFSET )
 
-				//XXX Hack: Force the compiler to keep Samples0 and Samples1.
-				if(guv.x < 0)
-					return _Samples0[0] + _Samples1[0]; // slick, thanks @lox9973
+                //XXX Hack: Force the compiler to keep Samples0 and Samples1.
+                if(guv.x < 0)
+                    return _Samples0[0] + _Samples1[0] + _Samples2[0] + _Samples3[0] + _AudioFrames[0]; // slick, thanks @lox9973
 
                 uint frame = coordinateLocal.x + coordinateLocal.y * 128;
                 if( frame >= SAMPHIST ) frame = SAMPHIST-1; //Prevent overflow.
 
-				//Uncomment to enable debugging of where on the CRT this pass is.
-				//return float4( frame/1000., coordinateLocal/10., 1. );
+                //Uncomment to enable debugging of where on the CRT this pass is.
+                //return float4( frame/1000., coordinateLocal/10., 1. );
 
                 return float4( 
                     _AudioFrames[frame],    //Red:   Spectrum power
