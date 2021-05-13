@@ -177,3 +177,59 @@ ENDCG
 ## Making audio play
 
 Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
+
+
+## CRT Perf Testing
+Test number results were performed on a laptop RTX2070.
+
+NSIGHT Tests were not performed in VR.
+
+SINGLE CRT TESTS
+
+Swapping buffers between passes:
+
+ * SAME CRT: 1024x1024 RGBAF Running a CRT with with 25x .2x.2 update zones, double buffering every time yields a total run time of 
+   * 2.25ms in-editor. 2.5ms in-game.
+   * Each pass executed over a 10us window.
+   * There was 100us between executions.
+ * Same as above, except for 128x128.
+   * 330us in-editor. 250us in-game.
+   * Each pass executed over a 6us window.
+   * There was 6us between executions.
+ * Same as above, except for 20x20.
+   * 340us in-editor. 270us in-game.
+   * Each pass executed over a 6us window.
+   * There was 6us between executions.
+   
+Not swapping buffers between passes:
+
+ * SAME CRT: 1024x1024 RGBAF Running a CRT with with 25x .2x.2 update zones, double buffering only on last pass yields a total run time of 
+   * 230-280us in-editor. 185us in-game.
+   * Each pass executed over a 3.5us window.
+   * There is no time between executions.
+   * There was a 100us lag on the very last update.
+ * Same as above, except for 128x128.
+   * 63us in-editor. 22us (+/- a fair bit) in-game.
+   * Each pass executed over a between 400ns and 1us window.
+   * There are random lags surrounding this in game, but the lags are all tiny.
+   
+   
+With chained CRTs, **but** using the same shader.  The mateials were set up so that each passing CRT.  All tests run 25 separate CRTs, using the last one.
+ * 1024x1024 RGBAF running a CRT, but only .2x.2 of the update zone. (So it's a fair test).
+   * ~80us in-editor, 140us in-game.
+   * ~6.5us between passes.
+   * First material uses a fixed material.
+   * OBSERVATION: This looks cheaty, as it's all the same rendertarget.
+ * Same, except forces the chain to be circular.
+   * Same in-game perf.
+ * Same, except verifying that each step is not stepped upon.
+   * Unity a little slower (110us), 160us in-game.
+
+ * Forced different rendertarget sizes, pinging between 1024x1024 and 512x512.
+   * ~85us in-editor.
+   * 120us in-game.
+
+ * Forcefully inserting one double-buffered frame, to allow data tobe fed back in on itself
+    * 190us in-editor
+	* 250us in-game.
+	* The frame with the double buffer incurs a huge pipeline hit of ~110us.
