@@ -233,3 +233,25 @@ With chained CRTs, **but** using the same shader.  The mateials were set up so t
     * 190us in-editor
 	* 250us in-game.
 	* The frame with the double buffer incurs a huge pipeline hit of ~110us.
+
+### Cameras
+ * Created 25 cameras, pointed at 25 quads, each on an invisible layer.
+ * No depth buffer, no clear.
+ * Quad was only .2x.2
+ * Basically same shader as chain CRT.
+ * 1024x1024 RGBA32F
+ 
+ * In-Editor 234us per camera. 5.8ms total.
+ * In-Game 300us per camera. 7.8ms total.
+
+Trying 128x128
+ * In-Editor: 35us per camera. around 600us total.
+ * In-game: ~30us per camera.  But, weird timing. Has stalls. Takes ~2.1ms total.
+
+### Conclusions:
+ * You can work with large CRTs that chain with virtually no overhead.
+ * Small (say 128x128) buffers can double buffer almost instantly.
+ * Larger buffers, for instance 1024x1024 RGBA32F take ~110us to double-buffer.
+ * No penalty is paid by chaining CRTs target different texture sizes.
+ * Note that all tests were performed with the same shader for all CRTs.
+ * Cameras work surprisingly well for smaller textures and really poorly for big textures.
