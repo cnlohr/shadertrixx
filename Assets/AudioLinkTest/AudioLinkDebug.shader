@@ -43,7 +43,7 @@ Shader "Custom/AudioLinkDebug"
             #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
             #define EXPBINS 24
             #define EXPOCT 10
-			#define MAXNOTES 16
+			#define MAXNOTES 10
             #define ETOTALBINS (EXPOCT*EXPBINS)         
 
             #define _RootNote 0
@@ -187,7 +187,20 @@ Shader "Custom/AudioLinkDebug"
 
 
 				//Output any debug notes
-				
+				{
+					#define MAXNOTES 10
+					#define PASS_SIX_OFFSET    int2(4,20) //Pass 6: ColorChord Notes Note: This is reserved to 32,16.
+
+					int selnote = (int)(iuv.x * 10);
+					float4 NoteSummary = tex2D( _AudioLinkTexture, float2( PASS_SIX_OFFSET*_AudioLinkTexture_TexelSize.xy) );
+					float4 Note = tex2D( _AudioLinkTexture, float2( (PASS_SIX_OFFSET + uint2(selnote+1,0) )*_AudioLinkTexture_TexelSize.xy) );	
+
+					float intensity = clamp( Note.z * .01, 0, 1 );
+					if( abs( iuv.y - intensity ) < 0.05 && intensity > 0 )
+					{
+						return float4(CCtoRGB( Note.x, 1.0, _RootNote ), 1.);
+					}
+				}
 
 
 				if( iuv.x < 1. )

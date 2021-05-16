@@ -1,8 +1,8 @@
 
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
-#define EXPBINS 64
-#define EXPOCT 8
-#define OCTAVES 8
+#define EXPBINS 24
+#define EXPOCT 10
+#define OCTAVES 10
 #define MAXPEAKS 16
 #define SAMPHIST 1023
 #define ETOTALBINS (EXPOCT*EXPBINS)			
