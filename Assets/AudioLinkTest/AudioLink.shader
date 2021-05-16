@@ -521,11 +521,11 @@ Shader "AudioLink/AudioLink"
                 #define MAXNOTES 10
 
 				#define EMAXBIN 192
-				#define EBASEBIN 36
+				#define EBASEBIN 24
 				
 				static const float NOTECLOSEST = 3.5;
 				static const float NOTE_MINIMUM = 0.5;
-				static const float IIR1_DECAY = 0.95;
+				static const float IIR1_DECAY = 0.90;
 				static const float CONSTANT1_DECAY = 0.01;
 				static const float IIR2_DECAY = 0.85;
 				static const float CONSTANT2_DECAY = 0.00;
@@ -670,7 +670,7 @@ Shader "AudioLink/AudioLink"
 						//XXX TODO: Do uniformity calculation on n1 for n1.a.
 					}
 					
-					//n1.y = max( 0, pow( n1.z, 1.5 ) - 10.5 );
+					n1.y = max( 0, pow( n1.z, 1.5 ) - 50. );
 					n1.y = 0;
 					
 					if( n1.z >= 0 )
