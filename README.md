@@ -182,6 +182,8 @@ Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
 ## CRT Perf Testing
 Test number results were performed on a laptop RTX2070.
 
+**BIG NOTE**: CNLohr has observed lots of oddities and breaking things when you use the "period" functionality in CRTs.  I strongly recommend setting "period" to 0.
+
 NSIGHT Tests were not performed in VR.
 
 SINGLE CRT TESTS
