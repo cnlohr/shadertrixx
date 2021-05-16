@@ -41,8 +41,9 @@ Shader "Custom/AudioLinkDebug"
             #include "UnityCG.cginc"
             
             #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
-            #define EXPBINS 64
+            #define EXPBINS 24
             #define EXPOCT 10
+			#define MAXNOTES 16
             #define ETOTALBINS (EXPOCT*EXPBINS)         
 
             #define _RootNote 0
@@ -179,10 +180,15 @@ Shader "Custom/AudioLinkDebug"
                 spectrum_value = forcefilt(_AudioLinkTexture, _AudioLinkTexture_TexelSize, 
                      float2((fmod(notenof,128))/128.,((noteno/128)/64.+4./64.)) ) * _SpectrumGain;
                 
-                spectrum_value.x *= 1.;
-                spectrum_value.y *= 1.;
+                spectrum_value.x *= 1.; // Quick, unfiltered spectrum.
+                spectrum_value.y *= 1.; // Slower, filtered spectrum
             
                 float4 coloro = _BaseColor;
+
+
+				//Output any debug notes
+				
+
 
 				if( iuv.x < 1. )
 				{
