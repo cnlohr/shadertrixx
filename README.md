@@ -102,6 +102,8 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
 
 From @lox9973
 
+BIG WARNING: After a lot of testing, we've found that this is slower than reading from a texture if doing intensive reads.  If you need to read from like 100 of these in a shader, probably best to move it into a texture first.
+
 ```c
 cbuffer SampleBuffer {
     float _Samples[1023*4] : packoffset(c0);  
