@@ -174,6 +174,12 @@ cbuffer FingerBuffer {
 ENDCG
 ```
 
+## Keywords.
+
+(1) DO NOT INCLUDE `[Toggle]` use `[ToggleUI]`
+
+(2) If you do want to use keywords, you can from this list: https://pastebin.com/83fQvZ3n
+
 ## Making audio play
 
 Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
