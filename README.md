@@ -98,6 +98,14 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
             Tags {  "DisableBatching"="true"}
 ```
 
+
+## Udon events.
+
+Re: `FixedUpdate`, `Update`, `LateUpdate`
+
+From Merlin: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html most of the events under Messages, with some exceptions like awake and things that don't make sense like the Unity networking related ones
+you can look at what events UdonBehaviour.cs registers to see if they are actually there on Udon's side
+
 ## Getting big buffers
 
 From @lox9973
