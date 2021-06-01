@@ -98,6 +98,13 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
             Tags {  "DisableBatching"="true"}
 ```
 
+## HALP The Unity compiler is emitting really bizarre assembly code.
+
+Eh, just try using a different shader model, add a 
+```glsl
+#pragma  target 5.0
+```
+in your code or something.  Heck 5.0's been supported since the GeForce 400 in 2010.
 
 ## Udon events.
 
