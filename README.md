@@ -186,7 +186,8 @@ ENDCG
 
 ## Keywords.
 
-(1) DO NOT INCLUDE `[Toggle]` use `[ToggleUI]`
+(1) DO NOT INCLUDE `[Toggle]`!!
+INSTEAD, use `[ToggleUI]`
 
 (2) If you do want to use keywords, you can from this list: https://pastebin.com/83fQvZ3n
 
