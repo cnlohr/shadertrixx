@@ -1,0 +1,85 @@
+
+                // sample the texture
+				float2 iuvt = i.uv * _MainTex_TexelSize.zw;
+				
+				iuvt.x -= ( ( iuvt.y+0.5 ) ) / 2.;
+
+				float2 ipt = ( floor( iuvt ) ) * _MainTex_TexelSize.xy;
+				
+				
+				#if 1
+				//
+				//  * - * - * - *
+				//   \ / \ / \ /
+				//    * - * - *
+				//   / \ / \ / \
+				//  * - * - * - *
+				//
+				
+				// * --- *
+				// |    /|
+				// |   / |
+				// |  /  |
+				// | /   |
+				// |/    |
+				// * --- *
+
+                float4 colUL = tex2D(_MainTex, ipt+float2(0,0)*_MainTex_TexelSize.xy);
+                float4 colUR = tex2D(_MainTex, ipt+float2(1,0)*_MainTex_TexelSize.xy);
+                float4 colLL = tex2D(_MainTex, ipt+float2(0,1)*_MainTex_TexelSize.xy);
+                float4 colLR = tex2D(_MainTex, ipt+float2(1,1)*_MainTex_TexelSize.xy);
+				
+				float2 coordin = iuvt - floor( iuvt );
+
+				//colUL = colUR = colLL = colLR = 0.5;
+				
+				//coordin = smoothstep( 0, 1, coordin );
+
+#define RMIX(x) (x)
+				float4 ctot = 0;
+				if( coordin.x + coordin.y > 1.0 )
+				{
+					float3 rs = float3( (coordin.y+coordin.x)-1, 1.-coordin.x, 1.-coordin.y );
+					rs = ((rs*rs));
+					rs = rs/(rs.x+rs.y+rs.z);
+					//Bottom half.
+					ctot += (colLR * rs.x);
+					ctot += (colLL * rs.y);
+					ctot += (colUR * rs.z);
+				}
+				else
+				{
+					//Top half.
+					//Bottom half.
+					float3 rs = float3( 1.-(coordin.y+coordin.x), coordin.y, coordin.x );
+					rs = ((rs*rs));
+					rs = rs/(rs.x+rs.y+rs.z);
+					ctot += (colUL * rs.x);
+					ctot += (colLL * rs.y);
+					ctot += (colUR * rs.z);
+				}
+				
+				float4 col = ctot*2.-1.;
+				
+				
+				#else
+				
+                float4 colUL = tex2D(_MainTex, ipt+float2(0,0)*_MainTex_TexelSize.xy);
+                float4 colUR = tex2D(_MainTex, ipt+float2(1,0)*_MainTex_TexelSize.xy);
+                float4 colLL = tex2D(_MainTex, ipt+float2(0,1)*_MainTex_TexelSize.xy);
+                float4 colLR = tex2D(_MainTex, ipt+float2(1,1)*_MainTex_TexelSize.xy);
+
+				float2 shift = smoothstep( 0, 1, iuvt - floor( iuvt ) );
+				float4 ov = lerp(
+					lerp( colUL, colUR, shift.x ),
+					lerp( colLL, colLR, shift.x ), shift.y );
+
+				
+                float softness = 4*length( 2./pow( length( float2( ddx( iuvt.x ), ddy( iuvt.y ) ) ), 0.5 ));
+				float4 col = saturate( ov * softness - softness/2 );
+				#endif
+				
+
+                // apply fog
+                UNITY_APPLY_FOG(i.fogCoord, col);
+                return col;
