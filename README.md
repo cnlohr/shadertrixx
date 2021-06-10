@@ -20,6 +20,8 @@ From @Lyuma
  * force a loop with [loop] (UNITY_LOOP)
  * there's also [call] for if or switch statements I think, not sure exactly how it works.
 
+From @Orels
+ * Here's a pretty quick reference for HLSL: https://developer.download.nvidia.com/cg/index_stdlib.html
 
 ## tanoise
 
