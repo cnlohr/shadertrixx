@@ -31,9 +31,17 @@ Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertr
 
 tanoise-modified aurora, originally written by nimitz, modified further by scrn.  https://github.com/cnlohr/shadertrixx/tree/main/Assets/scrn_aurora
 
-## ColorChordVRC
+## MRT
 
-(In progress)
+This demo is not in this project, but, I wanted to include notes on how to do multiple rendertextures.
+
+1) Set up cameras pointed at whatever you want to compute.
+2) Put the things on the mirrorreflection layer
+3) Cull in camrea based on that layer.
+4) Put camera on default layer.
+5) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order.
+6) {{TODO}}
+
 
 ## Additional Links
 
