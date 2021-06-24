@@ -23,6 +23,9 @@ From @Lyuma
 From @Orels
  * Here's a pretty quick reference for HLSL: https://developer.download.nvidia.com/cg/index_stdlib.html
 
+From @lox9973
+ * This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
+
 ## tanoise
 
 Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/blob/main/Assets/tanoise/README.md
