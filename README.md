@@ -42,8 +42,17 @@ This demo is not in this project, but, I wanted to include notes on how to do mu
 2) Put the things on the mirrorreflection layer
 3) Cull in camrea based on that layer.
 4) Put camera on default layer.
-5) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order.
-6) {{TODO}}
+5) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order, unless you really don't care.
+6) I find putting camera calcs on `UiMenu` to work best.
+
+NOTE: Unfortunately, Unity messes up ordering of cameras.  You will need to explicitly execute the order you want for all the cameras.   You can only do this in `Update` or `LateUpdate`, i.e.
+
+```cs
+		CamCalcA.enabled = false;
+		RenderBuffer[] renderBuffersA = new RenderBuffer[] { rtPositionA.colorBuffer, rtVelocityA.colorBuffer };
+		CamCalcA.SetTargetBuffers(renderBuffersA, rtPositionA.depthBuffer);
+```
+
 
 
 ## Additional Links
