@@ -45,7 +45,9 @@ This demo is not in this project, but, I wanted to include notes on how to do mu
 5) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order, unless you really don't care.
 6) I find putting camera calcs on `UiMenu` to work best.
 
-NOTE: Unfortunately, Unity often messes up ordering of cameras.  **TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) FIRST AS THIS WILL SLOW THINGS DOWN** You will need to explicitly execute the order you want for all the cameras.   You can only do this in `Update` or `LateUpdate`, i.e.
+OPTION 1: Cameras ignore their depth and render order when you do this.  Instead they will execute in the order you call SetTargetBuffers on them.
+
+NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) FIRST AS THIS WILL SLOW THINGS DOWN** You will need to explicitly execute the order you want for all the cameras.   You can only do this in `Update` or `LateUpdate`, i.e.
 
 ```cs
 		CamCalcA.enabled = false;
@@ -56,6 +58,7 @@ NOTE: Unfortunately, Unity often messes up ordering of cameras.  **TEST IT WITHO
 		CamCalcA.Render()
 		CamCalcB.Render()
 ```
+
 
 
 
