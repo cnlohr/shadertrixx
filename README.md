@@ -34,6 +34,11 @@ Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertr
 
 tanoise-modified aurora, originally written by nimitz, modified further by scrn.  https://github.com/cnlohr/shadertrixx/tree/main/Assets/scrn_aurora
 
+
+## VRC Layers
+
+http://vrchat.wikidot.com/worlds:layers
+
 ## MRT
 
 This demo is not in this project, but, I wanted to include notes on how to do multiple rendertextures.
