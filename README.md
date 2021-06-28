@@ -229,7 +229,7 @@ INSTEAD, use `[ToggleUI]`
 
 ## VRChat "Build & Test" Overrides
 
-You can insert additional parameters into VRC for "Build & Test" with the following (compiled TCC build of code included.) For instance, this one adds the --fps=1000 command-line parameter.
+You can insert additional parameters into VRC for "Build & Test" with the following (compiled TCC build of code included.) For instance, this one adds the `--fps=0` command-line parameter.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -239,7 +239,7 @@ int main( int argc, char ** argv )
     char cts[8192];
     char * ctsp = cts;
     int i;
-    ctsp += sprintf( ctsp, "vrchat.exe --fps=1000" );
+    ctsp += sprintf( ctsp, "vrchat.exe --fps=0" );
     for( i = 1; i < argc; i++ )
     {
         ctsp += sprintf( ctsp, " \"%s\"", argv[i] );
@@ -250,10 +250,10 @@ int main( int argc, char ** argv )
 ```
 Command-line to compile application:
 ```
-c:\tcc\tcc.exe vrc1000.c
+c:\tcc\tcc.exe vrc-uncapped.c
 ```
 
-Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc1000.exe
+Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 
 
 
