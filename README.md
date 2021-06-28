@@ -227,6 +227,36 @@ INSTEAD, use `[ToggleUI]`
 
 (2) If you do want to use keywords, you can from this list: https://pastebin.com/83fQvZ3n
 
+## VRChat "Build & Test" Overrides
+
+You can insert additional parameters into VRC for "Build & Test" with the following (compiled TCC build of code included.) For instance, this one adds the --fps=1000 command-line parameter.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main( int argc, char ** argv )
+{
+    char cts[8192];
+    char * ctsp = cts;
+    int i;
+    ctsp += sprintf( ctsp, "vrchat.exe --fps=1000" );
+    for( i = 1; i < argc; i++ )
+    {
+        ctsp += sprintf( ctsp, " \"%s\"", argv[i] );
+    }
+    printf( "Launching: %s\n", cts );
+    system( cts );
+}
+```
+Command-line to compile application:
+```
+c:\tcc\tcc.exe vrc1000.c
+```
+
+Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc1000.exe
+
+
+
 ## Making audio play
 
 Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
