@@ -39,6 +39,12 @@ tanoise-modified aurora, originally written by nimitz, modified further by scrn.
 
 http://vrchat.wikidot.com/worlds:layers
 
+## Need to iterate on Udon Sharp faster?
+
+Edit -> Preferences -> General -> Auto Refresh, uncheck.
+
+Whenever you do need Unity to reload, ctrl+r
+
 ## MRT
 
 This demo is not in this project, but, I wanted to include notes on how to do multiple rendertextures.
