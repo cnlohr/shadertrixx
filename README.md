@@ -50,18 +50,21 @@ Whenever you do need Unity to reload, ctrl+r
 This demo is not in this project, but, I wanted to include notes on how to do multiple rendertextures.
 
 1) Set up cameras pointed at whatever you want to compute.
-2) Put the things on the mirrorreflection layer
-3) Cull in camrea based on that layer.
-4) Put camera on default layer.
-5) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order, unless you really don't care.
-6) I find putting camera calcs on `UiMenu` to work best.
+2) Put the things on a layer which is not heavily used by anything else.
+3) Make sure to cull that layer on all lights.
+4) Use `SetReplacementShader` - this will prevent a mountain of `OnRenderObject()` callbacks.
+5) Cull in camrea based on that layer.
+6) Put camera on default layer.
+7) Don't care about depth because when using MRTs, you want to avoid letting unity figure out the render order, unless you really don't care.
+8) I find putting camera calcs on `UiMenu` to work best.
 
 OPTION 1: Cameras ignore their depth and render order when you do this.  Instead they will execute in the order you call SetTargetBuffers on them.
 
-NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) FIRST AS THIS WILL SLOW THINGS DOWN** You will need to explicitly execute the order you want for all the cameras.   You can only do this in `Update` or `LateUpdate`, i.e.
+NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) FIRST AS THIS WILL SLOW THINGS DOWN  You will need to explicitly execute the order you want for all the cameras.   You can only do this in `Update` or `LateUpdate`, i.e.
 
 ```cs
 		CamCalcA.enabled = false;
+		CamCalcA.SetReplacementShader( <shader>, "" );
 		RenderBuffer[] renderBuffersA = new RenderBuffer[] { rtPositionA.colorBuffer, rtVelocityA.colorBuffer };
 		CamCalcA.SetTargetBuffers(renderBuffersA, rtPositionA.depthBuffer);
 ..
