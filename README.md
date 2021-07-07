@@ -78,7 +78,7 @@ NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) F
 
  * Put the camera, the culling mask and the object you're looking at on a unique layer from your scene in general.  Find all lights, and cull off that layer.  If a camera is on a layer that is lit by a light, things get slow.
  * Make sure your bounding box for your geometry you are computing on doesn't leak into other cameras.
- * Use the following script on your camera: `<camera>.SetReplacementShader( <shader>, "");` where `<camera>` is your camera and `<shader>` is the shader you are using on the object you care about.  As a warning, using a tag here will slow things back down.  
+ * Use the following script on your camera: `<camera>.SetReplacementShader( <shader>, "");` where `<camera>` is your camera and `<shader>` is the shader you are using on the object you care about.  As a warning, using a tag here will slow things back down.  This prevents a ton of callbacks like `OnRenderObject()` in complicated scenes.
  * Doing these things should make your camera passes take sub-200us in most situations.
 
 
