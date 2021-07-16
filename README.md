@@ -14,11 +14,12 @@ Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum p
 
 1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
 2. Read this https://discord.com/channels/189511567539306508/503009489486872583/865421330698731541
-3. Download this: https://files.vrchat.cloud/sdk/U2019-VRCSDK3-WORLD-2021.07.15.13.46_Public.unitypackage
-4. Download & Install Unity Hub: https://unity3d.com/get-unity/download
-5. Install Unity 2019.4.28f1.
-6. Backup your project.
-7. Upgrade away!
+4. Download this: https://files.vrchat.cloud/sdk/U2019-VRCSDK3-WORLD-2021.07.15.13.46_Public.unitypackage
+5. Download & Install Unity Hub: https://unity3d.com/get-unity/download
+7. Install Unity 2019.4.28f1.
+8. Backup your project.
+9. Follow this guide: https://docs.vrchat.com/v2021.3.2/docs/migrating-from-2018-lts-to-2019-lts
+10. Upgrade away!
 
 NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
 
