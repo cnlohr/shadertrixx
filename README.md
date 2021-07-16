@@ -19,7 +19,16 @@ Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum p
 7. Install Unity 2019.4.28f1.
 8. Backup your project.
 9. Follow this guide: https://docs.vrchat.com/v2021.3.2/docs/migrating-from-2018-lts-to-2019-lts
-10. Upgrade away!
+Basically:
+1. Open the project to an empty scene.
+2. Import the BETA SDK - if you ever import the not beta SDK you will likely have to start over.
+3. Import Udon sharp aftert the beta SDK.
+4. Import CyanEmu.
+
+Import anything else you need.
+
+Then open your scene.
+
 
 NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
 
