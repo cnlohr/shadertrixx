@@ -10,6 +10,19 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 
 Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
 
+## General 2019 Beta Info:
+
+(1) React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
+(2) Read this https://discord.com/channels/189511567539306508/503009489486872583/865421330698731541
+(3) Download this: https://files.vrchat.cloud/sdk/U2019-VRCSDK3-WORLD-2021.07.15.13.46_Public.unitypackage
+(4) Download & Install Unity Hub: https://unity3d.com/get-unity/download
+(5) Install Unity 2019.4.28f1.
+(6) Backup your project.
+(7) Upgrade away!
+
+NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
+
+
 
 ## Additional tricks
 
