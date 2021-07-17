@@ -8,6 +8,8 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
+This makes a well behaved `mod` function that rounds down even when negative.
+
 Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
 
 ## General 2019 Beta Info:
