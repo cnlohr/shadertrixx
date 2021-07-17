@@ -65,6 +65,8 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 http://vrchat.wikidot.com/worlds:layers
 
+Want to do a camera compute loop?  Shove everything on the "Compute" layer and put it somewhere a long way away.
+
 ## Need to iterate on Udon Sharp faster?
 
 Edit -> Preferences -> General -> Auto Refresh, uncheck.
