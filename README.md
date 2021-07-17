@@ -32,8 +32,6 @@ Then open your scene.
 
 NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
 
-
-
 ## Additional tricks
 
 From @Lyuma
@@ -57,6 +55,11 @@ Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertr
 
 tanoise-modified aurora, originally written by nimitz, modified further by scrn.  https://github.com/cnlohr/shadertrixx/tree/main/Assets/scrn_aurora
 
+## Defining Avatar Scale
+
+The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
+
+"It's mentioned many places that armspan is the defining scale, but that comment is more specific (armspan is 2 * head_to_wrist, and the ratio to height)" - Ben
 
 ## VRC Layers
 
