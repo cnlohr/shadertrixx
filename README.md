@@ -65,13 +65,17 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 ## Grabpasses
 
-You can add a grabpass tag outside of any pass (this happens in the SubShader tag)
+You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
 
 ```
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        LOD 100
+
         GrabPass
         {
             "_GrabTexture"
         }
+
 ```
 
 You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
@@ -81,6 +85,24 @@ You can then index into it as a sampler2D.
 
 ```glsl
             sampler2D _GrabTexture;
+```
+
+```glsl
+float2 grabuv = i.uv;
+#if !UNITY_UV_STARTS_AT_TOP
+grabuv.y = 1 - grabuv.y;
+#endif
+fixed4 col = tex2D(_GrabTexture, grabuv);
+```
+
+Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
+
+```glsl
+float2 grabuv = (i.vertex/_ScreenParams.xy);
+#if !UNITY_UV_STARTS_AT_TOP
+grabuv.y = 1 - grabuv.y;
+#endif
+fixed4 col = tex2D(_GrabTexture, grabuv);
 ```
 
 ## Depth Textures
