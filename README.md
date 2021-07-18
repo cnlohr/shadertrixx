@@ -121,12 +121,13 @@ fixed4 col = tex2D(_GrabTexture, grabuv);
 
 Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
 
+in Vertex shader:
 ```glsl
-float2 grabuv = (i.vertex/_ScreenParams.xy);
-#if !UNITY_UV_STARTS_AT_TOP
-grabuv.y = 1 - grabuv.y;
-#endif
-fixed4 col = tex2D(_GrabTexture, grabuv);
+	o.grabposs = ComputeGrabScreenPos( o.vertex );
+```
+in Fragment shader:
+```glsl
+	col = tex2Dproj(_GrabTexture, i.grabposs );
 ```
 
 ## Depth Textures
