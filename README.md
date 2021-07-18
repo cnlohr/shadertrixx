@@ -4,13 +4,21 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 
 ## The most important trick
 
-```hlsl
+```glsl
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
 This makes a well behaved `mod` function that rounds down even when negative.
 
 Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
+
+## Struggling with shader type mismatches?
+
+You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
+
+```glsl
+#pragma warning (default : 3206) // implicit truncation
+```
 
 ## General 2019 Beta Info:
 
