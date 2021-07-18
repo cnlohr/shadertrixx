@@ -63,6 +63,55 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 "It's mentioned many places that armspan is the defining scale, but that comment is more specific (armspan is 2 * head_to_wrist, and the ratio to height)" - Ben
 
+## Grabpasses
+
+You can add a grabpass tag outside of any pass (this happens in the SubShader tag)
+
+```
+        GrabPass
+        {
+            "_GrabTexture"
+        }
+```
+
+You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
+
+You can then index into it as a sampler2D.
+
+
+```glsl
+            sampler2D _GrabTexture;
+```
+
+## Depth Textures
+
+If you define a sampler2D the following way, you can read the per-pixel depth.
+```glsl
+sampler2D _CameraDepthTexture;
+```
+
+```glsl
+// Compute projective scaling factor...
+float perspectiveDivide = 1.0f / i.screenPosition.w;
+
+// Scale our view ray to unit depth.
+float3 direction = i.worldDirection * perspectiveDivide;
+
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = (i.screenPosition.xy * perspectiveDivide) * 0.5f + 0.5f;
+
+// No idea
+screenUV.y = 1 - screenUV.y; 
+
+// VR stereo support
+screenUV = UnityStereoTransformScreenSpaceTex(screenUV);
+
+// Read depth, linearizing into worldspace units.    
+float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
+
+float3 worldspace = direction * depth + _WorldSpaceCameraPos;
+```
+
 ## VRC Layers
 
 http://vrchat.wikidot.com/worlds:layers
