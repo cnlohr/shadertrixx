@@ -313,7 +313,7 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
 
 
-## CRT Perf Testing
+## CRT Perf Testing (Unity 2018)
 Test number results were performed on a laptop RTX2070.
 
 **BIG NOTE**: CNLohr has observed lots of oddities and breaking things when you use the "period" functionality in CRTs.  I strongly recommend setting "period" to 0.
