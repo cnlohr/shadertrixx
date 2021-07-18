@@ -130,6 +130,8 @@ in Fragment shader:
 	col = tex2Dproj(_GrabTexture, i.grabposs );
 ```
 
+editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
+
 ## Depth Textures
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
