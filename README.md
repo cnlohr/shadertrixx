@@ -63,6 +63,22 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 "It's mentioned many places that armspan is the defining scale, but that comment is more specific (armspan is 2 * head_to_wrist, and the ratio to height)" - Ben
 
+## Using depth cameras on avatars.
+
+If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
+
+```
+Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer.
+```
+
+A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
+
+```cs
+	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
+```
+
+
+
 ## Grabpasses
 
 You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
