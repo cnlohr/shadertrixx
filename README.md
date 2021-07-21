@@ -132,6 +132,41 @@ in Fragment shader:
 
 editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
 
+## Default Texture Parameters
+
+Default values available for texture properties:
+```
+red
+gray
+grey
+linearGray
+linearGrey
+grayscaleRamp
+greyscaleRamp
+bump
+blackCube
+lightmap
+unity_Lightmap
+unity_LightmapInd
+unity_ShadowMask
+unity_DynamicLightmap
+unity_DynamicDirectionality
+unity_DynamicNormal
+unity_DitherMask
+_DitherMaskLOD
+_DitherMaskLOD2D
+unity_RandomRotation16
+unity_NHxRoughness
+unity_SpecCube0
+unity_SpecCube1
+```
+
+And of course, "white" and "black"
+
+IE `_MainTex ("Texture", 2D) = "unity_DynamicLightmap" {}`
+
+Thanks, @Pema
+
 ## Depth Textures
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
