@@ -326,6 +326,16 @@ Re: `FixedUpdate`, `Update`, `LateUpdate`
 From Merlin: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html most of the events under Messages, with some exceptions like awake and things that don't make sense like the Unity networking related ones
 you can look at what events UdonBehaviour.cs registers to see if they are actually there on Udon's side
 
+## UdonSharp Get All Node Names
+
+Edit->Project Settings->Player Settings->Configuration->Scripting Define Values
+
+Add `UDONSHARP_DEBUG`
+
+Then, reload.
+
+Then, Window->Udon Sharp->Node Definition Grabber
+
 ## Getting big buffers
 
 From @lox9973
