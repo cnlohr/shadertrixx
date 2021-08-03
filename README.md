@@ -336,6 +336,10 @@ Then, reload.
 
 Then, Window->Udon Sharp->Node Definition Grabber
 
+Press the button. Your clipboard now contains a present.
+
+Once you've done this, go back and remove `UDONSHARP_DEBUG`
+
 ## Getting big buffers
 
 From @lox9973
