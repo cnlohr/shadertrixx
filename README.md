@@ -111,6 +111,7 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 			v2f vert(appdata_base v)
 			{
 				v2f o;
+				UNITY_SETUP_INSTANCE_ID(v);
 				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 				o.uv = v.texcoord;
 				return o;
