@@ -130,7 +130,7 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 ## Instancing
 
 To enable instancing, you must have in your shader:
- * `#pragma multi_compile_instancing`
+ * `#pragma multi_compile_instancing` in all all passes.
  * Optionally
 ```glsl
         UNITY_INSTANCING_BUFFER_START(Props)
