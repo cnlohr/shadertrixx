@@ -85,7 +85,92 @@ A way around this is to create a junk R8 texture with no depth buffer `rtDepthTh
 	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
 ```
 
+## Shadowcasting
 
+Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader.
+
+```glsl
+		// shadow caster rendering pass, implemented manually
+		// using macros from UnityCG.cginc
+		Pass
+		{
+			Tags {"LightMode"="ShadowCaster"}
+			Cull Off
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_shadowcaster
+			#pragma multi_compile_instancing
+			#include "UnityCG.cginc"
+
+			struct v2f { 
+				V2F_SHADOW_CASTER;
+				float4 uv : TEXCOORD0;
+			};
+
+			v2f vert(appdata_base v)
+			{
+				v2f o;
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+				o.uv = v.texcoord;
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				float edginess = 1.;
+				float alpha = FragmentAlpha( i.uv, edginess );
+				clip( alpha-0.5 );
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
+```
+
+## Instancing
+
+To enable instancing, you must have in your shader:
+ * `#pragma multi_compile_instancing`
+ * Optionally
+```glsl
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+```
+ * An example thing you could put there, in the middle is:
+```glsl
+	UNITY_DEFINE_INSTANCED_PROP( float4, _InstanceID)
+```
+ * I've found it to be super janky to try to access the variable in the fragment/surf shader, but it does seem to work in the vertex shader.
+ * In your vertex shader:
+```glsl
+	UNITY_SETUP_INSTANCE_ID(v);
+```
+ * Access variables with `UNITY_ACCESS_INSTANCED_PROP(Props, _InstanceID).x;`
+ * Access which instance it is in the list with `unity_InstanceID` - note this will change from frame to frame.
+ * To change the value see following example:
+```cs
+
+using UdonSharp;
+using UnityEngine;
+using VRC.SDKBase;
+using VRC.Udon;
+
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
+{
+    void Start()
+    {
+		MaterialPropertyBlock block;
+		MeshRenderer mr;
+        int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
+		block = new MaterialPropertyBlock();
+		mr = GetComponent<MeshRenderer>();
+		block.SetVector( "_InstanceID", new Vector4( id, 0, 0, 0 ) );
+		mr.SetPropertyBlock(block);
+    }
+}
+```
 
 ## Grabpasses
 
