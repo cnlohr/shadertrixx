@@ -119,9 +119,6 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 
 			float4 frag(v2f i) : SV_Target
 			{
-				float edginess = 1.;
-				float alpha = FragmentAlpha( i.uv, edginess );
-				clip( alpha-0.5 );
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG
