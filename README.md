@@ -166,6 +166,7 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
         int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
 		block = new MaterialPropertyBlock();
 		mr = GetComponent<MeshRenderer>();
+		//mr.GetPropertyBlock(block);  //Not sure if this is needed
 		block.SetVector( "_InstanceID", new Vector4( id, 0, 0, 0 ) );
 		mr.SetPropertyBlock(block);
     }
