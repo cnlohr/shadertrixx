@@ -20,6 +20,18 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 #pragma warning (default : 3206) // implicit truncation
 ```
 
+## My recommended packages and order:
+
+1. Import VRC SDK Worlds: https://vrchat.com/home/download
+2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
+3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
+4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
+5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
+
+To try:
+Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases/tag/v3.0.0
+
+
 ## General 2019 Beta Info:
 
 1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
