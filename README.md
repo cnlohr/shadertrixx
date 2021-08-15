@@ -29,7 +29,7 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
 
 To try:
-Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases/tag/v3.0.0
+Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases  (This is probably deprecated because U# should do everything this does automatically)
 
 
 ## General 2019 Beta Info:
