@@ -292,6 +292,14 @@ float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, scree
 float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 ```
 
+## Reference Camera
+
+Don't forget to drag your Main Camera into "Reference Camera" property on your VRCWorld.  Not having a reference camera will sometimes set zNear to be too far or other problems.  So having a reference camera is highly advised.
+
+## Making Unity UI much faster
+
+Go under Edit->Project Settings...->Editor->Sprite Packer->Mode->Always Enabled
+
 ## VRC Layers
 
 http://vrchat.wikidot.com/worlds:layers
