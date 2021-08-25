@@ -97,6 +97,36 @@ A way around this is to create a junk R8 texture with no depth buffer `rtDepthTh
 	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
 ```
 
+## Is your UV within the unit square?
+
+```glsl
+any(i.uvs < 0 || i.uvs > 1)
+```
+```
+   0: lt r0.xy, v0.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
+   1: lt r0.zw, l(0.000000, 0.000000, 1.000000, 1.000000), v0.xxxy
+   2: or r0.xy, r0.zwzz, r0.xyxx
+   3: or r0.x, r0.y, r0.x
+   4: sample r1.xyzw, v0.xyxx, t0.xyzw, s0
+   5: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r1.wwww
+   6: ret 
+```
+(From @d4rkpl4y3r)
+
+And the much less readable and more ambiguous on edge conditions version:
+```glsl
+any(abs(i.uvs-.5)>.5)
+```
+```
+   0: add r0.xy, v0.xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
+   1: lt r0.xy, l(0.500000, 0.500000, 0.000000, 0.000000), |r0.xyxx|
+   2: or r0.x, r0.y, r0.x
+   3: sample r1.xyzw, v0.xyxx, t0.xyzw, s0
+   4: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r1.wwww
+   5: ret 
+```
+(From @scruffyruffles)
+
 ## Shadowcasting
 
 Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader.
