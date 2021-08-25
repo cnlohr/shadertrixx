@@ -107,8 +107,8 @@ any(i.uvs < 0 || i.uvs > 1)
    1: lt r0.zw, l(0.000000, 0.000000, 1.000000, 1.000000), v0.xxxy
    2: or r0.xy, r0.zwzz, r0.xyxx
    3: or r0.x, r0.y, r0.x
-   4: sample r1.xyzw, v0.xyxx, t0.xyzw, s0
-   5: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r1.wwww
+   4: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
+   5: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
    6: ret 
 ```
 (From @d4rkpl4y3r)
@@ -121,8 +121,8 @@ any(abs(i.uvs-.5)>.5)
    0: add r0.xy, v0.xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
    1: lt r0.xy, l(0.500000, 0.500000, 0.000000, 0.000000), |r0.xyxx|
    2: or r0.x, r0.y, r0.x
-   3: sample r1.xyzw, v0.xyxx, t0.xyzw, s0
-   4: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r1.wwww
+   3: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
+   4: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
    5: ret 
 ```
 (From @scruffyruffles)
