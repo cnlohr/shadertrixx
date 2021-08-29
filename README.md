@@ -32,6 +32,18 @@ To try:
 Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases  (This is probably deprecated because U# should do everything this does automatically)
 
 
+## Basics of shader coding:
+
+Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
+List of intrinsic functions: https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-intrinsic-functions
+The common built-in header for unity-provided functions: https://github.com/TwoTailsGames/Unity-Built-in-Shaders/blob/master/CGIncludes/UnityCG.cginc
+Unity's built-in shader variables: https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
+Defining parameters for your shader/material: https://docs.unity3d.com/Manual/SL-Properties.html
+Unity surface shader examples: https://docs.unity3d.com/Manual/SL-SurfaceShaderExamples.html
+
+
+Unity's overview page: https://docs.unity3d.com/2019.4/Documentation/Manual/shader-writing.html
+
 ## General 2019 Beta Info:
 
 1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
