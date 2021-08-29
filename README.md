@@ -34,37 +34,14 @@ Thing that detects broken refernces to Udon Scripts https://github.com/esnya/Esn
 
 ## Basics of shader coding:
 
-Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
-List of intrinsic functions: https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-intrinsic-functions
-The common built-in header for unity-provided functions: https://github.com/TwoTailsGames/Unity-Built-in-Shaders/blob/master/CGIncludes/UnityCG.cginc
-Unity's built-in shader variables: https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
-Defining parameters for your shader/material: https://docs.unity3d.com/Manual/SL-Properties.html
-Unity surface shader examples: https://docs.unity3d.com/Manual/SL-SurfaceShaderExamples.html
-
+* Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
+* List of intrinsic functions: https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-intrinsic-functions
+* The common built-in header for unity-provided functions: https://github.com/TwoTailsGames/Unity-Built-in-Shaders/blob/master/CGIncludes/UnityCG.cginc
+* Unity's built-in shader variables: https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
+* Defining parameters for your shader/material: https://docs.unity3d.com/Manual/SL-Properties.html
+* Unity surface shader examples: https://docs.unity3d.com/Manual/SL-SurfaceShaderExamples.html
 
 Unity's overview page: https://docs.unity3d.com/2019.4/Documentation/Manual/shader-writing.html
-
-## General 2019 Beta Info:
-
-1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
-2. Read this https://discord.com/channels/189511567539306508/503009489486872583/865421330698731541
-4. Download this: https://files.vrchat.cloud/sdk/U2019-VRCSDK3-WORLD-2021.07.15.13.46_Public.unitypackage
-5. Download & Install Unity Hub: https://unity3d.com/get-unity/download
-7. Install Unity 2019.4.28f1.
-8. Backup your project.
-9. Follow this guide: https://docs.vrchat.com/v2021.3.2/docs/migrating-from-2018-lts-to-2019-lts
-Basically:
-1. Open the project to an empty scene.
-2. Import the BETA SDK - if you ever import the not beta SDK you will likely have to start over.
-3. Import Udon sharp aftert the beta SDK.
-4. Import CyanEmu.
-
-Import anything else you need.
-
-Then open your scene.
-
-
-NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
 
 ## Additional tricks
 
@@ -684,3 +661,25 @@ Trying 128x128
  * No penalty is paid by chaining CRTs target different texture sizes.
  * Note that all tests were performed with the same shader for all CRTs.
  * Cameras work surprisingly well for smaller textures and really poorly for big textures.
+
+## General 2019 Beta Info:
+
+1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
+2. Read this https://discord.com/channels/189511567539306508/503009489486872583/865421330698731541
+4. Download this: https://files.vrchat.cloud/sdk/U2019-VRCSDK3-WORLD-2021.07.15.13.46_Public.unitypackage
+5. Download & Install Unity Hub: https://unity3d.com/get-unity/download
+7. Install Unity 2019.4.28f1.
+8. Backup your project.
+9. Follow this guide: https://docs.vrchat.com/v2021.3.2/docs/migrating-from-2018-lts-to-2019-lts
+Basically:
+1. Open the project to an empty scene.
+2. Import the BETA SDK - if you ever import the not beta SDK you will likely have to start over.
+3. Import Udon sharp aftert the beta SDK.
+4. Import CyanEmu.
+
+Import anything else you need.
+
+Then open your scene.
+
+
+NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
