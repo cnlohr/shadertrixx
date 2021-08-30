@@ -690,6 +690,8 @@ NOTE: If you are going from a fresh git tree of a project, you should open a bla
  * Use .gitignore from cnballpit-vrc
  * Import the VRC SDK
  * Import the U# SDK
+ * Import VRWorldToolkit
+ * Open World Debugger -> If it warns youabout bad Player Settings let it autofix.
  * Verify under Edit->Project Settings->Player->Scripting Define Symbols -> `UNITY_POST_PROCESSING_STACK_V2;UDON;VRC_SDK_VRCSDK3`
 
 
