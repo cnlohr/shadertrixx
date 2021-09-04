@@ -31,6 +31,22 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 To try:
 Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases  (This is probably deprecated because U# should do everything this does automatically)
 
+## When opening worlds from git using the .gitignore file from here
+
+1. Open project in Unity Hub for correct version of Unity.
+3. Import VRC SDK
+2. **Configure your player settings under editor preprocessor to include UDON**
+4. Import UdonSharp
+5. Import AudioLink
+6. Import Esnya Tools
+7. Import VRC World Toolkit
+8. Run Window->UdonSharp->Refresh All UdonSharp Assets
+9. Repeat 6 til no new assets.
+10. Close and reopen Unity
+11. Open Scene
+12. EsnyaTools -> Repair Udon
+13. VRWorldToolkit -> World Debugger 
+14. Fix all errors.
 
 ## Basics of shader coding:
 
