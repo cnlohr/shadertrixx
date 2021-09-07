@@ -592,11 +592,18 @@ c:\tcc\tcc.exe vrc-uncapped.c
 
 Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 
+## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
+ * https://quaternius.com/
+ * https://www.kenney.nl/assets
 
 ## Making audio play
 
 Thanks, @lox9973 for informing me of this: https://gitlab.com/-/snippets/2115172
+
+# ATTIC
+
+(Stuff below here may no longer be valid)
 
 
 ## CRT Perf Testing (Unity 2018)
@@ -678,6 +685,15 @@ Trying 128x128
  * Note that all tests were performed with the same shader for all CRTs.
  * Cameras work surprisingly well for smaller textures and really poorly for big textures.
 
+## General notes for working from git (NOTES ONLY)
+
+ * Use .gitignore from cnballpit-vrc
+ * Import the VRC SDK
+ * Import the U# SDK
+ * Import VRWorldToolkit
+(Reopen project)
+ * Run "Refresh all UdonSharp Assets"
+
 ## General 2019 Beta Info:
 
 1. React to this post: https://discord.com/channels/189511567539306508/449348023147823124/500437451085578262
@@ -699,17 +715,6 @@ Then open your scene.
 
 
 NOTE: If you are going from a fresh git tree of a project, you should open a blank scene, import the new beta SDK and all your modules then close unity and reopen your scene.
-
-
-## General notes for working from git (NOTES ONLY)
-
- * Use .gitignore from cnballpit-vrc
- * Import the VRC SDK
- * Import the U# SDK
- * Import VRWorldToolkit
- * Open World Debugger -> If it warns youabout bad Player Settings let it autofix.
- * Verify under Edit->Project Settings->Player->Scripting Define Symbols -> `UNITY_POST_PROCESSING_STACK_V2;UDON;VRC_SDK_VRCSDK3`
-
 
 --> TODO --> Include in PR.
 ```cs
