@@ -452,6 +452,23 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
             Tags {  "DisableBatching"="true"}
 ```
 
+## Notes on grabpass avatar data exfiltration
+
+@d4rkpl4y3r notes that you can use queue < 2000 and zwrite off to exfiltrate data without horrible visual artifacts.  You can also use points to do the export instead of being limited to quads by exporting points from a geometry shader on the avatar with the following function:
+
+```glsl
+float4 pixelToClipPos(float2 pixelPos)
+{
+    float4 pos = float4((pixelPos + .5) / _ScreenParams.xy, 0.5, 1);
+    pos.xy = pos.xy * 2 - 1;
+    pos.y = -pos.y;
+    return pos;
+}
+```
+
+(TODO: Expand upon this with actual demo)
+
+
 ## HALP The Unity compiler is emitting really bizarre assembly code.
 
 Eh, just try using a different shader model, add a 
