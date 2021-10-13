@@ -704,6 +704,9 @@ Trying 128x128
  * Note that all tests were performed with the same shader for all CRTs.
  * Cameras work surprisingly well for smaller textures and really poorly for big textures.
 
+## FYI
+ * For maximum platform support, make all edges of your RenderTexture divisible by 16.  (Note: ShaderFes, and VRSS)
+
 ## General notes for working from git (NOTES ONLY)
 
  * Use .gitignore from cnballpit-vrc
