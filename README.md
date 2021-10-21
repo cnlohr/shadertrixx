@@ -349,6 +349,27 @@ Edit -> Preferences -> General -> Auto Refresh, uncheck.
 
 Whenever you do need Unity to reload, ctrl+r
 
+## Iterating through every instance of a behavior or udonsharpbehavior attached to all objects in a scene.
+
+For instance getting all instances of the BrokeredBlockIDer behavior.
+```cs
+foreach( UnityEngine.GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)) as UnityEngine.GameObject[] )
+{
+	foreach( BrokeredBlockIDer b in go.GetUdonSharpComponentsInChildren<BrokeredBlockIDer>() )
+	{
+		b.UpdateProxy();
+		b.defaultBlockID = (int)Random.Range( 0, 182.99f );
+		ct++;
+		b._SetBlockID( b.defaultBlockID );
+		b._UpdateID();
+		b.ApplyProxyModifications();
+	}
+}
+```
+
+`GetUdonSharpComponentsInChildren` is the magic thing.  **PLEASE NOTE** You must use `UpdateProxy()` before reading from and `ApplyProxyModifications()` when done.
+
+
 ## MRT
 
 This demo is not in this project, but, I wanted to include notes on how to do multiple rendertextures.
