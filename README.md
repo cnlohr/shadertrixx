@@ -473,7 +473,7 @@ Thanks, error.mdl for telling me how to disable batching.  This fixes issues whe
             Tags {  "DisableBatching"="true"}
 ```
 
-## Notes on grabpass avatar data exfiltration
+## Notes on grabpass avatar->map data exfiltration
 
 @d4rkpl4y3r notes that you can use queue < 2000 and zwrite off to exfiltrate data without horrible visual artifacts.  You can also use points to do the export instead of being limited to quads by exporting points from a geometry shader on the avatar with the following function:
 
