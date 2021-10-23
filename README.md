@@ -69,6 +69,13 @@ From @Lyuma
  * force loop to unroll with [unroll] (UNITY_UNROLL) or
  * force a loop with [loop] (UNITY_LOOP)
  * there's also [call] for if or switch statements I think, not sure exactly how it works.
+ * If you want to use pixels but make the boundaries between the pixels be less ugly, use this:
+```glsl
+float2 coord = i.tex.xy * _MainTex_TexelSize.zw;
+float2 fr = frac(coord + 0.5);
+float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
+i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
+```
 
 From @Orels
  * Here's a pretty quick reference for HLSL: https://developer.download.nvidia.com/cg/index_stdlib.html
