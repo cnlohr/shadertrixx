@@ -69,7 +69,10 @@ From @Lyuma
  * force loop to unroll with [unroll] (UNITY_UNROLL) or
  * force a loop with [loop] (UNITY_LOOP)
  * there's also [call] for if or switch statements I think, not sure exactly how it works.
- * If you want to use pixels but make the boundaries between the pixels be less ugly, use this:
+
+### Lyuma Beautiful Retro Pixels Technique
+
+If you want to use pixels but make the boundaries between the pixels be less ugly, use this:
 ```glsl
 float2 coord = i.tex.xy * _MainTex_TexelSize.zw;
 float2 fr = frac(coord + 0.5);
