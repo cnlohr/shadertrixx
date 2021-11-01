@@ -616,7 +616,30 @@ ENDCG
 (1) DO NOT INCLUDE `[Toggle]`!!
 INSTEAD, use `[ToggleUI]`
 
-(2) If you do want to use keywords, you can from this list: https://pastebin.com/83fQvZ3n
+(2) If you do want to use keywords, you can from this list:  
+
+(3) To use keywords, do the following:
+
+In your properties block: 
+```
+[Toggle(_ALPHAMODULATE_ON)] _ALPHAMODULATE_ON ( "Some Feature", int ) = 0
+```
+
+In your shader block, add:
+```
+#pragma shader_feature _ALPHAMODULATE_ON
+```
+or
+```
+#pragma multi_compile __ _ALPHAMODULATE_ON
+```
+
+And in your shader
+```
+#if _ALPHAMODULATE_ON
+ // Do something
+#endif
+```
 
 ## VRChat "Build & Test" Overrides
 
