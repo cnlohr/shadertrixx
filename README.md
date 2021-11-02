@@ -618,7 +618,7 @@ INSTEAD, use `[ToggleUI]`
 
 (2) If you do want to use keywords, you can from this list:  
 
-(3) To use keywords, do the following:
+(3) To use keywords, do the following: https://pastebin.com/83fQvZ3n
 
 In your properties block: 
 ```
