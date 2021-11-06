@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
-  m_Name: depthcontrol
+  m_Name: BrokeredUpdateManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 25ced6ddf2cf7b7479236023efb62d31,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 853a334c4f6534646893906c427736e4,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: c82155c91afc9fd49b9b418f755a8ff2, type: 3}
-  behaviourSyncMode: 0
+  sourceCsScript: {fileID: 11500000, guid: 29ffb6c28ae43824b9ec768dba12c453, type: 3}
+  behaviourSyncMode: 4
   behaviourIDHeapVarName: __refl_const_intnl_udonTypeID
   compileErrors: []
   hasInteractEvent: 0
@@ -43,13 +43,13 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 15
+      Data: 16
     - Name: 
       Entry: 7
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideZDeflection
+      Data: MAX_UPDATE_COMPS
     - Name: $v
       Entry: 7
       Data: 2|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -61,25 +61,25 @@ MonoBehaviour:
       Data: 4|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.UI.Slider, UnityEngine.UI
+      Data: System.Int32, mscorlib
     - Name: 
       Entry: 8
       Data: 
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 258
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideZDeflection
+      Data: MAX_UPDATE_COMPS
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideZDeflection
+      Data: MAX_UPDATE_COMPS
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -112,7 +112,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textZDeflection
+      Data: MAX_SLOW_ROLL_COMPS
     - Name: $v
       Entry: 7
       Data: 6|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -120,29 +120,23 @@ MonoBehaviour:
       Entry: 7
       Data: 7|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
-      Entry: 7
-      Data: 8|System.RuntimeType, mscorlib
-    - Name: 
-      Entry: 1
-      Data: UnityEngine.UI.Text, UnityEngine.UI
-    - Name: 
-      Entry: 8
-      Data: 
+      Entry: 9
+      Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 258
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textZDeflection
+      Data: MAX_SLOW_ROLL_COMPS
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textZDeflection
+      Data: MAX_SLOW_ROLL_COMPS
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -151,7 +145,7 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 9|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 8|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -175,31 +169,37 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideSteps
+      Data: updateObjectList
     - Name: $v
       Entry: 7
-      Data: 10|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 9|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 11|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 10|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
-      Entry: 9
-      Data: 4
+      Entry: 7
+      Data: 11|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: UnityEngine.Component[], UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: UnityEngineComponentArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideSteps
+      Data: updateObjectList
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideSteps
+      Data: updateObjectList
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -232,7 +232,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textSteps
+      Data: updateObjectListCount
     - Name: $v
       Entry: 7
       Data: 13|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -241,22 +241,22 @@ MonoBehaviour:
       Data: 14|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 8
+      Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textSteps
+      Data: updateObjectListCount
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textSteps
+      Data: updateObjectListCount
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -289,7 +289,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideSearch
+      Data: slowUpdateList
     - Name: $v
       Entry: 7
       Data: 16|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -298,22 +298,22 @@ MonoBehaviour:
       Data: 17|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 4
+      Data: 11
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: UnityEngineComponentArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideSearch
+      Data: slowUpdateList
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideSearch
+      Data: slowUpdateList
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -346,7 +346,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textSearch
+      Data: slowUpdateListCount
     - Name: $v
       Entry: 7
       Data: 19|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -355,22 +355,22 @@ MonoBehaviour:
       Data: 20|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 8
+      Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textSearch
+      Data: slowUpdateListCount
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textSearch
+      Data: slowUpdateListCount
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -403,7 +403,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideStrength
+      Data: slowUpdatePlace
     - Name: $v
       Entry: 7
       Data: 22|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -415,19 +415,19 @@ MonoBehaviour:
       Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideStrength
+      Data: slowUpdatePlace
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideStrength
+      Data: slowUpdatePlace
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -460,7 +460,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textStrength
+      Data: slowObjectSyncUpdateList
     - Name: $v
       Entry: 7
       Data: 25|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -469,22 +469,22 @@ MonoBehaviour:
       Data: 26|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 8
+      Data: 11
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: UnityEngineComponentArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textStrength
+      Data: slowObjectSyncUpdateList
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textStrength
+      Data: slowObjectSyncUpdateList
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -517,7 +517,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideOffset
+      Data: slowObjectSyncUpdateListCount
     - Name: $v
       Entry: 7
       Data: 28|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -529,19 +529,19 @@ MonoBehaviour:
       Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideOffset
+      Data: slowObjectSyncUpdateListCount
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideOffset
+      Data: slowObjectSyncUpdateListCount
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -574,7 +574,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textOffset
+      Data: slowObjectSyncUpdatePlace
     - Name: $v
       Entry: 7
       Data: 31|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -583,22 +583,22 @@ MonoBehaviour:
       Data: 32|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 8
+      Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textOffset
+      Data: slowObjectSyncUpdatePlace
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textOffset
+      Data: slowObjectSyncUpdatePlace
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -631,7 +631,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideDepthMux
+      Data: snailUpdateList
     - Name: $v
       Entry: 7
       Data: 34|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -640,22 +640,22 @@ MonoBehaviour:
       Data: 35|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 4
+      Data: 11
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: UnityEngineComponentArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideDepthMux
+      Data: snailUpdateList
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideDepthMux
+      Data: snailUpdateList
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -688,7 +688,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textDepthMux
+      Data: snailUpdateListCount
     - Name: $v
       Entry: 7
       Data: 37|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -697,22 +697,22 @@ MonoBehaviour:
       Data: 38|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 8
+      Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textDepthMux
+      Data: snailUpdateListCount
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textDepthMux
+      Data: snailUpdateListCount
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -745,7 +745,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _slideDepthShift
+      Data: snailUpdatePlace
     - Name: $v
       Entry: 7
       Data: 40|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -757,19 +757,19 @@ MonoBehaviour:
       Data: 4
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUISlider
+      Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: _slideDepthShift
+      Data: snailUpdatePlace
     - Name: symbolUniqueName
       Entry: 1
-      Data: _slideDepthShift
+      Data: snailUpdatePlace
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -802,7 +802,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _textDepthShift
+      Data: bInitialized
     - Name: $v
       Entry: 7
       Data: 43|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -810,23 +810,29 @@ MonoBehaviour:
       Entry: 7
       Data: 44|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
-      Entry: 9
-      Data: 8
+      Entry: 7
+      Data: 45|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: System.Boolean, mscorlib
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineUIText
+      Data: SystemBoolean
     - Name: symbolOriginalName
       Entry: 1
-      Data: _textDepthShift
+      Data: bInitialized
     - Name: symbolUniqueName
       Entry: 1
-      Data: _textDepthShift
+      Data: bInitialized
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -835,7 +841,7 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 45|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 46|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -859,37 +865,37 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: mat1
+      Data: snailUpdateTime
     - Name: $v
       Entry: 7
-      Data: 46|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 47|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 47|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 48|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 48|System.RuntimeType, mscorlib
+      Data: 49|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.Material, UnityEngine.CoreModule
+      Data: System.Single, mscorlib
     - Name: 
       Entry: 8
       Data: 
     - Name: declarationType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: syncMode
       Entry: 3
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineMaterial
+      Data: SystemSingle
     - Name: symbolOriginalName
       Entry: 1
-      Data: mat1
+      Data: snailUpdateTime
     - Name: symbolUniqueName
       Entry: 1
-      Data: mat1
+      Data: snailUpdateTime
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -898,7 +904,64 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 49|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 50|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: userBehaviourSource
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: idIncrementer
+    - Name: $v
+      Entry: 7
+      Data: 51|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+    - Name: fieldSymbol
+      Entry: 7
+      Data: 52|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+    - Name: internalType
+      Entry: 9
+      Data: 4
+    - Name: declarationType
+      Entry: 3
+      Data: 2
+    - Name: syncMode
+      Entry: 3
+      Data: 0
+    - Name: symbolResolvedTypeName
+      Entry: 1
+      Data: SystemInt32
+    - Name: symbolOriginalName
+      Entry: 1
+      Data: idIncrementer
+    - Name: symbolUniqueName
+      Entry: 1
+      Data: idIncrementer
+    - Name: symbolDefaultValue
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: fieldAttributes
+      Entry: 7
+      Data: 53|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
       Data: 0

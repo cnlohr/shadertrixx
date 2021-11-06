@@ -1,1 +1,0 @@
-C:\tcc\tcc tanoisegen.c -run
