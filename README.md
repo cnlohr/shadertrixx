@@ -53,6 +53,7 @@ Thing that detects broken refernces to Udon Scripts https://github.com/esnya/Esn
 ## Basics of shader coding:
 
 * Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
+* From @Orels: quick reference for HLSL: https://developer.download.nvidia.com/cg/index_stdlib.html
 * List of intrinsic functions: https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-intrinsic-functions
 * The common built-in header for unity-provided functions: https://github.com/TwoTailsGames/Unity-Built-in-Shaders/blob/master/CGIncludes/UnityCG.cginc
 * Unity's built-in shader variables: https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
@@ -80,11 +81,9 @@ float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
 ```
 
-From @Orels
- * Here's a pretty quick reference for HLSL: https://developer.download.nvidia.com/cg/index_stdlib.html
+### Not-shaders
 
-From @lox9973
- * This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
+From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
 
 ## tanoise
 
