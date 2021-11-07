@@ -48,9 +48,8 @@ Shader "cnlohr/PoesFairies"
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
-
+			
 			#include "UnityCG.cginc"
-
 			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
 			#include "/Assets/AudioLink/Shaders/AudioLink.cginc"
 

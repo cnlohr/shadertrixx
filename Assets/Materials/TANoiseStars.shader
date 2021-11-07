@@ -36,7 +36,7 @@ Shader "Custom/TANoiseStars"
 				float3 normal : TEXCOORD3;
             };
 
-			#include "../tanoise/tanoise.cginc"
+			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
 
             v2f vert (appdata v)
             {

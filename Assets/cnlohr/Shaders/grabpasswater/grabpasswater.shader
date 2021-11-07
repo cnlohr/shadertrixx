@@ -11,6 +11,40 @@
 	}
 	SubShader
 	{
+		// shadow caster rendering pass, implemented manually
+		// using macros from UnityCG.cginc
+		Pass
+		{
+			Tags {"LightMode"="ShadowCaster"}
+			Cull Off
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_shadowcaster
+			#pragma multi_compile_instancing
+			#include "UnityCG.cginc"
+
+			struct v2f { 
+				V2F_SHADOW_CASTER;
+				float4 uv : TEXCOORD0;
+			};
+
+			v2f vert(appdata_base v)
+			{
+				v2f o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+				o.uv = v.texcoord;
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
+		
 		// Draw ourselves after all opaque geometry
 		Tags {
 			"RenderType" = "Transparent"
@@ -140,7 +174,7 @@
 				//float2 refractionVector = (i.ssnormalcalc.xyz).xy*.00;
 				//surfaceNormal += (i.ssnormalcalc.xyz)*-.05;
 
-				float deferAmount = (distanceBeyondWater) * ((distanceToSurfaceOfWater+20)/depthAtGrab);
+				float deferAmount = (distanceBeyondWater) * (20/depthAtGrab) * (1+pow(distanceToSurfaceOfWater,1.2));
 				
 				float2  deflectionVector = surfaceNormal.xy * deferAmount * _WaterNormalDeflection;// + refractionVector * distanceBeyondWater * _RefractionAmount;
 				float4  thisUV = i.grabpos + float4(deflectionVector, 0, 0);

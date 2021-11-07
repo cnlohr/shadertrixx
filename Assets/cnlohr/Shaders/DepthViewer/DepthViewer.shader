@@ -10,6 +10,7 @@
     {
         Tags { "RenderType"="Opaque" }
 
+
         Pass
         {
             CGPROGRAM
@@ -145,6 +146,8 @@
 				#endif
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
+				
+				col = min( col, 1.5 );
                 return col;
             }
             ENDCG

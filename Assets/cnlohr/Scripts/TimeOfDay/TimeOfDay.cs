@@ -32,7 +32,7 @@ namespace cnlohr
 		{
 			if( !bHeld )
 			{
-				transform.localRotation *= Quaternion.Euler((float)(Time.deltaTime),0,0);
+				transform.localRotation *= Quaternion.Euler((float)((Time.deltaTime)*.5f),0,0);
 			}
 			//gameObject.GetComponent<BrokeredSync>()._SendMasterMove();
 			lightToControl.transform.localRotation = transform.localRotation;
