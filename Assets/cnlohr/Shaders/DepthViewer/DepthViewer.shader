@@ -8,7 +8,7 @@
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Opaque" "Queue" = "Overlay" }
 
 
         Pass
