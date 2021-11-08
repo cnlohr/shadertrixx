@@ -14,7 +14,15 @@ namespace cnlohr
 		public Material matSquareStarrySky;
 		private bool bHeld;
 		Quaternion qch_mirror;
-		
+/*
+		XXX TODO
+		public float DuskBright;
+		public Color DuskColor;
+		public float DayBright;
+		public Color DayColor;
+		public float NightBright;
+		public Color NightColor;
+*/
 		void Start()
 		{
 			qch_mirror = new Quaternion( 0, 1, 0, 0 );  //Flips sun around over the floor.
