@@ -303,6 +303,17 @@ in Fragment shader:
 
 editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
 
+## Are you in a mirror?
+
+Thanks, @Lyuma
+
+```glsl
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+```
+
 ## Default Texture Parameters
 
 Default values available for texture properties:
