@@ -65,7 +65,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Albedo: 0
-    - _Amplitude: 2
+    - _Amplitude: 1.5
     - _Brightness: 1.5
     - _BumpScale: 1
     - _Cutoff: 0.5

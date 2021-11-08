@@ -14,8 +14,10 @@ Properties {
     _AtmosphereThickness ("Atmosphere Thickness", Range(0,5)) = 1.0
     _SkyTint ("Sky Tint", Color) = (.5, .5, .5, 1)
     _GroundColor ("Ground", Color) = (.369, .349, .341, 1)
-
     _Exposure("Exposure", Range(0, 8)) = 1.3
+	
+	[Toggle(_USEINPUTBASIS)] _UseInputBasis ("Use Input Basis", Int ) = 0
+	_InputBasisQuaternion ("Input Basis Quaternion", Vector) = ( 0, 0, 0, 1 )
 }
 
 SubShader {
@@ -32,7 +34,9 @@ SubShader {
         #include "Lighting.cginc"
 
         #pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
+		#pragma shader_feature_local _USEINPUTBASIS
 
+		uniform float4 _InputBasisQuaternion;
         uniform half _Exposure;     // HDR exposure
         uniform half3 _GroundColor;
         uniform half _SunSize;
@@ -121,16 +125,9 @@ SubShader {
 			#endif
 			
 			
-		fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
-		{
-			fixed2 a = sin(fixed2(1.5707963, 0) + th);
-			return fixed2x2(a, -a.y, a.x);
-		}
 		#define ResX  _ScreenParams.x
 		float StarCalc( float3 p, float3 dir )
 		{
-			// Shortcuts were taken - only *actually* works across top of sky.
-			p.xy = mul(mm2(-atan2(dir.x,dir.y)),p.xy);
 			fixed3 c = fixed3(0,0,0);
 			fixed res = ResX;
 			[unroll]
@@ -200,6 +197,17 @@ SubShader {
             UNITY_VERTEX_OUTPUT_STEREO
         };
 
+		// Thanks, @axlecrusher for this gem.
+		float3 vector_quat_rotate( float3 v, float4 q )
+		{ 
+			return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+		}
+
+		float3 vector_quat_unrotate( float3 v, float4 q )
+		{ 
+			return v + 2.0 * cross(q.xyz, cross(q.xyz, v) - q.w * v);
+		}
+
 
         float scale(float inCos)
         {
@@ -213,6 +221,14 @@ SubShader {
             UNITY_SETUP_INSTANCE_ID(v);
             UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
             OUT.pos = UnityObjectToClipPos(v.vertex);
+
+			#ifdef _USEINPUTBASIS
+			float3 lightray = float3(0,0,-1);
+			float3 lightray_rot = vector_quat_rotate( lightray,_InputBasisQuaternion );
+			#else
+			float3 lightray = _WorldSpaceLightPos0.xyz;
+			float3 lightray_rot = lightray;
+			#endif
 
             float3 kSkyTintInGammaSpace = COLOR_2_GAMMA(_SkyTint); // convert tint from Linear back to Gamma
             float3 kScatteringWavelength = lerp (
@@ -263,9 +279,9 @@ SubShader {
                     float height = length(samplePoint);
                     float depth = exp(kScaleOverScaleDepth * (kInnerRadius - height));
                     float lightAngle;
-					float lightAngleStandard = dot(_WorldSpaceLightPos0.xyz, samplePoint) / height;
+					float lightAngleStandard = dot(lightray_rot.xyz, samplePoint) / height;
 					float lightAngleEnvironmental = samplePoint / height;
-					float nightness = saturate( (1.-_WorldSpaceLightPos0.y*10.) );
+					float nightness = saturate( (1.-lightray_rot.y*10.) );
 					lightAngle = lerp( lightAngleStandard, lightAngleEnvironmental, nightness );
 					
                     float cameraAngle = dot(eyeRay, samplePoint) / height;
@@ -278,7 +294,7 @@ SubShader {
                 {
                     float height = length(samplePoint);
                     float depth = exp(kScaleOverScaleDepth * (kInnerRadius - height));
-                    float lightAngle = dot(_WorldSpaceLightPos0.xyz, samplePoint) / height;
+                    float lightAngle = dot(lightray_rot.xyz, samplePoint) / height;
                     float cameraAngle = dot(eyeRay, samplePoint) / height;
                     float scatter = (startOffset + depth*(scale(lightAngle) - scale(cameraAngle)));
                     float3 attenuate = exp(-clamp(scatter, 0.0, kMAX_SCATTER) * (kInvWavelength * kKr4PI + kKm4PI));
@@ -303,7 +319,7 @@ SubShader {
                 // Calculate the ray's starting position, then calculate its scattering offset
                 float depth = exp((-kCameraHeight) * (1.0/kScaleDepth));
                 float cameraAngle = dot(-eyeRay, pos);
-                float lightAngle = dot(_WorldSpaceLightPos0.xyz, pos);
+                float lightAngle = dot(lightray_rot.xyz, pos);
                 float cameraScale = scale(cameraAngle);
                 float lightScale = scale(lightAngle);
                 float cameraOffset = depth*cameraScale;
@@ -344,8 +360,10 @@ SubShader {
             // 1. in case of linear: multiply by _Exposure in here (even in case of lerp it will be common multiplier, so we can skip mul in fshader)
             // 2. in case of gamma and SKYBOX_COLOR_IN_TARGET_COLOR_SPACE: do sqrt right away instead of doing that in fshader
 
+
+
             OUT.groundColor = _Exposure * (cIn + COLOR_2_LINEAR(_GroundColor) * cOut);
-            OUT.skyColor    = _Exposure * (cIn * getRayleighPhase(_WorldSpaceLightPos0.xyz, -eyeRay));
+            OUT.skyColor    = _Exposure * (cIn * getRayleighPhase(lightray_rot, -eyeRay));
 
         #if SKYBOX_SUNDISK != SKYBOX_SUNDISK_NONE
             // The sun should have a stable intensity in its course in the sky. Moreover it should match the highlight of a purely specular material.
@@ -428,10 +446,23 @@ SubShader {
             // if we did precalculate color in vprog: just do lerp between them
             col = lerp(IN.skyColor, IN.groundColor, saturate(y));
 			
+			float3 rray = ray;
+			#ifdef _USEINPUTBASIS
+				rray = vector_quat_unrotate(ray,_InputBasisQuaternion);
+			#endif
+
+			#ifdef _USEINPUTBASIS
+			float3 lightray = float3(0,0,1);
+			float3 lightray_rot = vector_quat_rotate( lightray,_InputBasisQuaternion );
+			#else
+			float3 lightray = _WorldSpaceLightPos0.xyz;
+			float3 lightray_rot = lightray;
+			#endif
 
         #if SKYBOX_SUNDISK != SKYBOX_SUNDISK_NONE
-			fixed3 SunAttenuation = calcSunAttenuation(_WorldSpaceLightPos0.xyz, ray);
-			SunAttenuation += calcSunAttenuation(_WorldSpaceLightPos0.xyz, -ray);
+
+			fixed3 SunAttenuation = calcSunAttenuation(lightray, rray);
+			SunAttenuation += calcSunAttenuation(lightray, -rray);
 			#if SKYBOX_SUNDISK == SKYBOX_SUNDISK_HQ
 			SunAttenuation*=.1;
 			#endif
@@ -448,11 +479,11 @@ SubShader {
 		#endif
 			
         #if SKYBOX_SUNDISK != SKYBOX_SUNDISK_NONE
-				if( _WorldSpaceLightPos0.y < .2 )
+				if( lightray_rot.y > -.2 )
 				{
 					float moonness = SunAttenuation;
-					float nightness = saturate( .1-_WorldSpaceLightPos0.y ) * 3.;
-					col += max( StarCalc( -ray, _WorldSpaceLightPos0.xyz )*nightness, moonness );
+					float nightness = saturate( .1+lightray_rot.y ) * 3.;
+					col += max( StarCalc( rray, vector_quat_rotate( float3(0,0,-1),_InputBasisQuaternion ) )*nightness, moonness );
 				}
 				else
 				{
@@ -467,6 +498,7 @@ SubShader {
 
 			// Add movie grain noise.
 			col.xyz += chash13( float3( _Time.y, Pos.xy ) )/512.-1./1024;
+			
 
             return half4(col,1.0);
 
