@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: squarestarrysky
   m_Shader: {fileID: 4800000, guid: 90ff35b50c1539a4c94c6e1bd1144324, type: 3}
-  m_ShaderKeywords: _SUNDISK_HIGH_QUALITY
+  m_ShaderKeywords: _SUNDISK_HIGH_QUALITY _USEINPUTBASIS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -111,10 +111,12 @@ Material:
     - _SunSizeConvergence: 5
     - _Sundisk: 1
     - _UVSec: 0
+    - _UseInputBasis: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GroundColor: {r: 0.36899996, g: 0.34899998, b: 0.34099993, a: 1}
+    - _InputBasisQuaternion: {r: 0.9906263, g: -0, b: 0, a: -0.1366005}
     - _SkyTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}

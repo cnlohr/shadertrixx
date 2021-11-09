@@ -99,6 +99,31 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 "It's mentioned many places that armspan is the defining scale, but that comment is more specific (armspan is 2 * head_to_wrist, and the ratio to height)" - Ben
 
+
+## Multiply vector-by-quaterion
+
+From @axlecrusher :
+```glsl
+float3 vector_quat_rotate( float3 v, float4 q )
+{ 
+	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+
+float3 vector_quat_unrotate( float3 v, float4 q )
+{ 
+	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) - q.w * v);
+}
+```
+
+Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other swizzle.  Not sure where this one came from
+```glsl
+		fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
+		{
+			fixed2 a = sin(fixed2(1.5707963, 0) + th);
+			return fixed2x2(a, -a.y, a.x);
+		}
+```
+
 ## Using depth cameras on avatars.
 
 If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
@@ -277,6 +302,17 @@ in Fragment shader:
 ```
 
 editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
+
+## Are you in a mirror?
+
+Thanks, @Lyuma
+
+```glsl
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+```
 
 ## Default Texture Parameters
 

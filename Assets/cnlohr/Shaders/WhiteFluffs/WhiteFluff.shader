@@ -5,6 +5,7 @@
         _MainTex ("Texture", 2D) = "white" {}
 		_BillboardSizeAdd( "Billboard Size", float) = 0
 		_TANoiseTex ("TANoise", 2D) = "white" {}
+		[HDR]_FluffColor ("Fluff Color", Color) = (1,1,1,1)
     }
     SubShader
     {
@@ -26,7 +27,6 @@
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-
 			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
 			#include "/Assets/AudioLink/Shaders/AudioLink.cginc"
 
@@ -47,6 +47,7 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
 			float _BillboardSizeAdd;
+			float4 _FluffColor;
 
 			float max3 (in float3 v) {
 			  return max (max (v.x, v.y), v.z);
@@ -197,6 +198,7 @@
 					discard;
 				}
 				col.a = 1.;
+				col*=_FluffColor;
 				
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

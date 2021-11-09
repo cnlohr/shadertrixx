@@ -8,7 +8,8 @@
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Opaque" "Queue" = "Overlay" }
+
 
         Pass
         {
@@ -145,6 +146,8 @@
 				#endif
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
+				
+				col = min( col, 1.5 );
                 return col;
             }
             ENDCG

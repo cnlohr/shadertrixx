@@ -68,11 +68,6 @@ namespace BrokeredUpdates
 			thisRigidBody = GetComponent<Rigidbody>();
 			thisCollider = GetComponent<Collider>();
 
-			//Tricky: There's a bug with Unity that can cause us to not know the
-			//rigid body is valid.  This prevents us from losing it.
-			bUseGravityOnRelease = thisRigidBody.useGravity;
-			bKinematicOnRelease =  thisRigidBody.isKinematic;
-
 			resetPosition = transform.localPosition;
 			resetQuaternion = transform.localRotation;
 			
@@ -103,6 +98,12 @@ namespace BrokeredUpdates
 			{
 				bUseGravityOnRelease = thisRigidBody.useGravity;
 				bKinematicOnRelease = thisRigidBody.isKinematic;
+			}
+			else
+			{
+				Debug.Log( $"CNL WARNING: Rigid Body Invalid for object {gameObject.name}" );
+				bUseGravityOnRelease = false;
+				bKinematicOnRelease = true;
 			}
 			wasMoving = false;
 			masterMoving = false;
@@ -174,16 +175,40 @@ namespace BrokeredUpdates
 						SendUpdateSystemAsMaster();
 						
 						//Also pause object.
-						if( Utilities.IsValid( thisRigidBody ) )
-						{
-							thisRigidBody.velocity = new Vector3( 0, 0, 0 );
-							thisRigidBody.Sleep();
-						}
+						//if( Utilities.IsValid( thisRigidBody ) )
+						//{
+						//	thisRigidBody.velocity = new Vector3( 0, 0, 0 );
+						//	thisRigidBody.Sleep();
+						//}
 					}
 				}
 				else
 				{
 					if( syncPosition.magnitude > 0 ) OnDeserialization();
+				}
+
+				if( !syncMoving )
+				{
+					_ReturnToQuescentState();
+				}
+			}
+		}
+		
+		private void _ReturnToQuescentState()
+		{
+			// Make sure eventually, things become how the quescent state is.
+			// XXX TODO: This needs to happen when someone steals your ball
+			// then they release it.  The stealer then does not normally hit this
+			// code through the normal path. ->> Once that is resolved, try removing
+			// this code.
+			if( Utilities.IsValid( thisRigidBody ) )
+			{
+				thisRigidBody.useGravity = bUseGravityOnRelease;
+				thisRigidBody.isKinematic = bKinematicOnRelease;
+				if( bKinematicOnRelease )
+				{
+					thisRigidBody.velocity = new Vector3( 0, 0, 0 );
+					thisRigidBody.Sleep();
 				}
 			}
 		}
@@ -206,7 +231,7 @@ namespace BrokeredUpdates
 					// Stop Updating
 					brokeredUpdateManager._UnregisterSubscription( this );
 					
-					// Do this so if we were moving SUPER slowly, we actually stop.  TODO: How to disable motion?
+					// Do this so if we were moving SUPER slowly, we actually stop.
 					if( Utilities.IsValid( thisRigidBody ) )
 					{
 						thisRigidBody.velocity = new Vector3( 0, 0, 0 );
@@ -252,8 +277,18 @@ namespace BrokeredUpdates
 		
 		public override void OnDeserialization()
 		{
-			//Shouldn't really happen.
-			if( masterMoving ) return;
+			// This happens if it was stolen.  We should release it.
+			if( masterMoving && Networking.GetOwner( gameObject ) != Networking.LocalPlayer )
+			{
+				Debug.Log( $"Received OnDeserialization() after master masterMoving on {gameObject.name}" );
+				masterMoving = false;
+				brokeredUpdateManager._UnregisterSubscription( this );
+				syncMoving = false;
+				if( bDisableColliderOnGrab ) thisCollider.enabled = true;
+				OnDrop();
+				_ReturnToQuescentState();
+				return;
+			}
 
 			if( firstUpdateSlave )
 			{
@@ -277,13 +312,7 @@ namespace BrokeredUpdates
 				transform.localRotation = syncRotation;
 				wasMoving = false;
 				brokeredUpdateManager._UnregisterSubscription( this );
-				if( Utilities.IsValid( thisRigidBody ) )
-				{
-					thisRigidBody.useGravity = bUseGravityOnRelease;
-					thisRigidBody.isKinematic = bKinematicOnRelease;
-					thisRigidBody.velocity = new Vector3( 0, 0, 0 );
-					thisRigidBody.Sleep();
-				}
+				_ReturnToQuescentState();
 			}
 
 			if( !masterMoving )
@@ -367,13 +396,7 @@ namespace BrokeredUpdates
 						transform.localPosition = syncPosition;
 						transform.localRotation = syncRotation;
 						wasMoving = false;
-						if( Utilities.IsValid( thisRigidBody ) )
-						{
-							thisRigidBody.useGravity = bUseGravityOnRelease;
-							thisRigidBody.isKinematic = bKinematicOnRelease;
-							thisRigidBody.velocity = new Vector3( 0, 0, 0 );
-							thisRigidBody.Sleep();
-						}
+						_ReturnToQuescentState();
 						brokeredUpdateManager._UnregisterSubscription( this );
 					}
 				}
