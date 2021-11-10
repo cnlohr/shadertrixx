@@ -116,6 +116,15 @@ bool isPanorama() {
 }
 ```
 
+### Merlin's IsMirror()
+
+```glsl
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+```
+
 ### Not-shaders
 
 From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
