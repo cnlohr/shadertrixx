@@ -81,6 +81,41 @@ float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
 ```
 
+### Scruffy Ruffle's utilitiy functions
+
+```glsl
+bool isVR() {
+    // USING_STEREO_MATRICES
+    #if UNITY_SINGLE_PASS_STEREO
+        return true;
+    #else
+        return false;
+    #endif
+}
+
+bool isVRHandCamera() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
+}
+
+bool isDesktop() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005;
+}
+
+bool isVRHandCameraPreview() {
+    return isVRHandCamera() && _ScreenParams.y == 720;
+}
+
+bool isVRHandCameraPicture() {
+    return isVRHandCamera() && _ScreenParams.y == 1080;
+}
+
+bool isPanorama() {
+    // Crude method
+    // FOV=90=camproj=[1][1]
+    return unity_CameraProjection[1][1] == 1 && _ScreenParams.x == 1075 && _ScreenParams.y == 1025;
+}
+```
+
 ### Not-shaders
 
 From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
