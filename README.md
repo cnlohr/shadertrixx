@@ -8,7 +8,7 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
-This makes a well behaved `mod` function that rounds down even when negative.
+This makes a well behaved `mod` function that rounds down even when negative.  For instance, `glsl_mod(-0.3, 1)` is 0.7.
 
 Also note: Using this trick in some situations actually produces smaller code than regular mod!!
 
