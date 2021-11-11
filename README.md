@@ -393,7 +393,7 @@ IE `_MainTex ("Texture", 2D) = "unity_DynamicLightmap" {}`
 
 Thanks, @Pema
 
-## Depth Textures
+## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
 ```glsl
@@ -410,9 +410,9 @@ float3 direction = i.worldDirection * perspectiveDivide;
 // Calculate our UV within the screen (for reading depth buffer)
 float2 screenUV = (i.screenPosition.xy * perspectiveDivide) * 0.5f + 0.5f;
 
-// No idea
-screenUV.y = 1 - screenUV.y; 
-
+// Flip y in any situation where y needs to be flipped for reading depth.
+screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
+ 
 // VR stereo support
 screenUV = UnityStereoTransformScreenSpaceTex(screenUV);
 
