@@ -444,7 +444,7 @@ float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 
 ### Option 2: Re-use .vertex
 
-Note: this approach is slower by about 8-10 fragment ops, but requires no additional varying.
+This approach is slower by about 8-10 fragment ops, but requires no additional varying if all you want is the screenUV for depth or grab passes.  If you want world space, you will still need to compute that in the vertex shader and use one varying.  It would require multiple matrix-vector multiplies and the needed matricies are unavailable in the normal pipeline.
 
 Vertex Shader:
 ```glsl
@@ -466,15 +466,13 @@ float3 direction = i.worldDirection * perspectiveDivide;
 float2 screenUV = (i.vertex.xy / _ScreenParams.xy);
 
 // Flip y in any situation where y needs to be flipped for reading depth. (OpenGL, no-MSAA, no-HDR)
-screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
-
-// VR stereo support
-screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
+screenUV = float2( screenUV.x*.5, _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x );
 
 // Read depth, linearizing into worldspace units.    
 float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
 
-float3 worldspace = direction * depth + _WorldSpaceCameraPos;
+// VR stereo support
+screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
 
 
