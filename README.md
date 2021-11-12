@@ -400,13 +400,14 @@ If you define a sampler2D the following way, you can read the per-pixel depth.
 sampler2D _CameraDepthTexture;
 ```
 
-### Option 1: Use a varying, noperspective, `screenPosition`
+### Option 1: Use a varying, `screenPosition`
 
 **NOTE**: this `screenPosition` can also be used to access `_Grabpass`!
 
 Struct:
 ```
-    noperspective float2 screenPosition : TEXCOORD1;
+float4 screenPosition : TEXCOORD1; // Trivially refactorable to a float2
+float3 worldDirection : TEXCOORD2;
 ```
 
 Vertex Shader:
