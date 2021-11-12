@@ -63,7 +63,11 @@
 				// Save the clip space position so we can use it later.
 				// This also handles situations where the Y is flipped.
 				float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
-				o.screenPosition = float4( suv, 0, o.vertex.w );
+				
+				//Tricky, constants like the 0.5 and the second paramter
+				// need to be premultiplied by o.vertex.w.
+				o.screenPosition = float4( TransformStereoScreenSpaceTex(
+					suv+0.5*o.vertex.w, o.vertex.w), 0, o.vertex.w );
 
                 return o;
             }
@@ -78,8 +82,8 @@
 				// Scale our view ray to unit depth.
 				float3 direction = i.worldDirection * perspectiveDivide;
 
-				// Calculate our UV within the screen (for reading depth buffer)
-				float2 screenUV = UnityStereoTransformScreenSpaceTex( i.screenPosition.xy / i.screenPosition.w + 0.5 );
+				// Calculate our UV within the screen (for reading depth buffer).
+				float2 screenUV = i.screenPosition.xy / i.screenPosition.w;
 
 				// Read depth, linearizing into worldspace units.    
 				float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
@@ -135,8 +139,8 @@
 					// we retrieved from the depth buffer.
 					float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 					col = float4(frac(worldspace), 1.0f);
-					//if( depth >= 999 ) col = tex2D( _Grabpass, screenUV.xy )+0.1; // Test grabpasses
-					if( depth >= 999 ) discard;
+					//if( depth >= 900 ) col = tex2D( _Grabpass, screenUV.xy )+0.1; // Test grabpasses
+					if( depth >= 900 ) discard;
 				#elif defined( _OUTMODE_DEPTH )
 					depth -= length(i.worldDirection);
 					col = depth.xxxx*.1;
