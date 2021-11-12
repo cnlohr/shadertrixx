@@ -8,7 +8,7 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  T
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
-This makes a well behaved `mod` function that rounds down even when negative.
+This makes a well behaved `mod` function that rounds down even when negative.  For instance, `glsl_mod(-0.3, 1)` is 0.7.
 
 Also note: Using this trick in some situations actually produces smaller code than regular mod!!
 
@@ -79,6 +79,50 @@ float2 coord = i.tex.xy * _MainTex_TexelSize.zw;
 float2 fr = frac(coord + 0.5);
 float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
+```
+
+### Scruffy Ruffle's utilitiy functions
+
+```glsl
+bool isVR() {
+    // USING_STEREO_MATRICES
+    #if UNITY_SINGLE_PASS_STEREO
+        return true;
+    #else
+        return false;
+    #endif
+}
+
+bool isVRHandCamera() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
+}
+
+bool isDesktop() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005;
+}
+
+bool isVRHandCameraPreview() {
+    return isVRHandCamera() && _ScreenParams.y == 720;
+}
+
+bool isVRHandCameraPicture() {
+    return isVRHandCamera() && _ScreenParams.y == 1080;
+}
+
+bool isPanorama() {
+    // Crude method
+    // FOV=90=camproj=[1][1]
+    return unity_CameraProjection[1][1] == 1 && _ScreenParams.x == 1075 && _ScreenParams.y == 1025;
+}
+```
+
+### Merlin's IsMirror()
+
+```glsl
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
 ```
 
 ### Not-shaders
@@ -349,7 +393,7 @@ IE `_MainTex ("Texture", 2D) = "unity_DynamicLightmap" {}`
 
 Thanks, @Pema
 
-## Depth Textures
+## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
 ```glsl
@@ -366,9 +410,9 @@ float3 direction = i.worldDirection * perspectiveDivide;
 // Calculate our UV within the screen (for reading depth buffer)
 float2 screenUV = (i.screenPosition.xy * perspectiveDivide) * 0.5f + 0.5f;
 
-// No idea
-screenUV.y = 1 - screenUV.y; 
-
+// Flip y in any situation where y needs to be flipped for reading depth.
+screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
+ 
 // VR stereo support
 screenUV = UnityStereoTransformScreenSpaceTex(screenUV);
 
