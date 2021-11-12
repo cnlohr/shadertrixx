@@ -400,27 +400,78 @@ If you define a sampler2D the following way, you can read the per-pixel depth.
 sampler2D _CameraDepthTexture;
 ```
 
+### Option 1: Use a varying, noperspective, `screenPosition`
+
+**NOTE**: this `screenPosition` can also be used to access `_Grabpass`!
+
+Struct:
+```
+    noperspective float2 screenPosition : TEXCOORD1;
+```
+
+Vertex Shader:
+```glsl
+// Subtract camera position from vertex position in world
+// to get a ray pointing from the camera to this vertex.
+o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
+
+// Save the clip space position so we can use it later.
+// This also handles situations where the Y is flipped.
+float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x) / o.vertex.w + 0.5;
+o.screenPosition = UnityStereoTransformScreenSpaceTex(suv);
+```
+
+Fragment Shader:
 ```glsl
 // Compute projective scaling factor...
-float perspectiveDivide = 1.0f / i.screenPosition.w;
+float perspectiveDivide = 1.0f / i.vertex.w;
 
 // Scale our view ray to unit depth.
 float3 direction = i.worldDirection * perspectiveDivide;
 
 // Calculate our UV within the screen (for reading depth buffer)
-float2 screenUV = (i.screenPosition.xy * perspectiveDivide) * 0.5f + 0.5f;
-
-// Flip y in any situation where y needs to be flipped for reading depth.
-screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
- 
-// VR stereo support
-screenUV = UnityStereoTransformScreenSpaceTex(screenUV);
+float2 screenUV = i.screenPosition.xy;
 
 // Read depth, linearizing into worldspace units.    
 float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
 
 float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 ```
+
+### Option 2: Re-use .vertex
+
+
+Vertex Shader:
+```glsl
+// Subtract camera position from vertex position in world
+// to get a ray pointing from the camera to this vertex.
+o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
+```
+
+Fragment Shader:
+
+```glsl
+// Compute projective scaling factor...
+float perspectiveDivide = 1.0f / i.vertex.w;
+
+// Scale our view ray to unit depth.
+float3 direction = i.worldDirection * perspectiveDivide;
+
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = (i.vertex.xy / _ScreenParams.xy);
+
+// Flip y in any situation where y needs to be flipped for reading depth. (OpenGL, no-MSAA, no-HDR)
+screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
+
+// VR stereo support
+screenUV = UnityStereoTransformScreenSpaceTex( screenUV );
+
+// Read depth, linearizing into worldspace units.    
+float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
+
+float3 worldspace = direction * depth + _WorldSpaceCameraPos;
+```
+
 
 ## Reference Camera
 
