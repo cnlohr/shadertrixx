@@ -570,6 +570,9 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
 
+Way more than you ever wanted to know about postprocessing:
+ * https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing
+
 Lit vertex shader
  * https://github.com/Xiexe/Unity-Lit-Shader-Templates
 
