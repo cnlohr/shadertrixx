@@ -10,7 +10,10 @@
     {
         Tags { "RenderType"="Opaque" "Queue" = "Overlay" }
 
-
+		GrabPass
+		{
+			"_Grabpass"
+		}
         Pass
         {
             CGPROGRAM
@@ -35,12 +38,13 @@
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
-				float4 screenPosition : TEXCOORD1;
+				noperspective float2 screenPosition : TEXCOORD1;
 				float3 worldDirection : TEXCOORD2;
             };
 
 			UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
             float4 _CameraDepthTexture_TexelSize;
+			sampler2D _Grabpass;
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
@@ -57,10 +61,9 @@
 				o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
 
 				// Save the clip space position so we can use it later.
-				// (There are more efficient ways to do this in SM 3.0+, 
-				// but here I'm aiming for the simplest version I can.
-				// Optimized versions welcome in additional answers!)
-				o.screenPosition = o.vertex;//UnityObjectToClipPos(v.vertex);
+				// This also handles situations where the Y is flipped.
+				float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x) / o.vertex.w + 0.5;
+				o.screenPosition = UnityStereoTransformScreenSpaceTex(suv);
 
                 return o;
             }
@@ -70,20 +73,13 @@
 				float4 col;
 
 				// Compute projective scaling factor...
-				float perspectiveDivide = 1.0f / i.screenPosition.w;
+				float perspectiveDivide = 1.0f / i.vertex.w;
 
 				// Scale our view ray to unit depth.
 				float3 direction = i.worldDirection * perspectiveDivide;
 
 				// Calculate our UV within the screen (for reading depth buffer)
-				float2 screenUV = (i.screenPosition.xy * perspectiveDivide) * 0.5f + 0.5f;
-
-				// No idea, Seems to fix lox's stuff.
-				if (_ProjectionParams.x < 0)
-					screenUV.y = 1 - screenUV.y; 
-
-				// VR stereo support
-				screenUV = UnityStereoTransformScreenSpaceTex(screenUV);
+				float2 screenUV = i.screenPosition.xy;
 
 				// Read depth, linearizing into worldspace units.    
 				float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
@@ -139,7 +135,7 @@
 					// we retrieved from the depth buffer.
 					float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 					col = float4(frac(worldspace), 1.0f);
-					clip( depth >= 999 ? -1 : 1 );
+					if( depth >= 999 ) col = tex2D( _Grabpass, screenUV.xy )+0.1;
 				#elif defined( _OUTMODE_DEPTH )
 					depth -= length(i.worldDirection);
 					col = depth.xxxx*.1;
