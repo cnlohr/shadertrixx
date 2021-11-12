@@ -444,6 +444,7 @@ float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 
 ### Option 2: Re-use .vertex
 
+Note: this approach is slower by about 8-10 fragment ops, but requires no additional varying.
 
 Vertex Shader:
 ```glsl
@@ -468,7 +469,7 @@ float2 screenUV = (i.vertex.xy / _ScreenParams.xy);
 screenUV.y = _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x;
 
 // VR stereo support
-screenUV = UnityStereoTransformScreenSpaceTex( screenUV );
+screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 
 // Read depth, linearizing into worldspace units.    
 float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
