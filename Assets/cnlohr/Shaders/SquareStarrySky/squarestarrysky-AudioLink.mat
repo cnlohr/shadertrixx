@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: squarestarrysky
-  m_Shader: {fileID: 4800000, guid: 90ff35b50c1539a4c94c6e1bd1144324, type: 3}
-  m_ShaderKeywords: _SUNDISK_HIGH_QUALITY _USEINPUTBASIS
+  m_Name: squarestarrysky-AudioLink
+  m_Shader: {fileID: 4800000, guid: d96e087a3ca7a1041be8fa47ad8207a0, type: 3}
+  m_ShaderKeywords: _SUNDISK_SIMPLE _USEINPUTBASIS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -106,7 +106,7 @@ Material:
     - _SpecularHighlights: 1
     - _SquareTheSun: 1
     - _SrcBlend: 1
-    - _SunDisk: 2
+    - _SunDisk: 1
     - _SunSize: 0.022
     - _SunSizeConvergence: 5
     - _Sundisk: 1
@@ -117,6 +117,6 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GroundColor: {r: 0.36899996, g: 0.34899998, b: 0.34099993, a: 1}
-    - _InputBasisQuaternion: {r: 0.96066755, g: 0, b: 0, a: -0.27770117}
+    - _InputBasisQuaternion: {r: 0.99245113, g: 0, b: 0, a: -0.12264087}
     - _SkyTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}

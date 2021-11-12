@@ -5,7 +5,7 @@
 // General use: The Y rotation of your light should = 90.
 // Control day/night with X value of light.
 
-Shader "Skybox/squarestarrysky" {
+Shader "Skybox/squarestarrysky-AudioLink" {
 Properties {
     [KeywordEnum(None, Simple, High Quality)] _SunDisk ("Sun", Int) = 2
     _SunSize ("Sun Size", Range(0,1)) = 0.04
@@ -33,6 +33,8 @@ SubShader {
         #include "UnityCG.cginc"
         #include "Lighting.cginc"
 
+		#include "/Assets/AudioLink/Shaders/AudioLink.cginc"
+		
         #pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
 		#pragma shader_feature_local _USEINPUTBASIS
 
@@ -116,7 +118,6 @@ SubShader {
 		float4 _NoiseTex_ST;
 
 		#include "Assets/cnlohr/Shaders/hashwithoutsine/hashwithoutsine.cginc"
-		
         #if defined(_SUNDISK_NONE)
             #define SKYBOX_SUNDISK SKYBOX_SUNDISK_NONE
         #elif defined(_SUNDISK_SIMPLE)
@@ -140,7 +141,7 @@ SubShader {
 				fixed2 rn = chash23(id).xy;
 				fixed c2 = 1.-smoothstep(0.,.6,length(q));
 				c2 *= step(rn.x,.0005+i*i*0.001);
-				c += c2*((1-fixed3(0.75,0.9,1.)*rn.y)*0.1+0.9);
+				c += c2*((1-fixed3(0.75,0.9,1.)*rn.y)*0.1+0.9)*(AudioLinkLerp( ALPASS_AUDIOLINK + float2( dir.x * AUDIOLINK_WIDTH, i+1 ) )*3+.5);
 				p *= 1.3;
 			}
 			return c*c*.25;
@@ -414,15 +415,17 @@ SubShader {
 				(_SquareTheSun)?
 				max( max( delta.x, delta.y ), max( delta.x, delta.z ) ) :
 				length(delta);
+			dist/=(AudioLinkLerp( ALPASS_AUDIOLINK )+1);
             half spot = 1.0 - smoothstep(0.0, _SunSize, dist);
             return spot * spot;
         #else // SKYBOX_SUNDISK_HQ
             half3 delta = lightPos - ray;
 			delta = abs(delta);
+			delta/=(AudioLinkLerp( ALPASS_AUDIOLINK )+1);
             half focusedEyeCos = 
 							(_SquareTheSun)?
 							pow(saturate(1.025-max(max(delta.x,delta.y),delta.z)), _SunSizeConvergence):
-							pow(saturate(dot(lightPos, ray)), _SunSizeConvergence);
+							pow(saturate(dot(lightPos, ray))*(AudioLinkLerp( ALPASS_AUDIOLINK )*.004+1), _SunSizeConvergence);
             return getMiePhase(-focusedEyeCos, focusedEyeCos * focusedEyeCos);
         #endif
         }

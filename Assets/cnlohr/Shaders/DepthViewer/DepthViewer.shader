@@ -10,10 +10,10 @@
     {
         Tags { "RenderType"="Opaque" "Queue" = "Overlay" }
 
-		GrabPass
-		{
-			"_Grabpass"
-		}
+		//GrabPass
+		//{
+		//	"_Grabpass"
+		//}
         Pass
         {
             CGPROGRAM
@@ -38,13 +38,13 @@
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
-				noperspective float2 screenPosition : TEXCOORD1;
+				float4 screenPosition : TEXCOORD1;
 				float3 worldDirection : TEXCOORD2;
             };
 
 			UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
             float4 _CameraDepthTexture_TexelSize;
-			sampler2D _Grabpass;
+			//sampler2D _Grabpass;
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
@@ -62,8 +62,8 @@
 
 				// Save the clip space position so we can use it later.
 				// This also handles situations where the Y is flipped.
-				float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x) / o.vertex.w + 0.5;
-				o.screenPosition = UnityStereoTransformScreenSpaceTex(suv);
+				float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
+				o.screenPosition = float4( suv, 0, o.vertex.w );
 
                 return o;
             }
@@ -79,7 +79,7 @@
 				float3 direction = i.worldDirection * perspectiveDivide;
 
 				// Calculate our UV within the screen (for reading depth buffer)
-				float2 screenUV = i.screenPosition.xy;
+				float2 screenUV = UnityStereoTransformScreenSpaceTex( i.screenPosition.xy / i.screenPosition.w + 0.5 );
 
 				// Read depth, linearizing into worldspace units.    
 				float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
@@ -135,7 +135,8 @@
 					// we retrieved from the depth buffer.
 					float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 					col = float4(frac(worldspace), 1.0f);
-					if( depth >= 999 ) col = tex2D( _Grabpass, screenUV.xy )+0.1;
+					//if( depth >= 999 ) col = tex2D( _Grabpass, screenUV.xy )+0.1; // Test grabpasses
+					if( depth >= 999 ) discard;
 				#elif defined( _OUTMODE_DEPTH )
 					depth -= length(i.worldDirection);
 					col = depth.xxxx*.1;
