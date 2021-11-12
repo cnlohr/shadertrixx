@@ -418,9 +418,12 @@ o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos
 // Save the clip space position so we can use it later.
 // This also handles situations where the Y is flipped.
 float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
+				
+// Tricky, constants like the 0.5 and the second paramter
+// need to be premultiplied by o.vertex.w.
+o.screenPosition = float4( TransformStereoScreenSpaceTex(
+	suv+0.5*o.vertex.w, o.vertex.w), 0, o.vertex.w );
 
-// Some algebraic trickery to get the clipped values to make sense, avoiding a little math in the frag.
-o.screenPosition = float4( (suv/o.vertex.w+0.5)* o.vertex.w, 0, o.vertex.w );
 ```
 
 Fragment Shader:
@@ -428,15 +431,14 @@ Fragment Shader:
 // Compute projective scaling factor...
 float perspectiveDivide = 1.0f / i.vertex.w;
 
-// Scale our view ray to unit depth.
-float3 direction = i.worldDirection * perspectiveDivide;
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = i.screenPosition.xy * perspectiveDivide;
 
-// Calculate our UV within the screen (for reading depth buffer); Note: This turns into a /,*,+
-float2 screenUV = UnityStereoTransformScreenSpaceTex( i.screenPosition.xy / i.screenPosition.w  );
-
-// Read depth, linearizing into worldspace units.    
+// Read depth, linearizing into worldspace units.
 float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
 
+// Scale our view ray to unit depth.
+float3 direction = i.worldDirection * perspectiveDivide;
 float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 ```
 
