@@ -393,6 +393,28 @@ IE `_MainTex ("Texture", 2D) = "unity_DynamicLightmap" {}`
 
 Thanks, @Pema
 
+## Raycasting with Orthographic and Normal Cameras
+
+If you want your raycaster/raytracer to work with a shadow map or other orthographic camera, you will need to consider that the ray origin is not `_WorldSpaceCameraPos`.  This neat code compiled by BenDotCom shows how you can do this computation in a vertex shader, however, the code works with trivial substitution in a geometry or fragment shader as well.
+
+```glsl
+o.vertex = UnityObjectToClipPos(v.vertex);
+o.objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) );
+
+// I saw these ortho shadow substitutions in a few places, but bgolus explains them
+// https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
+float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+float3 worldSpaceCameraPos = UNITY_MATRIX_I_V._m03_m13_m23; // instead of _WorldSpaceCameraPos
+float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+float3 cameraToVertex = worldPos - worldSpaceCameraPos;
+float3 orthoFwd = -UNITY_MATRIX_I_V._m02_m12_m22; // often seen: -UNITY_MATRIX_V[2].xyz;
+float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
+// start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
+float3 orthoCameraPos = worldPos - orthoRayDir;
+o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
+o.rayDir = lerp(cameraToVertex, orthoRayDir, howOrtho );
+```
+
 ## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
