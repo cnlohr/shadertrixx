@@ -102,10 +102,6 @@ bool IsInMirror()
 }
 ```
 
-### Not-shaders
-
-From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
-
 ## tanoise
 
 Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/tree/main/Assets/cnlohr/Shaders/tanoise
@@ -141,20 +137,6 @@ Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other
 			fixed2 a = sin(fixed2(1.5707963, 0) + th);
 			return fixed2x2(a, -a.y, a.x);
 		}
-```
-
-## Using depth cameras on avatars.
-
-If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
-
-```
-Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer.
-```
-
-A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
-
-```cs
-	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
 ```
 
 ## Is your UV within the unit square?
@@ -277,51 +259,6 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
 }
 ```
 
-## Grabpasses
-
-You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
-
-```
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
-        LOD 100
-
-        GrabPass
-        {
-            "_GrabTexture"
-        }
-
-```
-
-You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
-
-You can then index into it as a sampler2D.
-
-
-```glsl
-            sampler2D _GrabTexture;
-```
-
-```glsl
-float2 grabuv = i.uv;
-#if !UNITY_UV_STARTS_AT_TOP
-grabuv.y = 1 - grabuv.y;
-#endif
-fixed4 col = tex2D(_GrabTexture, grabuv);
-```
-
-Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
-
-in Vertex shader:
-```glsl
-	o.grabposs = ComputeGrabScreenPos( o.vertex );
-```
-in Fragment shader:
-```glsl
-	col = tex2Dproj(_GrabTexture, i.grabposs );
-```
-
-editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
-
 ## Default Texture Parameters
 
 Default values available for texture properties:
@@ -377,6 +314,44 @@ float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
 float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
 o.rayDir = lerp(cameraToVertex, orthoRayDir, howOrtho );
+```
+
+
+This SLERP function, found by ACiiL,
+```c
+        ////============================================================
+        //// blend between two directions by %
+        //// https://www.shadertoy.com/view/4sV3zt
+        //// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+        float3 slerp(float3 start, float3 end, float percent)
+        {
+            float d     = dot(start, end);
+            d           = clamp(d, -1.0, 1.0);
+            float theta = acos(d)*percent;
+            float3 RelativeVec  = normalize(end - start*d);
+            return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
+        }
+```
+
+## Disable Batching
+
+From error.mdl - This fixes issues where shaders need to get access to their local coordinates at the cost of a small amount of performance.
+
+```
+            Tags {  "DisableBatching"="true"}
+```
+
+ ## Convert detph function:
+ ```c
+     //Convert to Corrected LinearEyeDepth by DJ Lukis
+     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
+
+     //Convert from Corrected Linear Eye Depth to Raw Depth 
+     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+
+     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
+     //Convert to Linear01Depth
+     depth = Linear01Depth(depth);
 ```
 
 ## Depth Textures & Getting Worldspace Info
@@ -462,6 +437,66 @@ float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, scree
 screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
 
+
+## Using depth cameras on avatars.
+
+If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
+
+```
+Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer.
+```
+
+A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
+
+```cs
+	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
+```
+
+
+## Grabpasses
+
+You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
+
+```
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        LOD 100
+
+        GrabPass
+        {
+            "_GrabTexture"
+        }
+
+```
+
+You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
+
+You can then index into it as a sampler2D.
+
+
+```glsl
+            sampler2D _GrabTexture;
+```
+
+```glsl
+float2 grabuv = i.uv;
+#if !UNITY_UV_STARTS_AT_TOP
+grabuv.y = 1 - grabuv.y;
+#endif
+fixed4 col = tex2D(_GrabTexture, grabuv);
+```
+
+Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
+
+in Vertex shader:
+```glsl
+	o.grabposs = ComputeGrabScreenPos( o.vertex );
+```
+in Fragment shader:
+```glsl
+	col = tex2Dproj(_GrabTexture, i.grabposs );
+```
+
+Or use the method above to get grab coordinates.
 
 ## Reference Camera
 
@@ -606,40 +641,11 @@ Making procedural things like grids that behave correctly for going off in the d
  * https://www.iquilezles.org/www/articles/filterableprocedurals/filterableprocedurals.htm
  * https://www.iquilezles.org/www/articles/bandlimiting/bandlimiting.htm
 
- Convert detp function:
- ```c
-     //Convert to Corrected LinearEyeDepth by DJ Lukis
-     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
 
-     //Convert from Corrected Linear Eye Depth to Raw Depth 
-     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+### Not-shaders
 
-     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
-     //Convert to Linear01Depth
-     depth = Linear01Depth(depth);
-```
+From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
 
-
-This SLERP function, found by ACiiL,
-```c
-        ////============================================================
-        //// blend between two directions by %
-        //// https://www.shadertoy.com/view/4sV3zt
-        //// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
-        float3 slerp(float3 start, float3 end, float percent)
-        {
-            float d     = dot(start, end);
-            d           = clamp(d, -1.0, 1.0);
-            float theta = acos(d)*percent;
-            float3 RelativeVec  = normalize(end - start*d);
-            return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
-        }
-```
-
-Thanks, error.mdl for telling me how to disable batching.  This fixes issues where shaders need to get access to their local coordinates.
-```
-            Tags {  "DisableBatching"="true"}
-```
 
 ## Notes on grabpass avatar->map data exfiltration
 
