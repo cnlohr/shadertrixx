@@ -136,11 +136,7 @@ From @lox9973 This flowchart of how mono behaviors are executed and in what orde
 
 ## tanoise
 
-Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/blob/main/Assets/tanoise/README.md
-
-## scrn_aurora
-
-tanoise-modified aurora, originally written by nimitz, modified further by scrn.  https://github.com/cnlohr/shadertrixx/tree/main/Assets/scrn_aurora
+Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/tree/main/Assets/cnlohr/Shaders/tanoise
 
 ## Defining Avatar Scale
 
@@ -151,13 +147,15 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 ## Multiply vector-by-quaterion
 
-From @axlecrusher :
+From @axlecrusher effectively using :
 ```glsl
+// Rotate v by q
 float3 vector_quat_rotate( float3 v, float4 q )
 { 
 	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
+// Anti-rotate v by q
 float3 vector_quat_unrotate( float3 v, float4 q )
 { 
 	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) - q.w * v);
@@ -297,7 +295,7 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
     {
 		MaterialPropertyBlock block;
 		MeshRenderer mr;
-        int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
+		int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
 		block = new MaterialPropertyBlock();
 		mr = GetComponent<MeshRenderer>();
 		//mr.GetPropertyBlock(block);  //Not sure if this is needed
