@@ -121,7 +121,7 @@
 				float lineism = 0;
 				float4 grab = tex2D( _Grabpass, screenUV.xy );
 				if( depth < 999 )
-					lineism = saturate( csimplex3( worldspace.xyz*.2 + 1000 + float3( 0, frac(AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_NETWORK_TIME )/1000)*200, 0 ))*(300./depth)+.5 );
+					lineism = saturate( csimplex3( worldspace.xyz*.2 + 1000 + float3( 0, frac(AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_NETWORK_TIME )/5000)*200, 0 ))*(300./depth)+.5 );
 
 				float4 c = 0;
 				//col.rgb = lerp( grab, deldep.xxx*100,  lineism );

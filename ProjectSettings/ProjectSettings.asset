@@ -355,8 +355,8 @@ PlayerSettings:
   - m_BuildTarget: Standalone
     m_Enabled: 1
     m_Devices:
-    - OpenVR
     - None
+    - OpenVR
     - Oculus
   openGLRequireES31: 0
   openGLRequireES31AEP: 0
