@@ -258,6 +258,14 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
     }
 }
 ```
+## Surface Shaders hate advanced features
+
+Just wrap your stuff in a
+```
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+// Do something awesome.
+#endif
+```
 
 ## Default Texture Parameters
 
@@ -476,13 +484,38 @@ You can then index into it as a sampler2D.
 ```glsl
             sampler2D _GrabTexture;
 ```
-
+...
 ```glsl
 float2 grabuv = i.uv;
 #if !UNITY_UV_STARTS_AT_TOP
 grabuv.y = 1 - grabuv.y;
 #endif
 fixed4 col = tex2D(_GrabTexture, grabuv);
+```
+
+Or, alternatively, if you would like pixel-perfect operations:
+```glsl
+SamplerState sampler_CameraDepthTexture;
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+  Texture2D _CameraDepthTexture;
+#else
+  UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
+#endif
+uniform float4 _CameraDepthTexture_TexelSize;
+```
+...
+```
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+  ScreenDepth = LinearEyeDepth(_CameraDepthTexture.Sample(sampler_CameraDepthTexture, screenPosNorm.xy));
+#else
+  ScreenDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenPosNorm.xy ));
+#endif
+```
+And to check it:
+```
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+_CameraDepthTexture.GetDimensions(width, width);
+#endif
 ```
 
 Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
