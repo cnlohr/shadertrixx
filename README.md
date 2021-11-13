@@ -764,32 +764,45 @@ ENDCG
 
 ## Keywords.
 
-(1) DO NOT INCLUDE `[Toggle]`!!
-INSTEAD, use `[ToggleUI]`
+Keywords can be used to create variants of a shader to avoid runtime branches.  Never ever use `[Toggle(...)]` unless you are operating with a local keyword or a reserved keyword.  Even using local leywords are discouraged, in most situations, it is encouraged instead to use `[ToggleUI]` and branch based on the value.
 
-(2) If you do want to use keywords, you can from this list:  
+To use a non-local keyword, use from the following list: https://pastebin.com/83fQvZ3n
 
-(3) To use keywords, do the following: https://pastebin.com/83fQvZ3n
+To use a local keyword, here is an example
 
 In your properties block: 
 ```
-[Toggle(_ALPHAMODULATE_ON)] _ALPHAMODULATE_ON ( "Some Feature", int ) = 0
+[Toggle(_is_torso_local)] _is_torso_local ( "Torso (check)/Wall (uncheck)", int ) = 0
 ```
 
 In your shader block, add:
 ```
-#pragma shader_feature _ALPHAMODULATE_ON
-```
-or
-```
-#pragma multi_compile __ _ALPHAMODULATE_ON
+#pragma shader_feature_local _is_torso_local
 ```
 
 And in your shader
 ```
-#if _ALPHAMODULATE_ON
+#if _is_torso_local
  // Do something
 #endif
+```
+
+If you have a sort of radio button option, you can use it like the following:
+
+In your properties block:
+```
+[KeywordEnum(None, Simple, High Quality)] _SunDisk ("Sun", Int) = 2
+```
+
+In your shader block:
+```
+#pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
+```
+
+In your code:
+```
+#if defined(_SUNDISK_SIMPLE)
+// Do stuff
 ```
 
 ## VRChat "Build & Test" Overrides
