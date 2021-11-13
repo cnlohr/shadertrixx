@@ -22,34 +22,6 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 #pragma warning (default : 3206) // implicit truncation
 ```
 
-## My recommended packages and order:
-
-1. Import VRC SDK Worlds: https://vrchat.com/home/download
-2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
-3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
-4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
-5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
-
-To try:
-Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases  (This is probably deprecated because U# should do everything this does automatically)
-
-## When opening worlds from git using the .gitignore file from here
-
-1. Open project in Unity Hub for correct version of Unity.
-3. Import VRC SDK
-2. **Configure your player settings under editor preprocessor to include UDON**
-4. Import UdonSharp
-5. Import AudioLink
-6. Import Esnya Tools
-7. Import VRC World Toolkit
-8. Run Window->UdonSharp->Refresh All UdonSharp Assets
-9. Repeat 6 til no new assets.
-10. Close and reopen Unity
-11. Open Scene
-12. EsnyaTools -> Repair Udon
-13. VRWorldToolkit -> World Debugger 
-14. Fix all errors.
-
 ## Basics of shader coding:
 
 * Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
@@ -569,6 +541,34 @@ NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) F
  * Doing these things should make your camera passes take sub-200us in most situations.
 
 
+# Working with git world repos
+
+## My recommended packages and order:
+
+1. Import VRC SDK Worlds: https://vrchat.com/home/download
+2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
+3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
+4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
+5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
+
+Sometimes Esnya tools is useful, especially for finding broken refernces to Udon Scripts, etc. https://github.com/esnya/EsnyaUnityTools/releases 
+
+## When opening worlds from git using the .gitignore file from here
+
+1. Open project in Unity Hub for correct version of Unity.
+3. Import VRC SDK
+2. **Configure your player settings under editor preprocessor to include UDON**
+4. Import UdonSharp
+5. Import AudioLink
+6. Import Esnya Tools
+7. Import VRC World Toolkit
+8. Run Window->UdonSharp->Refresh All UdonSharp Assets
+9. Repeat 6 til no new assets.
+10. Close and reopen Unity
+11. Open Scene
+12. EsnyaTools -> Repair Udon
+13. VRWorldToolkit -> World Debugger 
+14. Fix all errors.
 
 ## Additional Links
 
@@ -583,6 +583,9 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/aiya000/VRChat-Flya
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
+
+Neat way to procedurally generate a ton of texture in a non-repeating way from a small source:
+ * https://github.com/Error-mdl/UnityGaussianTex
 
 Way more than you ever wanted to know about postprocessing:
  * https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing
