@@ -81,7 +81,9 @@ float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
 ```
 
-### Scruffy Ruffle's utilitiy functions
+### Detecting if you are on Desktop, VR, Camera, etc.
+
+Thanks, @scruffyruffles for this!
 
 ```glsl
 bool isVR() {
@@ -116,7 +118,10 @@ bool isPanorama() {
 }
 ```
 
-### Merlin's IsMirror()
+
+### Are you in a mirror?
+
+Thanks, @Lyuma and @merlinvr for this one.
 
 ```glsl
 bool IsInMirror()
@@ -346,17 +351,6 @@ in Fragment shader:
 ```
 
 editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
-
-## Are you in a mirror?
-
-Thanks, @Lyuma
-
-```glsl
-bool IsInMirror()
-{
-    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-}
-```
 
 ## Default Texture Parameters
 
