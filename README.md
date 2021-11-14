@@ -22,34 +22,6 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 #pragma warning (default : 3206) // implicit truncation
 ```
 
-## My recommended packages and order:
-
-1. Import VRC SDK Worlds: https://vrchat.com/home/download
-2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
-3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
-4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
-5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
-
-To try:
-Thing that detects broken refernces to Udon Scripts https://github.com/esnya/EsnyaUnityTools/releases  (This is probably deprecated because U# should do everything this does automatically)
-
-## When opening worlds from git using the .gitignore file from here
-
-1. Open project in Unity Hub for correct version of Unity.
-3. Import VRC SDK
-2. **Configure your player settings under editor preprocessor to include UDON**
-4. Import UdonSharp
-5. Import AudioLink
-6. Import Esnya Tools
-7. Import VRC World Toolkit
-8. Run Window->UdonSharp->Refresh All UdonSharp Assets
-9. Repeat 6 til no new assets.
-10. Close and reopen Unity
-11. Open Scene
-12. EsnyaTools -> Repair Udon
-13. VRWorldToolkit -> World Debugger 
-14. Fix all errors.
-
 ## Basics of shader coding:
 
 * Unity shader fundamentals: https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
@@ -81,7 +53,9 @@ float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
 ```
 
-### Scruffy Ruffle's utilitiy functions
+### Detecting if you are on Desktop, VR, Camera, etc.
+
+Thanks, @scruffyruffles for this!
 
 ```glsl
 bool isVR() {
@@ -116,7 +90,10 @@ bool isPanorama() {
 }
 ```
 
-### Merlin's IsMirror()
+
+### Are you in a mirror?
+
+Thanks, @Lyuma and @merlinvr for this one.
 
 ```glsl
 bool IsInMirror()
@@ -125,17 +102,9 @@ bool IsInMirror()
 }
 ```
 
-### Not-shaders
-
-From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
-
 ## tanoise
 
-Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/blob/main/Assets/tanoise/README.md
-
-## scrn_aurora
-
-tanoise-modified aurora, originally written by nimitz, modified further by scrn.  https://github.com/cnlohr/shadertrixx/tree/main/Assets/scrn_aurora
+Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/tree/main/Assets/cnlohr/Shaders/tanoise
 
 ## Defining Avatar Scale
 
@@ -146,13 +115,15 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 ## Multiply vector-by-quaterion
 
-From @axlecrusher :
+From @axlecrusher effectively using :
 ```glsl
+// Rotate v by q
 float3 vector_quat_rotate( float3 v, float4 q )
 { 
 	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
+// Anti-rotate v by q
 float3 vector_quat_unrotate( float3 v, float4 q )
 { 
 	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) - q.w * v);
@@ -166,20 +137,6 @@ Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other
 			fixed2 a = sin(fixed2(1.5707963, 0) + th);
 			return fixed2x2(a, -a.y, a.x);
 		}
-```
-
-## Using depth cameras on avatars.
-
-If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
-
-```
-Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer.
-```
-
-A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
-
-```cs
-	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
 ```
 
 ## Is your UV within the unit square?
@@ -292,7 +249,7 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
     {
 		MaterialPropertyBlock block;
 		MeshRenderer mr;
-        int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
+		int id = GameObject.Find( "BrokeredUpdateManager" ).GetComponent<BrokeredUpdateManager>().GetIncrementingID();
 		block = new MaterialPropertyBlock();
 		mr = GetComponent<MeshRenderer>();
 		//mr.GetPropertyBlock(block);  //Not sure if this is needed
@@ -301,61 +258,13 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
     }
 }
 ```
+## Surface Shaders hate advanced features
 
-## Grabpasses
-
-You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
-
+Just wrap your stuff in a
 ```
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
-        LOD 100
-
-        GrabPass
-        {
-            "_GrabTexture"
-        }
-
-```
-
-You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
-
-You can then index into it as a sampler2D.
-
-
-```glsl
-            sampler2D _GrabTexture;
-```
-
-```glsl
-float2 grabuv = i.uv;
-#if !UNITY_UV_STARTS_AT_TOP
-grabuv.y = 1 - grabuv.y;
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+// Do something awesome.
 #endif
-fixed4 col = tex2D(_GrabTexture, grabuv);
-```
-
-Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
-
-in Vertex shader:
-```glsl
-	o.grabposs = ComputeGrabScreenPos( o.vertex );
-```
-in Fragment shader:
-```glsl
-	col = tex2Dproj(_GrabTexture, i.grabposs );
-```
-
-editor's note: I spent a long time trying to find a good way to do this exclusively from the fragment shader, and I did not find one.
-
-## Are you in a mirror?
-
-Thanks, @Lyuma
-
-```glsl
-bool IsInMirror()
-{
-    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-}
 ```
 
 ## Default Texture Parameters
@@ -413,6 +322,44 @@ float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
 float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
 o.rayDir = lerp(cameraToVertex, orthoRayDir, howOrtho );
+```
+
+
+This SLERP function, found by ACiiL,
+```c
+        ////============================================================
+        //// blend between two directions by %
+        //// https://www.shadertoy.com/view/4sV3zt
+        //// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+        float3 slerp(float3 start, float3 end, float percent)
+        {
+            float d     = dot(start, end);
+            d           = clamp(d, -1.0, 1.0);
+            float theta = acos(d)*percent;
+            float3 RelativeVec  = normalize(end - start*d);
+            return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
+        }
+```
+
+## Disable Batching
+
+From error.mdl - This fixes issues where shaders need to get access to their local coordinates at the cost of a small amount of performance.
+
+```
+            Tags {  "DisableBatching"="true"}
+```
+
+ ## Convert detph function:
+ ```c
+     //Convert to Corrected LinearEyeDepth by DJ Lukis
+     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
+
+     //Convert from Corrected Linear Eye Depth to Raw Depth 
+     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+
+     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
+     //Convert to Linear01Depth
+     depth = Linear01Depth(depth);
 ```
 
 ## Depth Textures & Getting Worldspace Info
@@ -499,6 +446,91 @@ screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
 
 
+## Using depth cameras on avatars.
+
+If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
+
+```
+Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer.
+```
+
+A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
+
+```cs
+	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
+```
+
+
+## Grabpasses
+
+You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
+
+```
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        LOD 100
+
+        GrabPass
+        {
+            "_GrabTexture"
+        }
+
+```
+
+You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
+
+You can then index into it as a sampler2D.
+
+
+```glsl
+            sampler2D _GrabTexture;
+```
+...
+```glsl
+float2 grabuv = i.uv;
+#if !UNITY_UV_STARTS_AT_TOP
+grabuv.y = 1 - grabuv.y;
+#endif
+fixed4 col = tex2D(_GrabTexture, grabuv);
+```
+
+Or, alternatively, if you would like pixel-perfect operations:
+```glsl
+SamplerState sampler_CameraDepthTexture;
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+  Texture2D _CameraDepthTexture;
+#else
+  UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
+#endif
+uniform float4 _CameraDepthTexture_TexelSize;
+```
+...
+```
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+  ScreenDepth = LinearEyeDepth(_CameraDepthTexture.Sample(sampler_CameraDepthTexture, screenPosNorm.xy));
+#else
+  ScreenDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenPosNorm.xy ));
+#endif
+```
+And to check it:
+```
+#ifndef SHADER_TARGET_SURFACE_ANALYSIS
+_CameraDepthTexture.GetDimensions(width, width);
+#endif
+```
+
+Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
+
+in Vertex shader:
+```glsl
+	o.grabposs = ComputeGrabScreenPos( o.vertex );
+```
+in Fragment shader:
+```glsl
+	col = tex2Dproj(_GrabTexture, i.grabposs );
+```
+
+Or use the method above to get grab coordinates.
+
 ## Reference Camera
 
 Don't forget to drag your Main Camera into "Reference Camera" property on your VRCWorld.  Not having a reference camera will sometimes set zNear to be too far or other problems.  So having a reference camera is highly advised.
@@ -577,6 +609,34 @@ NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) F
  * Doing these things should make your camera passes take sub-200us in most situations.
 
 
+# Working with git world repos
+
+## My recommended packages and order:
+
+1. Import VRC SDK Worlds: https://vrchat.com/home/download
+2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
+3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
+4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
+5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
+
+Sometimes Esnya tools is useful, especially for finding broken refernces to Udon Scripts, etc. https://github.com/esnya/EsnyaUnityTools/releases 
+
+## When opening worlds from git using the .gitignore file from here
+
+1. Open project in Unity Hub for correct version of Unity.
+3. Import VRC SDK
+2. **Configure your player settings under editor preprocessor to include UDON**
+4. Import UdonSharp
+5. Import AudioLink
+6. Import Esnya Tools
+7. Import VRC World Toolkit
+8. Run Window->UdonSharp->Refresh All UdonSharp Assets
+9. Repeat 6 til no new assets.
+10. Close and reopen Unity
+11. Open Scene
+12. EsnyaTools -> Repair Udon
+13. VRWorldToolkit -> World Debugger 
+14. Fix all errors.
 
 ## Additional Links
 
@@ -591,6 +651,9 @@ These are links other people have given me, these links are surrounding U#.
  * https://github.com/aiya000/VRChat-Flya
  * https://github.com/MerlinVR/USharpVideo
  * https://github.com/Reimajo/EstrelElevatorEmulator/tree/master/ConvertedForUdon
+
+Neat way to procedurally generate a ton of texture in a non-repeating way from a small source:
+ * https://github.com/Error-mdl/UnityGaussianTex
 
 Way more than you ever wanted to know about postprocessing:
  * https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing
@@ -611,40 +674,11 @@ Making procedural things like grids that behave correctly for going off in the d
  * https://www.iquilezles.org/www/articles/filterableprocedurals/filterableprocedurals.htm
  * https://www.iquilezles.org/www/articles/bandlimiting/bandlimiting.htm
 
- Convert detp function:
- ```c
-     //Convert to Corrected LinearEyeDepth by DJ Lukis
-     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
 
-     //Convert from Corrected Linear Eye Depth to Raw Depth 
-     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+### Not-shaders
 
-     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
-     //Convert to Linear01Depth
-     depth = Linear01Depth(depth);
-```
+From @lox9973 This flowchart of how mono behaviors are executed and in what order: https://docs.unity3d.com/uploads/Main/monobehaviour_flowchart.svg
 
-
-This SLERP function, found by ACiiL,
-```c
-        ////============================================================
-        //// blend between two directions by %
-        //// https://www.shadertoy.com/view/4sV3zt
-        //// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
-        float3 slerp(float3 start, float3 end, float percent)
-        {
-            float d     = dot(start, end);
-            d           = clamp(d, -1.0, 1.0);
-            float theta = acos(d)*percent;
-            float3 RelativeVec  = normalize(end - start*d);
-            return      ((start*cos(theta)) + (RelativeVec*sin(theta)));
-        }
-```
-
-Thanks, error.mdl for telling me how to disable batching.  This fixes issues where shaders need to get access to their local coordinates.
-```
-            Tags {  "DisableBatching"="true"}
-```
 
 ## Notes on grabpass avatar->map data exfiltration
 
@@ -772,32 +806,45 @@ ENDCG
 
 ## Keywords.
 
-(1) DO NOT INCLUDE `[Toggle]`!!
-INSTEAD, use `[ToggleUI]`
+Keywords can be used to create variants of a shader to avoid runtime branches.  Never ever use `[Toggle(...)]` unless you are operating with a local keyword or a reserved keyword.  Even using local leywords are discouraged, in most situations, it is encouraged instead to use `[ToggleUI]` and branch based on the value.
 
-(2) If you do want to use keywords, you can from this list:  
+To use a non-local keyword, use from the following list: https://pastebin.com/83fQvZ3n
 
-(3) To use keywords, do the following: https://pastebin.com/83fQvZ3n
+To use a local keyword, here is an example
 
 In your properties block: 
 ```
-[Toggle(_ALPHAMODULATE_ON)] _ALPHAMODULATE_ON ( "Some Feature", int ) = 0
+[Toggle(_is_torso_local)] _is_torso_local ( "Torso (check)/Wall (uncheck)", int ) = 0
 ```
 
 In your shader block, add:
 ```
-#pragma shader_feature _ALPHAMODULATE_ON
-```
-or
-```
-#pragma multi_compile __ _ALPHAMODULATE_ON
+#pragma shader_feature_local _is_torso_local
 ```
 
 And in your shader
 ```
-#if _ALPHAMODULATE_ON
+#if _is_torso_local
  // Do something
 #endif
+```
+
+If you have a sort of radio button option, you can use it like the following:
+
+In your properties block:
+```
+[KeywordEnum(None, Simple, High Quality)] _SunDisk ("Sun", Int) = 2
+```
+
+In your shader block:
+```
+#pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
+```
+
+In your code:
+```
+#if defined(_SUNDISK_SIMPLE)
+// Do stuff
 ```
 
 ## VRChat "Build & Test" Overrides
