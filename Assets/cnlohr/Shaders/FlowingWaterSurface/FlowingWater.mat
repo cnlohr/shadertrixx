@@ -71,7 +71,7 @@ Material:
     - _Brightness: 1.5
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _Depth: 0.32
+    - _Depth: 1.76
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GIShift: 0.01
@@ -87,7 +87,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Vividity: 0.41
+    - _Vividity: 0.02
     - _VividitySurface: 1.21
     - _WaterScale: 1.2
     - _WaterSpeed: 2.36
