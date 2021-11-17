@@ -304,7 +304,7 @@ Thanks, @Pema
 
 ## Raycasting with Orthographic and Normal Cameras
 
-If you want your raycaster/raytracer to work with a shadow map or other orthographic camera, you will need to consider that the ray origin is not `_WorldSpaceCameraPos`.  This neat code compiled by BenDotCom shows how you can do this computation in a vertex shader, however, the code works with trivial substitution in a geometry or fragment shader as well.
+If you want your raycaster/raytracer to work with a shadow map or other orthographic camera, you will need to consider that the ray origin is not `_WorldSpaceCameraPos`.  This neat code compiled by BenDotCom ( @bbj ) shows how you can do this computation in a vertex shader, however, the code works with trivial substitution in a geometry or fragment shader as well.
 
 ```glsl
 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -321,7 +321,7 @@ float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
 // start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
 float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
-o.rayDir = lerp(cameraToVertex, orthoRayDir, howOrtho );
+o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 ```
 
 
