@@ -7,13 +7,11 @@ namespace cnlohr
 {
 	public class BallpitYeet : UdonSharpBehaviour
 	{
-		float LastYeet;
 		public float YeetIntensity = 10;
-		
 		public GameObject Spawn;
+
 		void Start()
 		{
-			LastYeet = 0;
 		}
 		
 		private Vector3 GetYeetVector()
@@ -28,10 +26,9 @@ namespace cnlohr
 		
 		public override void OnPlayerTriggerEnter(VRCPlayerApi player)
 		{
-			if( Time.timeSinceLevelLoad - LastYeet > 0.2 && Vector3.Distance( transform.position, Spawn.transform.position ) > 7 )
+			if( Vector3.Distance( transform.position, Spawn.transform.position ) > 7 )
 			{
 				player.SetVelocity( GetYeetVector() + ( transform.position - player.GetPosition() ) * .25f ); // Apply correction
-				LastYeet = Time.timeSinceLevelLoad;
 			}
 		}
 		
