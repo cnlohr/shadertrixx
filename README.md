@@ -456,7 +456,8 @@ Shader "Unlit/meme"
 {
     SubShader
     {
-        GrabPass { "_MyGrabTex" }
+        GrabPass { "_Grabpass" }
+        { "Queue" = "Overlay" }
         Pass
         {
             CGPROGRAM
@@ -470,7 +471,7 @@ Shader "Unlit/meme"
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MyGrabTex;
+            sampler2D _Grabpass;
 
             v2f vert (float2 uv : TEXCOORD0)
             {
@@ -482,7 +483,7 @@ Shader "Unlit/meme"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return 1.0-tex2D(_MyGrabTex, i.grabPos.xy / i.grabPos.w);
+                return 1.0-tex2D(_Grabpass, i.grabPos.xy / i.grabPos.w);
             }
             ENDCG
         }
