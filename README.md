@@ -454,7 +454,7 @@ Shader "Unlit/meme"
 {
     SubShader
     {
-        GrabPass { "_Grabpass" }
+        GrabPass { "_MyGrabTex" }
         Pass
         {
             CGPROGRAM
@@ -462,31 +462,25 @@ Shader "Unlit/meme"
             #pragma fragment frag
             #include "UnityCG.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
             struct v2f
             {
-                float2 uv : TEXCOORD0;
+                float4 grabPos : TEXCOORD0;
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _Grabpass;
+            sampler2D _MyGrabTex;
 
-            v2f vert (appdata v)
+            v2f vert (float2 uv : TEXCOORD0)
             {
                 v2f o;
-                o.vertex = float4(float2(1,-1)*(v.uv*2-1),0,1);;
-                o.uv = v.uv;
+                o.vertex = float4(float2(1,-1)*(uv*2-1),0,1);
+                o.grabPos = ComputeGrabScreenPos(o.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return 1.0-tex2D(_Grabpass, i.uv);
+                return 1.0-tex2D(_MyGrabTex, i.grabPos.xy / i.grabPos.w);
             }
             ENDCG
         }
