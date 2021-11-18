@@ -447,16 +447,18 @@ screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 
 ## Doing full-screen effects.
 
-Thanks, @pema99 for this example shader which samples from the named `_Grabpass` and renders it to your face with inverted colors.  This lets you perform neat visual effects on full-screen effects, for instance rumble shaders, etc. can be performed with this.
+Thanks, @pema99 for this example shader which samples from the named `_GrabTexture` and renders it to your face with inverted colors.  This lets you perform neat visual effects on full-screen effects, for instance rumble shaders, etc. can be performed with this.
 
 All you need to do is paste this on a quad.
+
+NOTE: If you need to interact with objects which use the default grabpass, you will need to use a different name for your `_GrabTexture` for instance `_GrabTextureOverlay`
 
 ```glsl
 Shader "Unlit/meme"
 {
     SubShader
     {
-        GrabPass { "_Grabpass" }
+        GrabPass { "_GrabTexture" }
         { "Queue" = "Overlay" }
         Pass
         {
@@ -471,7 +473,7 @@ Shader "Unlit/meme"
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _Grabpass;
+            sampler2D _GrabTexture;
 
             v2f vert (float2 uv : TEXCOORD0)
             {
@@ -483,7 +485,7 @@ Shader "Unlit/meme"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return 1.0-tex2D(_Grabpass, i.grabPos.xy / i.grabPos.w);
+                return 1.0-tex2D(_GrabTexture, i.grabPos.xy / i.grabPos.w);
             }
             ENDCG
         }
