@@ -514,7 +514,6 @@ You can add a grabpass tag outside of any pass (this happens in the SubShader ta
 
 ```
         Tags { "RenderType"="Transparent" "Queue"="Transparent" }
-        LOD 100
 
         GrabPass
         {
