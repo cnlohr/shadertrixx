@@ -449,6 +449,8 @@ screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 
 Thanks, @pema99 for this example shader which samples from the named `_Grabpass` and renders it to your face with inverted colors.  This lets you perform neat visual effects on full-screen effects, for instance rumble shaders, etc. can be performed with this.
 
+All you need to do is paste this on a quad.
+
 ```glsl
 Shader "Unlit/meme"
 {
