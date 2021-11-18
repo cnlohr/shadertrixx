@@ -458,8 +458,8 @@ Shader "Unlit/meme"
 {
     SubShader
     {
+        Tags { "Queue" = "Overlay" }
         GrabPass { "_GrabTexture" }
-        { "Queue" = "Overlay" }
         Pass
         {
             CGPROGRAM
