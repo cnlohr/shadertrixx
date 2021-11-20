@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 char linebuffer[8193];
 
@@ -7,7 +8,7 @@ char * lreadline( FILE * f )
 {
 	int c;
 	int pl = 0;
-	while( ( c == fgetc() ) != EOF )
+	while( ( c = fgetc( f ) ) != EOF )
 	{
 		if( pl < sizeof( linebuffer ) - 1 ) 
 			linebuffer[pl++] = c;
@@ -24,7 +25,7 @@ int main()
 	{
 		lreadline( f );
 		lreadline( f );
-		sscanf( f, "%d %d\n", &w, &h );
+		fscanf( f, "%d %d\n", &w, &h );
 		lreadline( f );
 	}
 	if( w != 768 || h != 8 )
@@ -36,30 +37,42 @@ int main()
 	fread( buffer_in, 768,8, f );
 	fclose( f );
 
-	uint32_t buffero[94*6/4+3]; //144 uint32_t's (we round up)
+	int chars = 128-32;
+	int ints = chars*6/4;
+	uint32_t buffero[ints]; // 144
 	int i;
-	for( i = 0; i < 141; i++ )
+	for( i = 0; i < ints; i++ )
 	{
 		uint32_t v = 0;
 		int bit;
 		for( bit = 0; bit < 32; bit++ )
 		{
-			int x = (bit/8)+i*4 + 33 * 6;
-			v |= (buffer_in[x+(bit)*w]?1:0)<<bit;
+			int x = (bit/8)+i*4 + 32 * 6;
+			//printf( "Reading %d / %d / %d -> %d = %d\n", x,i,bit,x+(bit%8)*w,buffer_in[x+(bit%8)*w] );
+			v |= (buffer_in[x+(7-(bit%8))*w]?1:0)<<bit;
+		}
 		buffero[i] = v;
 	}
+
 	FILE * cgo = fopen( "shader_tailer.glsl", "r" ); 
 	FILE * out = fopen( "shader5x7.glsl", "w" );
-	fprintf( out, "
-	for( i = 0 ; i < 141; i++ )
+	fprintf( out, "const uint shader5x7[%d] = uint[%d](", ints, ints );
+	for( i = 0 ; i < ints; i++ )
 	{
-		
+		if( i % 8 == 0 )
+		{
+			fprintf( out, "\n\t" );
+		}
+		fprintf( out, "0x%08x%c ", buffero[i], (i==(ints-1))?'\n':',' );
 	}
+	fprintf( out, ");\n" );
 	while( !feof( cgo ) )
 	{
-		fputs( out, lreadline( cgo ) );
+		fputs( lreadline( cgo ), out );
 	}
-	
-
+	fclose( cgo );
+	fclose( out );
+	return 0;
 }
+
 
