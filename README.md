@@ -362,6 +362,42 @@ From error.mdl - This fixes issues where shaders need to get access to their loc
      depth = Linear01Depth(depth);
 ```
 
+## Surface Shader Extra Parameters
+
+Sometimes when using surface shaders you want more than just `uv_MainTex`?  This also shows how to do vertex shaders in surface shaders.
+
+Note: Don't forget to add `alpha` if you are using alpha!
+
+```
+      #pragma surface surf Lambert vertex:vert
+      struct Input {
+          float3 viewDir;
+	  float4 color : COLOR;
+	  float2 uv_MainTex;
+          float2 uv_Detail;
+	  float2 uv_BumpMap;
+          float3 worldRefl;
+          float3 worldPos;
+	  float4 screenPos;
+          INTERNAL_DATA
+
+          // Note: Additional parameters may be added here.
+          float3 customColor;
+      };
+
+
+      float _Amount;
+      void vert (inout appdata_full v, out Input o) {
+          v.vertex.xyz += v.normal * _Amount;
+          UNITY_INITIALIZE_OUTPUT(Input,o);
+          o.customColor = abs(v.normal);
+      }
+      sampler2D _MainTex;
+      void surf (Input IN, inout SurfaceOutput o) {
+          o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
+      }
+```
+
 ## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
