@@ -56,7 +56,7 @@ int main()
 
 	FILE * cgo = fopen( "shader_tailer.glsl", "r" ); 
 	FILE * out = fopen( "shader5x7.glsl", "w" );
-	fprintf( out, "const uint shader5x7[%d] = uint[%d](", ints, ints );
+	fprintf( out, "const int shader5x7[%d] = int[%d](", ints, ints );
 	for( i = 0 ; i < ints; i++ )
 	{
 		if( i % 8 == 0 )
