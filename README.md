@@ -90,6 +90,12 @@ bool isPanorama() {
 }
 ```
 
+Get eye / in / not in VR by D4rkPl4y3r, vetted by III
+
+ * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
+ * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
+ * `if( UNITY_MATRIX_P._13 == 0 )` -> not vr
+
 
 ### Are you in a mirror?
 
