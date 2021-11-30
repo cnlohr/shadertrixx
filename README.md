@@ -976,6 +976,8 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 | -screen-width 1280 | screen width |
 | -screen-height 720 | screen nheight |
 | --midi=tounity | specify midi input |
+| -screen-fullscreen 1 | specify window full screen |
+| --log-debug-levels="Always;API;AssetBundleDownloadManager;ContentCreator;All;NetworkTransport;NetworkData;NetworkProcessing" | dunno, from 3 |
 
 
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
