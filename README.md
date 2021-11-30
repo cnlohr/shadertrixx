@@ -963,6 +963,11 @@ c:\tcc\tcc.exe vrc-uncapped.c
 
 Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 
+### Launch Options of Interest
+
+| --watch-avatars | reload avatars when updating |
+| --fps=0 | Run uncapped FPS |
+
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
  * https://quaternius.com/
