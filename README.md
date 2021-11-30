@@ -969,6 +969,14 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 |-----------|-------------|
 | --watch-avatars | reload avatars when updating |
 | --fps=0 | Run uncapped FPS |
+| --watch-worlds | reload worlds when updating |
+| --enable-sdk-log-levels | be more verbose |
+| --enable-debug-gui | enable debug gui |
+| --enable-udon-debug-logging | provide better stack tracing for udon apps |
+| -screen-width 1280 | screen width |
+| -screen-height 720 | screen nheight |
+| --midi=tounity | specify midi input |
+
 
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
