@@ -965,6 +965,8 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 
 ### Launch Options of Interest
 
+| Parameter | description |
+|-----------|-------------|
 | --watch-avatars | reload avatars when updating |
 | --fps=0 | Run uncapped FPS |
 
