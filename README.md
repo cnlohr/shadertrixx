@@ -98,7 +98,7 @@ Get eye / in / not in VR by D4rkPl4y3r, vetted by III
 
 
 Three's Utility Functions
-```
+```glsl
 //invert function from https://answers.unity.com/questions/218333/shader-inversefloat4x4-function.html, thank you d4rk
 float4x4 inverse(float4x4 input)
 {
