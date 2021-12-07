@@ -20,7 +20,7 @@ Shader "Custom/3DRockTexture"
 
             #include "UnityCG.cginc"
 
-			#include "../tanoise/tanoise.cginc"
+			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
 
             struct appdata
             {
