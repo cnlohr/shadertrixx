@@ -9,7 +9,6 @@
     SubShader
     {
         Tags { "RenderType"="Opaque" }
-        LOD 100
 
         Pass
         {
@@ -63,8 +62,9 @@
                 return o;
             }
 			
-
-			#define tessellationAmount 15
+			//Difference:              5   7    11    13    17     19    23    24?
+			//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
+			#define tessellationAmount 50
 
 			struct tessFactors
 			{
@@ -109,7 +109,7 @@
 			{
 				float2 tc = opos.xz+0.5;
 				float4 SnowData = tex2Dlod(_SnowCalcCRT, float4(tc, 0.0, 0.) );
-				opos.y += SnowData.x + SnowData.y + _BottomCameraOffset;
+				opos.y += SnowData.x + SnowData.y + _BottomCameraOffset - 0.02;//XXX Offset to acutally push snow.
 				float4 ov = UnityObjectToClipPos( opos  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1) );
 				if( SnowData.w > 0.9 ) ov = 0.;
 				
@@ -118,7 +118,7 @@
 							tex2Dlod(_SnowCalcCRT, float4(tc + float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) );
 				float4 dny = tex2Dlod(_SnowCalcCRT, float4(tc - float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) ) - 
 							tex2Dlod(_SnowCalcCRT, float4(tc + float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) );
-				float3 n = float3( dnx.y, .02, dny.y );
+				float3 n = float3( dnx.y, .03, dny.y );
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
 				return ov;
@@ -170,15 +170,12 @@
 				baryo = clamp( baryo, 0.0, 1.0 );
 	
 				col.rgb = baryo;
-				col.rgb *= i.rpos;
 				
 				float2 tc = i.rpos.xz+0.5;
 				float4 SnowData = tex2Dlod(_SnowCalcCRT, float4(tc, 0.0, 0.) );
 
-				col.rgb = SnowData.yyy;
-				
-				
-				col.rgb = saturate(dot(_WorldSpaceLightPos0.xyz, i.normal))+.1;
+				col.rgb = SnowData.yyy;		
+				col.rgb = (saturate(dot(_WorldSpaceLightPos0.xyz, i.normal))+.1)*.8;
 				
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

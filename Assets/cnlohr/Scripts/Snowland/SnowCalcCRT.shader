@@ -70,6 +70,9 @@
 				float4 prevmin = min(
 					min( _SelfTexture2D[licord+int2(-1,0)],	_SelfTexture2D[licord+int2( 1,0)] ),
 					min( _SelfTexture2D[licord+int2(0,-1)], _SelfTexture2D[licord+int2(0, 1)] ) ); 
+				float4 prevavg = 0.25*(
+					_SelfTexture2D[licord+int2(-1,0)] +	_SelfTexture2D[licord+int2( 1,0)] + 
+					_SelfTexture2D[licord+int2(0,-1)] + _SelfTexture2D[licord+int2(0, 1)] ); 
 				
 				float4 dat = prev;
 				
@@ -81,18 +84,22 @@
 				
 				float depth = prev.y;
 
-				float maxdepth = saturate( 1.0-prev.w*1.3 );
+				float maxdepth = saturate( 1.0-prev.w*1.11 );
 				float deltottop = maxdepth - depth;
 				depth += deltottop*unity_DeltaTime.x*.01;
 				if( depth > maxdepth ) depth = maxdepth;
 				
 				if( depth < 0 ) depth = 0;
 				
-				depth = min( prevmin.y + .02, depth );
+				float pmy = prevmin.y + .02; //MAke square falloff
+				depth = min( pmy, depth );
 				dat.x = vTop;
-				dat.y = depth;
+				dat.y = lerp( depth, prevavg.y, 0.1 );
 				dat.z = 0.0;
-				dat.w = max( clamp(topDiff,0,1), prevmax.w-.018);
+				
+				float pmw = prevmax.w-.018; //Make square edges
+				//float pmw = prevmax.w*.99;
+				dat.w = max( clamp(topDiff,0,1), pmw);
 				
 				return dat;
 			}
