@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: depthcontrol
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 252bcc42a48af054da770c7a2edcc407,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 66866cb01dff2b448aa19aea57f501bf,
     type: 2}
   udonAssembly: 
   assemblyError: 

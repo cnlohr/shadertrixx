@@ -21,7 +21,7 @@
 		#pragma require 2darray
         #pragma target 5.0
 		
-		#include "../AudioLink/Shaders/AudioLink.cginc"
+		#include "/Assets/AudioLink/Shaders/AudioLink.cginc"
 
 		//sampler2D _MineTexX;
         UNITY_DECLARE_TEX2DARRAY( _MineTex );

@@ -26,7 +26,7 @@
 			#pragma multi_compile_instancing
 			#pragma target 5.0
 			#include "UnityCG.cginc"
-			#include "Assets/AudioLink/Shaders/SmoothPixelFont.cginc"
+			#include "/Assets/AudioLink/Shaders/SmoothPixelFont.cginc"
 
 			
 			#ifndef glsl_mod

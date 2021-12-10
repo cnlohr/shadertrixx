@@ -17,7 +17,7 @@ public class SaccFlight : UdonSharpBehaviour
     private float controllertriggerR;
     private float controllertriggerL;
     private bool InVR = false;
-	public Texel.AccessControl ACL;
+//	public Texel.AccessControl ACL;
 
     private void Start()
     {
@@ -76,11 +76,11 @@ public class SaccFlight : UdonSharpBehaviour
 	{
 		bool master = Networking.IsMaster;
 		
-		if( Utilities.IsValid( ACL ) )
-		{
-			if( ACL._LocalHasAccess() )
-				master = true;
-		}
+//		if( Utilities.IsValid( ACL ) )
+//		{
+//			if( ACL._LocalHasAccess() )
+//				master = true;
+//		}
 		
 		if( master )
 		{
