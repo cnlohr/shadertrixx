@@ -8,8 +8,8 @@ public class GenerateSnowlandMesh : MonoBehaviour
 	static void CreateMesh_()
 	{
 		Mesh mesh = new Mesh();
-		int w = 9;
-		int h = 10;
+		int w = 36;
+		int h = 40;
 		Vector3[] vertices = new Vector3[w*h];
 		int x, y;
 		for( y = 0; y < h; y++ )

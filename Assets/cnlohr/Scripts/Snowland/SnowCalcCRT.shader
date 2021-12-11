@@ -37,7 +37,7 @@
 
 			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 			
-            #include "UnityCG.cginc"
+            #include "UnityCG.cginc"			#include "/Assets/cnlohr/Shaders/hashwithoutsine/hashwithoutsine.cginc"
 			
 			Texture2D<float> _DepthTop;
 			Texture2D<float> _DepthBot;
@@ -84,21 +84,29 @@
 				
 				float depth = prev.y;
 
-				float maxdepth = saturate( 1.0-prev.w*1.11 );
+				float maxdepth = saturate( 1.0-prev.w*1.11 ); //Limits height to make it look like snow drifts.
 				float deltottop = maxdepth - depth;
-				depth += deltottop*unity_DeltaTime.x*.01;
+				
+				
+				
+				float snowspeed = max( 0, csimplex3( float3( IN.localTexcoord.xy*5.+_Time.y*.1, _Time.y*.02 ) ) );
+				snowspeed *= .02; //Speed to grow snow
+				depth += deltottop*unity_DeltaTime.x*snowspeed; //Grow snow, slowly.
+
 				if( depth > maxdepth ) depth = maxdepth;
-				
 				if( depth < 0 ) depth = 0;
-				
-				float pmy = prevmin.y + .02; //MAke square falloff
+				//Blur things.
+				float pmy = prevavg.y + .002; //MAke square falloff
 				depth = min( pmy, depth );
+				
+				
 				dat.x = vTop;
-				dat.y = lerp( depth, prevavg.y, 0.1 );
+				dat.y = lerp( depth, prevavg.y, 0.01 );
 				dat.z = 0.0;
 				
-				float pmw = prevmax.w-.018; //Make square edges
-				//float pmw = prevmax.w*.99;
+				// This limits where the snow *can* go, i.e. this looks for steps, etc.
+				//float pmw = prevmax.w-.018; //Make square edges
+				float pmw = prevavg.w*.998;
 				dat.w = max( clamp(topDiff,0,1), pmw);
 				
 				return dat;
