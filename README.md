@@ -419,8 +419,8 @@ From error.mdl - This fixes issues where shaders need to get access to their loc
             Tags {  "DisableBatching"="true"}
 ```
 
- ## Convert detph function:
- ```c
+## Convert detph function:
+```c
      //Convert to Corrected LinearEyeDepth by DJ Lukis
      float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
 
@@ -825,6 +825,12 @@ This explaination of how the fallback system works (Linked by GenesisAria)
 Making procedural things like grids that behave correctly for going off in the distance.
  * https://www.iquilezles.org/www/articles/filterableprocedurals/filterableprocedurals.htm
  * https://www.iquilezles.org/www/articles/bandlimiting/bandlimiting.htm
+
+Using LERP to do good noise / motion IIR filtering:
+ * https://twitter.com/evil_arev/status/1128062338156900353
+ * Slow/Lumpy: `a = lerp( a, b, 0.1f)`
+ * Fast/Noisy: `a = lerp( a, b, 0.9f)`
+ * Adaptive: `a = lerp( a, b, k*(abs(a-b)))`
 
 
 ### Not-shaders
