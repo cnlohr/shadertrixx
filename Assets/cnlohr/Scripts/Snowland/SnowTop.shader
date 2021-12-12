@@ -47,6 +47,7 @@
 				float3 bary : TEXCOORD3;
                 float4 vertex : SV_POSITION;
 				float2 tc : TEXCOORD4;
+				float4 wpos : TEXCOORD5;
             };
 
             sampler2D _SnowCalcCRT;
@@ -60,14 +61,15 @@
                 o.pos = v.vertex;
                 UNITY_TRANSFER_FOG(o,o.vertex);
 				o.batchID = uint4( v.vertexID / 6, 0, 0, 0 );
-				o.wpos = float4( mul( unity_ObjectToWorld, v.vertex.xyz  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1) ).xyz, 1. );
+				//o.wpos = float4( mul( unity_ObjectToWorld, v.vertex.xyz  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1) ).xyz, 1. );
+				o.wpos = mul( unity_ObjectToWorld, (v.vertex.xyzw  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1)) );
                 return o;
             }
 			
 			//Difference:              5   7    11    13    17     19    23    24?
 			//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
-			#define tessellationAmountMax 50
-			#define tessellationAmountMin 1
+			#define tessellationAmountMax 100
+			#define tessellationAmountMin 10
 
 			struct tessFactors
 			{
@@ -123,13 +125,14 @@
 				return o;
 			}
 			
-			float4 CalcPos( float4 opos, out float hp, out float2 tc )
+			float4 CalcPos( float4 opos, out float hp, out float2 tc, out float4 wpos )
 			{
 				tc = opos.xz+0.5;
 				float4 SnowData = tex2Dlod(_SnowCalcCRT, float4(tc, 0.0, 0.) );
 				hp = SnowData.x;
 				opos.y += SnowData.x + SnowData.y + _BottomCameraOffset - 0.04;//XXX Offset to acutally push snow.
-				float4 ov = UnityObjectToClipPos( (opos  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1)) );
+				wpos = mul( unity_ObjectToWorld, (opos  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1)) );
+				float4 ov = UnityWorldToClipPos( wpos );
 			//	if( SnowData.w > 0.9 ) ov = 0.;
 /*				
 				float4 dnx = tex2Dlod(_SnowCalcCRT, float4(tc - float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) ) - 
@@ -151,27 +154,31 @@
 				float3 n0, n1, n2;
 				float hp1, hp2, hp0;
 				float2 tc0, tc1, tc2;
-				float4 cp0 =  CalcPos( p[0].pos, hp0, tc0 );
-				float4 cp1 =  CalcPos( p[1].pos, hp1, tc1 );
-				float4 cp2 =  CalcPos( p[2].pos, hp2, tc2 );
+				float4 wp0 = 1, wp1 = 1, wp2 = 1;
+				float4 cp0 =  CalcPos( p[0].pos, hp0, tc0, wp0 );
+				float4 cp1 =  CalcPos( p[1].pos, hp1, tc1, wp1 );
+				float4 cp2 =  CalcPos( p[2].pos, hp2, tc2, wp2 );
 				
 				if( length( cp0 ) == 0 || length( cp1 ) == 0 || length( cp2 ) == 0 ) return;
 				if( length( float3( hp0 - hp1, hp1 - hp2, hp0 - hp2 ) ) > 0.2 ) return;
 				g2f pIn;
 				pIn.vertex = cp0;
 				pIn.rpos = p[0].pos;
+				pIn.wpos = wp0;
 				pIn.bary = float3( 1, 0, 0 );
 				pIn.tc = tc0;
 				triStream.Append(pIn);
 
 				pIn.vertex = cp1;
 				pIn.rpos = p[1].pos;
+				pIn.wpos = wp1;
 				pIn.bary = float3( 0, 1, 0 );
 				pIn.tc = tc1;
 				triStream.Append(pIn);
 
 				pIn.vertex = cp2;
 				pIn.rpos = p[2].pos;
+				pIn.wpos = wp2;
 				pIn.bary = float3( 0, 0, 1 );
 				pIn.tc = tc2;
 				triStream.Append(pIn);
@@ -180,13 +187,52 @@
 			ENDCG
 			CGPROGRAM
 			
+						// normal should be normalized, w=1.0
+			//NOTE: We can't do this here -> We aren't using sample probe volumes :(
+			half3 SHEvalLinearL0L1_SampleProbeVolumeVert (half4 normal, float3 worldPos)
+			{
+				const float transformToLocal = unity_ProbeVolumeParams.y;
+				const float texelSizeX = unity_ProbeVolumeParams.z;
+
+				//The SH coefficients textures and probe occlusion are packed into 1 atlas.
+				//-------------------------
+				//| ShR | ShG | ShB | Occ |
+				//-------------------------
+
+				float3 position = (transformToLocal == 1.0f) ? mul(unity_ProbeVolumeWorldToObject, float4(worldPos, 1.0)).xyz : worldPos;
+				float3 texCoord = (position - unity_ProbeVolumeMin.xyz) * unity_ProbeVolumeSizeInv.xyz;
+				texCoord.x = texCoord.x * 0.25f;
+
+				// We need to compute proper X coordinate to sample.
+				// Clamp the coordinate otherwize we'll have leaking between RGB coefficients
+				float texCoordX = clamp(texCoord.x, 0.5f * texelSizeX, 0.25f - 0.5f * texelSizeX);
+
+				// sampler state comes from SHr (all SH textures share the same sampler)
+				texCoord.x = texCoordX;
+				half4 SHAr = UNITY_SAMPLE_TEX3D_SAMPLER_LOD(unity_ProbeVolumeSH, unity_ProbeVolumeSH, texCoord, 0.);
+
+				texCoord.x = texCoordX + 0.25f;
+				half4 SHAg = UNITY_SAMPLE_TEX3D_SAMPLER_LOD(unity_ProbeVolumeSH, unity_ProbeVolumeSH, texCoord, 0.);
+
+				texCoord.x = texCoordX + 0.5f;
+				half4 SHAb = UNITY_SAMPLE_TEX3D_SAMPLER_LOD(unity_ProbeVolumeSH, unity_ProbeVolumeSH, texCoord, 0.);
+
+				// Linear + constant polynomial terms
+				half3 x1;
+				x1.r = dot(SHAr, normal);
+				x1.g = dot(SHAg, normal);
+				x1.b = dot(SHAb, normal);
+
+				return x1;
+			}
 
             fixed4 frag (g2f i) : SV_Target
             {
                 // sample the texture
                 fixed4 col = 1.;
 				
-								
+				float3 worldPos = i.wpos;//mul( unity_ObjectToWorld, float4( i.rpos.xyz, 1. ) ).xyz;
+
 				const float extrathickness = -0.01;
 				const float sharpness = 5.;//1./100.0;
 				float baryo = min( min( i.bary.x, i.bary.y ), i.bary.z );
@@ -205,13 +251,17 @@
 				float4 dny = tex2Dlod(_SnowCalcCRT, float4(tc - float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) ) - 
 							tex2Dlod(_SnowCalcCRT, float4(tc + float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) );
 
-				float3 n = float3( dnx.y, .02, dny.y ); //0.02 controls the vividity of the normals.
+				float3 n = float3( dnx.y, .05, dny.y ); //0.02 controls the vividity of the normals.
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
-
+				
+				
+				
+				col.rgb = SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
+				//col.xyz = worldPos;
 				//XXX TODO: Fix normals here.
 
-				col.rgb = (saturate(dot(_WorldSpaceLightPos0.xyz, normal))+.1)*.8;
+				//col.rgb = (saturate(dot(_WorldSpaceLightPos0.xyz, normal))+.1)*.8;
 				
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

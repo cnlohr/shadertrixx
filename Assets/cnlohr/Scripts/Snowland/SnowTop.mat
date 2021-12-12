@@ -62,7 +62,7 @@ Material:
     m_Floats:
     - _BottomCameraOffset: -0.5
     - _BumpScale: 1
-    - _CameraSpanDimension: 50
+    - _CameraSpanDimension: 70
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
