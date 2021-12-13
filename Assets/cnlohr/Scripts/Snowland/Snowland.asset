@@ -244,7 +244,7 @@ MonoBehaviour:
       Data: 11
     - Name: declarationType
       Entry: 3
-      Data: 2
+      Data: 1
     - Name: syncMode
       Entry: 3
       Data: 0
@@ -301,7 +301,7 @@ MonoBehaviour:
       Data: 11
     - Name: declarationType
       Entry: 3
-      Data: 2
+      Data: 1
     - Name: syncMode
       Entry: 3
       Data: 0
