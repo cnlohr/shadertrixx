@@ -1147,6 +1147,13 @@ Trying 128x128
 ## FYI
  * For maximum platform support, make all edges of your RenderTexture divisible by 16.  (Note: ShaderFes, and VRSS)
 
+## Run Unity in GLES3 mode to test for GLES3 compatibility.
+
+Thanks, lox9973
+```
+Unity.exe -force-gles31 -projectpath ...
+```
+
 ## General notes for working from git (NOTES ONLY)
 
  * Use .gitignore from cnballpit-vrc
