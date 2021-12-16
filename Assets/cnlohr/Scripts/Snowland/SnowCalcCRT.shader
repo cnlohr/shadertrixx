@@ -37,7 +37,8 @@
 
 			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 			
-            #include "UnityCG.cginc"			#include "/Assets/cnlohr/Shaders/hashwithoutsine/hashwithoutsine.cginc"
+            #include "UnityCG.cginc"
+			#include "/Assets/cnlohr/Shaders/hashwithoutsine/hashwithoutsine.cginc"
 			
 			Texture2D<float> _DepthTop;
 			Texture2D<float> _DepthBot;
@@ -63,52 +64,80 @@
 
 				float vBot = (1.-_DepthBot[licordz])*_CameraFar;
 				float4 prev = _SelfTexture2D[licord];
-				
-				float4 prevmax = max(
-					max( _SelfTexture2D[licord+int2(-1,0)],	_SelfTexture2D[licord+int2( 1,0)] ),
-					max( _SelfTexture2D[licord+int2(0,-1)], _SelfTexture2D[licord+int2(0, 1)] ) ); 
-				float4 prevmin = min(
-					min( _SelfTexture2D[licord+int2(-1,0)],	_SelfTexture2D[licord+int2( 1,0)] ),
-					min( _SelfTexture2D[licord+int2(0,-1)], _SelfTexture2D[licord+int2(0, 1)] ) ); 
-				float4 prevavg = 0.25*(
-					_SelfTexture2D[licord+int2(-1,0)] +	_SelfTexture2D[licord+int2( 1,0)] + 
-					_SelfTexture2D[licord+int2(0,-1)] + _SelfTexture2D[licord+int2(0, 1)] ); 
-				
 				float4 dat = prev;
 				
-				
+				float4 pl = _SelfTexture2D[licord+int2(-1,0)];
+				float4 pr = _SelfTexture2D[licord+int2( 1,0)];
+				float4 pu = _SelfTexture2D[licord+int2(0,-1)];
+				float4 pd = _SelfTexture2D[licord+int2(0, 1)];
 
-				//Pat down
-				if( prev.x + prev.y > vBot && vBot > vTop )
-					prev.y = vBot - prev.x;
+				float4 prevmax = max(
+					max( pl, pr ),
+					max( pu, pd ) ); 
+				float4 prevmin = min(
+					min( pl, pr ),
+					min( pu, pd ) ); 
+				float4 prevavg = 0.25*(
+					pl + pr + pu + pd ); 
 				
 				float depth = prev.y;
 
-				float maxdepth = saturate( 1.0-prev.w*1.11 ); //Limits height to make it look like snow drifts.
+				
+				// Allow snow to schluff from one cell to another if it's a significant slope.
+				#define maxslope 0.1
+				float diffl = depth - pl.y;
+				float diffr = depth - pr.y;
+				float diffu = depth - pu.y;
+				float diffd = depth - pd.y;
+				if( diffl > maxslope ) depth -= (diffl - maxslope)*0.2;
+				if( diffr > maxslope ) depth -= (diffr - maxslope)*0.2;
+				if( diffu > maxslope ) depth -= (diffu - maxslope)*0.2;
+				if( diffd > maxslope ) depth -= (diffd - maxslope)*0.2;
+				if( diffl <-maxslope ) depth -= (diffl + maxslope)*0.2;
+				if( diffr <-maxslope ) depth -= (diffr + maxslope)*0.2;
+				if( diffu <-maxslope ) depth -= (diffu + maxslope)*0.2;
+				if( diffd <-maxslope ) depth -= (diffd + maxslope)*0.2;
+
+
+				// Amount to push below bottom.
+				// i.e. push this much further than a person's foot.
+				const float minbelow = 0.03; //about 1 inch
+
+
+				//Pat down
+				if( prev.x + depth > vBot - minbelow && vBot > vTop )
+					depth = vBot - prev.x - minbelow;
+				
+
+				float maxdepth = prev.w;
 				float deltottop = maxdepth - depth;
-				
-				
+				float peakdepth = csimplex3( float3( IN.localTexcoord.xy*15., 0.0 ) )*0.8+0.5; 
+
+				if( dat.z < 1.4 )
+					depth = peakdepth/2;
 				
 				float snowspeed = max( 0, csimplex3( float3( IN.localTexcoord.xy*5.+_Time.y*.1, _Time.y*.02 ) ) );
-				snowspeed *= .02; //Speed to grow snow
+				snowspeed *= .1; //Speed to grow snow
 				depth += deltottop*unity_DeltaTime.x*snowspeed; //Grow snow, slowly.
 
 				if( depth > maxdepth ) depth = maxdepth;
-				if( depth < 0 ) depth = 0;
-				//Blur things.
-				float pmy = prevavg.y + .002; //MAke square falloff
-				depth = min( pmy, depth );
-				
-				
+				if( depth < -minbelow ) depth = -minbelow;
+
+
 				dat.x = vTop;
 				dat.y = lerp( depth, prevavg.y, 0.01 );
-				dat.z = 0.0;
+				if( dat.z < 1.5 )
+					dat.z+=0.1;
 				
 				// This limits where the snow *can* go, i.e. this looks for steps, etc.
-				//float pmw = prevmax.w-.018; //Make square edges
-				float pmw = prevavg.w*.998;
-				dat.w = max( clamp(topDiff,0,1), pmw);
-				
+				if( vTop <= 0.0 )
+					dat.w = 0;
+				else
+					dat.w = 
+						lerp(
+							lerp( peakdepth, prevavg.w, 0.9999 ),
+							min( prevmin.w + 0.1, peakdepth ), 0.02 );
+							
 				return dat;
 			}
 

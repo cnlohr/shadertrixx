@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: Snowland
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: e3d5127afcb5de64999d47e76b3d9c33,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 9b8030e11eb98d441adc738ae8429409,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -20,7 +20,7 @@ MonoBehaviour:
   behaviourSyncMode: 0
   behaviourIDHeapVarName: __refl_const_intnl_udonTypeID
   compileErrors: []
-  hasInteractEvent: 1
+  hasInteractEvent: 0
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 

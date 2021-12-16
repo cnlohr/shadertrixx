@@ -3,8 +3,9 @@
     Properties
     {
         _SnowCalcCRT ("Texture", 2D) = "white" {}
-		_CameraSpanDimension( "Camera Span Dimension", float ) = 16.0
 		_BottomCameraOffset( "Bottom Camera Y Offset", float ) = -0.5
+		_CameraSpanDimension( "Camera Span Dimension", float ) = 70.0
+		_SnowlandOffset( "Snowland Offset", Vector) = (8.6, -3.3, -16.5, 0)
     }
     SubShader
     {
@@ -13,6 +14,8 @@
         Pass
         {
             CGINCLUDE
+			#pragma require geometry
+			#pragma require tessHW
             #pragma vertex vert
             #pragma fragment frag
 			#pragma geometry geo
@@ -38,6 +41,7 @@
                 float4 pos : SV_POSITION;
 				float4 wpos : TEXCOORD4;
 				uint4 batchID : TEXCOORD5;
+				float tessamt : TEXCOORD6;
             };
 
             struct g2f
@@ -52,8 +56,9 @@
 
             sampler2D _SnowCalcCRT;
 			float4 _SnowCalcCRT_TexelSize;
-			float _CameraSpanDimension;
 			float _BottomCameraOffset;
+			float _CameraSpanDimension;
+			float4 _SnowlandOffset;
 
             vtx vert (appdata v)
             {
@@ -61,15 +66,39 @@
                 o.pos = v.vertex;
                 UNITY_TRANSFER_FOG(o,o.vertex);
 				o.batchID = uint4( v.vertexID / 6, 0, 0, 0 );
-				//o.wpos = float4( mul( unity_ObjectToWorld, v.vertex.xyz  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1) ).xyz, 1. );
-				o.wpos = mul( unity_ObjectToWorld, (v.vertex.xyzw  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1)) );
+				//o.wpos = float4( mul( unity_ObjectToWorld, v.vertex.xyz, 1. );
+				o.wpos = mul( unity_ObjectToWorld,( v.vertex.xyzw ) );
+				
+				float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+				#if defined(USING_STEREO_MATRICES)
+					float3 PlayerCenterCamera = (
+						float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
+						float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
+				#else
+					float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
+				#endif
+
+
+			
+				//Difference:              5   7    11    13    17     19    23    24?
+				//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
+				#define tessellationAmountMax 15
+				#define tessellationAmountMin 0
+
+
+				float tm = 1;
+
+				// Only tessellate for normal cameras.
+				if( howOrtho < 0.5 )
+				{
+					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) );
+					tm = 10./worldist;
+					tm = clamp( tm, tessellationAmountMin, tessellationAmountMax );
+				}
+				
+				o.tessamt = tm;
                 return o;
             }
-			
-			//Difference:              5   7    11    13    17     19    23    24?
-			//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
-			#define tessellationAmountMax 100
-			#define tessellationAmountMin 10
 
 			struct tessFactors
 			{
@@ -80,28 +109,18 @@
 			tessFactors hullConstant(InputPatch<vtx, 3> I, uint triID : SV_PrimitiveID)
 			{
 				tessFactors o = (tessFactors)0;
-
-				float wpos0 = length( I[0].wpos - _WorldSpaceCameraPos );
-				float wpos1 = length( I[1].wpos - _WorldSpaceCameraPos );
-				float wpos2 = length( I[2].wpos - _WorldSpaceCameraPos );
-				
-				float tm0 = 1+50./( wpos0 );
-				float tm1 = 1+50./( wpos1 );
-				float tm2 = 1+50./( wpos2 );
-				
-				tm0 = clamp( tm0, tessellationAmountMin, tessellationAmountMax );
-				tm1 = clamp( tm1, tessellationAmountMin, tessellationAmountMax );
-				tm2 = clamp( tm2, tessellationAmountMin, tessellationAmountMax );
-				
-				o.edgeTess[0] = tm2+tm1;
-				o.edgeTess[1] = tm0+tm2;
-				o.edgeTess[2] = tm0+tm1;
-				o.insideTess =  uint(tm1+tm2+tm0)/3;
+				float3 tm = float3( I[0].tessamt, I[1].tessamt, I[2].tessamt );
+				tm -= .1;
+				tm = clamp( tm,tessellationAmountMin+0.01, tessellationAmountMax );
+				o.edgeTess[0] = tm[2]+tm[1];
+				o.edgeTess[1] = tm[0]+tm[2];
+				o.edgeTess[2] = tm[0]+tm[1];
+				o.insideTess = (tm.x+tm.y+tm.z)/2.-.1;
 				return o;
 			}
 		 
 			[domain("tri")]
-			[partitioning("pow2")] // Or fractional_odd
+			[partitioning("fractional_odd")] // Or fractional_odd
 			[outputtopology("triangle_cw")]
 			[patchconstantfunc("hullConstant")]
 			[outputcontrolpoints(3)]
@@ -118,32 +137,42 @@
 			vtx dom( tessFactors HSConstantData, const OutputPatch<vtx, 3> IN, float3 bary : SV_DomainLocation )
 			{
 				vtx o = (vtx)0;
-	
-				o.pos = bary.x * IN[0].pos + bary.y * IN[1].pos + bary.z * IN[2].pos;
-				o.wpos = bary.x * IN[0].wpos + bary.y * IN[1].wpos + bary.z * IN[2].wpos;
+				
+				float3 barya = bary;
+				#if 0
+				if( barya.z + barya.y < 1 )
+				{
+					barya.zy /= (floor(HSConstantData.edgeTess[0])+1-frac(HSConstantData.edgeTess[0]))/floor(HSConstantData.edgeTess[0]);
+					barya.x = 1. - barya.y - barya.z;
+				}
+				if( barya.x + barya.z < 1 )
+				{
+					barya.xz /= (floor(HSConstantData.edgeTess[1])+1-frac(HSConstantData.edgeTess[1]))/floor(HSConstantData.edgeTess[1]);
+					barya.y = 1. - barya.x - barya.z;
+				}
+				if( barya.x + barya.y < 1 )
+				{
+					barya.xy /= (floor(HSConstantData.edgeTess[2])+1-frac(HSConstantData.edgeTess[2]))/floor(HSConstantData.edgeTess[2]);
+					barya.z = 1. - barya.x - barya.y;
+				}
+				#endif
+				o.pos  = barya.x * IN[0].pos +  barya.y * IN[1].pos +  barya.z * IN[2].pos;
+				o.wpos = barya.x * IN[0].wpos + barya.y * IN[1].wpos + barya.z * IN[2].wpos;
 			//	o.batchID = uint4( IN[0].batchID.x, bary.xy*float2((TESS_DIVX+0.5), (TESS_DIVY+0.5)), IN[0].batchID.w);
 				return o;
 			}
 			
-			float4 CalcPos( float4 opos, out float hp, out float2 tc, out float4 wpos )
+			float4 CalcPos( float4 opos, out float2 tc, out float4 wpos )
 			{
-				tc = opos.xz+0.5;
+				wpos = mul( unity_ObjectToWorld, opos );
+				tc = (wpos.xz-_SnowlandOffset.xz)/_CameraSpanDimension+0.5;
 				float4 SnowData = tex2Dlod(_SnowCalcCRT, float4(tc, 0.0, 0.) );
-				hp = SnowData.x;
-				opos.y += SnowData.x + SnowData.y + _BottomCameraOffset - 0.04;//XXX Offset to acutally push snow.
-				wpos = mul( unity_ObjectToWorld, (opos  * float4(_CameraSpanDimension,1,_CameraSpanDimension,1)) );
+				float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+				if( howOrtho < 0.5 )
+				{
+					wpos.y += SnowData.y;  // Only give snow depth if not on ortho cameara.
+				}
 				float4 ov = UnityWorldToClipPos( wpos );
-			//	if( SnowData.w > 0.9 ) ov = 0.;
-/*				
-				float4 dnx = tex2Dlod(_SnowCalcCRT, float4(tc - float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) ) - 
-							tex2Dlod(_SnowCalcCRT, float4(tc + float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) );
-				float4 dny = tex2Dlod(_SnowCalcCRT, float4(tc - float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) ) - 
-							tex2Dlod(_SnowCalcCRT, float4(tc + float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) );
-							
-				float3 n = float3( dnx.y, .03, dny.y );
-				n = normalize( n );
-				normal = mul( unity_ObjectToWorld, n );
-				*/
 				return ov;
 			}
 
@@ -152,15 +181,14 @@
 			void geo(triangle vtx p[3], inout TriangleStream<g2f> triStream, uint id : SV_PrimitiveID)
 			{
 				float3 n0, n1, n2;
-				float hp1, hp2, hp0;
 				float2 tc0, tc1, tc2;
 				float4 wp0 = 1, wp1 = 1, wp2 = 1;
-				float4 cp0 =  CalcPos( p[0].pos, hp0, tc0, wp0 );
-				float4 cp1 =  CalcPos( p[1].pos, hp1, tc1, wp1 );
-				float4 cp2 =  CalcPos( p[2].pos, hp2, tc2, wp2 );
+				float4 cp0 =  CalcPos( p[0].pos, tc0, wp0 );
+				float4 cp1 =  CalcPos( p[1].pos, tc1, wp1 );
+				float4 cp2 =  CalcPos( p[2].pos, tc2, wp2 );
 				
-				if( length( cp0 ) == 0 || length( cp1 ) == 0 || length( cp2 ) == 0 ) return;
-				if( length( float3( hp0 - hp1, hp1 - hp2, hp0 - hp2 ) ) > 0.2 ) return;
+				//if( length( cp0 ) == 0 || length( cp1 ) == 0 || length( cp2 ) == 0 ) return;
+				//if( length( float3( hp0 - hp1, hp1 - hp2, hp0 - hp2 ) ) > 0.2 ) return;
 				g2f pIn;
 				pIn.vertex = cp0;
 				pIn.rpos = p[0].pos;
@@ -233,6 +261,7 @@
 				
 				float3 worldPos = i.wpos;//mul( unity_ObjectToWorld, float4( i.rpos.xyz, 1. ) ).xyz;
 
+				// For drawing barycentric lines.
 				const float extrathickness = -0.01;
 				const float sharpness = 5.;//1./100.0;
 				float baryo = min( min( i.bary.x, i.bary.y ), i.bary.z );
@@ -256,8 +285,7 @@
 				normal = mul( unity_ObjectToWorld, n );
 				
 				
-				
-				col.rgb = SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
+				col.rgb *= SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
 				//col.xyz = worldPos;
 				//XXX TODO: Fix normals here.
 
