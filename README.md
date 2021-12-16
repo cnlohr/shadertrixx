@@ -163,15 +163,25 @@ float4x4 clipToWorld()
 
 ### Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
 
+Thanks, @dr4kpl4y3r
+
 ```glsl	
 #if defined(USING_STEREO_MATRICES)
-    float3 PlayerCenterCamera = (
-        float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
-        float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
+    float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 #else
     float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
 #endif
 ```
+
+Alternatively to get the raw value (I do not know why it was originally written this way)
+
+For stereo view:
+```
+    float3 PlayerCenterCamera = (
+        float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
+        float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
+```
+
 
 ### Are you in a mirror?
 
