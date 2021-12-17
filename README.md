@@ -161,6 +161,13 @@ float4x4 clipToWorld()
 }
 ```
 
+Determine vertical FoV.  Thanks @scruffyruffles
+```glsl
+    float t = unity_CameraProjection[1][1];
+    const float Rad2Deg = 180 / UNITY_PI;
+    float fov = atan(1.0f / t ) * 2.0 * Rad2Deg;
+```
+
 ### Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
 
 Thanks, @dr4kpl4y3r
