@@ -101,7 +101,7 @@
 				if( howOrtho < 0.5 )
 				{
 					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) );
-					tm = 12./worldist-.1;
+					tm = 12./worldist-.05;
 					tm = clamp( tm, tessellationAmountMin, tessellationAmountMax );
 				}
 				

@@ -1,11 +1,10 @@
-﻿Shader "cnlohr/WhiteFluff"
+﻿Shader "cnlohr/FallingSnow"
 {
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_BillboardSizeAdd( "Billboard Size", float) = 0
 		_TANoiseTex ("TANoise", 2D) = "white" {}
-		[HDR]_FluffColor ("Fluff Color", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
@@ -14,7 +13,6 @@
 
 		Pass
 		{
-			Tags {"LightMode"="ForwardBase"}
 			ZWrite Off
 			//Blend SrcAlpha OneMinusSrcAlpha
 			Blend SrcColor One 
@@ -27,8 +25,8 @@
 			#pragma multi_compile_fog
 
 			#include "UnityCG.cginc"
-			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
-			#include "/Assets/AudioLink/Shaders/AudioLink.cginc"
+
+			#include "../tanoise/tanoise.cginc"
 
 			struct appdata
 			{
@@ -47,7 +45,6 @@
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			float _BillboardSizeAdd;
-			float4 _FluffColor;
 
 			float max3 (in float3 v) {
 			  return max (max (v.x, v.y), v.z);
@@ -98,8 +95,6 @@
 				float3 ilocalpos = (floor( v.vertex * 10. + 0.5 ) )/10.; //Where it should center around.
 				float3 iworldpos = mul( unity_ObjectToWorld, float4( ilocalpos, 1. ) );
 
-				float SyncTime = AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_NETWORK_TIME );
-
 				float3 ingridsize = float3( 50*.15, 50*.045, 50*.25 );
 				float outgridsize = 20.;
 				float nrelem = 10.;
@@ -111,13 +106,8 @@
 				float farview = outgridsize * nrelem/16.;
 				float billboardsize = _BillboardSizeAdd;
 
-
-				//We don't use unity_StereoCameraToWorld here because we don't want things to look like flat impostors.
-				float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
-				
-				
-				float3 worldpos = glsl_mod( (iworldpos/ingridsize)*outgridsize/nrelem - PlayerCenterCamera, outgridsize )
-					+ PlayerCenterCamera - outgridsize/2.;
+				float3 worldpos = glsl_mod( (iworldpos/ingridsize)*outgridsize/nrelem - _WorldSpaceCameraPos, outgridsize )
+					+ _WorldSpaceCameraPos - outgridsize/2.;
 				float3 worldfloor = floor(worldpos+0.5)*outgridsize;
 					
 				//This is like a grid around the user.
@@ -133,12 +123,16 @@
 					tanoise2_hq(
 						float2(
 							worldfloor.y*10+worldfloor.z*1.,
-							SyncTime*_FlySpeed+worldfloor.x*2
+							_Time.y*_FlySpeed+worldfloor.x*2
 						)
 					) -0.5 ) * FlyMux;
 				hitworld += positional_offset;
+				hitworld.y -= _Time.y*.5;
 
-
+				float3 htdv = hitworld - _WorldSpaceCameraPos;
+				htdv = glsl_mod( htdv+5, 10. )-5;
+				hitworld = htdv + _WorldSpaceCameraPos;
+				
 				//Uncomment to debug (Set objects to their centers)
 				//hitworld = calcworld;
 				
@@ -178,7 +172,7 @@
 	
 					
 //				o.vertex = UnityObjectToClipPos(v.vertex +
-//					float4( sin(SyncTime/5.*2.555),cos(_Time.y/5.*3.2314),sin(_Time.y/5.*4.9581 ), 0. )*.1 );
+//					float4( sin(_Time.y/5.*2.555),cos(_Time.y/5.*3.2314),sin(_Time.y/5.*4.9581 ), 0. )*.1 );
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
@@ -198,7 +192,6 @@
 					discard;
 				}
 				col.a = 1.;
-				col*=_FluffColor;
 				
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
