@@ -6,6 +6,8 @@
 		_BottomCameraOffset( "Bottom Camera Y Offset", float ) = -0.5
 		_CameraSpanDimension( "Camera Span Dimension", float ) = 70.0
 		_SnowlandOffset( "Snowland Offset", Vector) = (8.6, -3.3, -16.5, 0)
+		[Toggle(SHOW_EDGES)] SHOW_EDGES( "Show Edges", int ) = 0
+		[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
     }
     SubShader
     {
@@ -19,10 +21,11 @@
             #pragma vertex vert
             #pragma fragment frag
 			#pragma geometry geo
-			
 			#pragma hull hull
 			#pragma domain dom
-
+			
+			#pragma shader_feature_local SHOW_EDGES
+			#pragma shader_feature_local VERTEX_LIGHTING
 
             // make fog work
             #pragma multi_compile_fog
@@ -48,10 +51,16 @@
             {
                 float4 rpos : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
+#ifdef VERTEX_LIGHTING
+				float3 color : TEXCOORD6;
+#else
+				float4 wpos : TEXCOORD5;
+#endif
+#ifdef SHOW_EDGES
 				float3 bary : TEXCOORD3;
+#endif
                 float4 vertex : SV_POSITION;
 				float2 tc : TEXCOORD4;
-				float4 wpos : TEXCOORD5;
             };
 
             sampler2D _SnowCalcCRT;
@@ -82,7 +91,7 @@
 			
 				//Difference:              5   7    11    13    17     19    23    24?
 				//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
-				#define tessellationAmountMax 15
+				#define tessellationAmountMax 10
 				#define tessellationAmountMin 0
 
 
@@ -92,7 +101,7 @@
 				if( howOrtho < 0.5 )
 				{
 					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) );
-					tm = 10./worldist;
+					tm = 12./worldist-.1;
 					tm = clamp( tm, tessellationAmountMin, tessellationAmountMax );
 				}
 				
@@ -110,12 +119,29 @@
 			{
 				tessFactors o = (tessFactors)0;
 				float3 tm = float3( I[0].tessamt, I[1].tessamt, I[2].tessamt );
-				tm -= .1;
-				tm = clamp( tm,tessellationAmountMin+0.01, tessellationAmountMax );
-				o.edgeTess[0] = tm[2]+tm[1];
-				o.edgeTess[1] = tm[0]+tm[2];
-				o.edgeTess[2] = tm[0]+tm[1];
-				o.insideTess = (tm.x+tm.y+tm.z)/2.-.1;
+				float3 edges = float3( tm.y+tm.z, tm.x+tm.z, tm.x+tm.y );
+				edges = ( edges + 1.0 ) / 2.0;
+				edges = (floor( edges ) + pow( frac( edges ), 0.5 ))*2-1;
+				o.edgeTess[0] = edges.x;
+				o.edgeTess[1] = edges.y;
+				o.edgeTess[2] = edges.z;
+				float insidetess = (tm.x+tm.y+tm.z)/1.5;
+				insidetess = ( insidetess + 2.0 ) / 3.0;
+				insidetess = floor( insidetess ) + pow( frac( insidetess ), 0.5 );
+				o.insideTess = insidetess*3-2;
+
+				//	o.edgeTess[0] = o.edgeTess[1] = o.edgeTess[2] = 5; o.insideTess = 5;				
+				// edgeTess: 1 = unity.
+				// edgeTess: 2 = 3 segs, but split.
+				// edgeTess: 3 = 3 segs, evenly split.
+				// insideTess: 1 = unity.
+				// insideTess: 2 = lumpy.
+				// insideTess: 3 = actual split
+				
+			//	o.insideTess = floor( insidetess ) + pow( frac( insidetess ), .5 )-.5;
+			//	o.insideTess = o.insideTess*3./2.;
+			//	if( o.insideTess < 1 )
+			//		o.edgeTess[0] = o.edgeTess[1] = o.edgeTess[2] = o.insideTess = -1;
 				return o;
 			}
 		 
@@ -158,7 +184,6 @@
 				#endif
 				o.pos  = barya.x * IN[0].pos +  barya.y * IN[1].pos +  barya.z * IN[2].pos;
 				o.wpos = barya.x * IN[0].wpos + barya.y * IN[1].wpos + barya.z * IN[2].wpos;
-			//	o.batchID = uint4( IN[0].batchID.x, bary.xy*float2((TESS_DIVX+0.5), (TESS_DIVY+0.5)), IN[0].batchID.w);
 				return o;
 			}
 			
@@ -176,46 +201,7 @@
 				return ov;
 			}
 
-			
-			[maxvertexcount(3)]
-			void geo(triangle vtx p[3], inout TriangleStream<g2f> triStream, uint id : SV_PrimitiveID)
-			{
-				float3 n0, n1, n2;
-				float2 tc0, tc1, tc2;
-				float4 wp0 = 1, wp1 = 1, wp2 = 1;
-				float4 cp0 =  CalcPos( p[0].pos, tc0, wp0 );
-				float4 cp1 =  CalcPos( p[1].pos, tc1, wp1 );
-				float4 cp2 =  CalcPos( p[2].pos, tc2, wp2 );
-				
-				//if( length( cp0 ) == 0 || length( cp1 ) == 0 || length( cp2 ) == 0 ) return;
-				//if( length( float3( hp0 - hp1, hp1 - hp2, hp0 - hp2 ) ) > 0.2 ) return;
-				g2f pIn;
-				pIn.vertex = cp0;
-				pIn.rpos = p[0].pos;
-				pIn.wpos = wp0;
-				pIn.bary = float3( 1, 0, 0 );
-				pIn.tc = tc0;
-				triStream.Append(pIn);
-
-				pIn.vertex = cp1;
-				pIn.rpos = p[1].pos;
-				pIn.wpos = wp1;
-				pIn.bary = float3( 0, 1, 0 );
-				pIn.tc = tc1;
-				triStream.Append(pIn);
-
-				pIn.vertex = cp2;
-				pIn.rpos = p[2].pos;
-				pIn.wpos = wp2;
-				pIn.bary = float3( 0, 0, 1 );
-				pIn.tc = tc2;
-				triStream.Append(pIn);
-			}
-			
-			ENDCG
-			CGPROGRAM
-			
-						// normal should be normalized, w=1.0
+			// normal should be normalized, w=1.0
 			//NOTE: We can't do this here -> We aren't using sample probe volumes :(
 			half3 SHEvalLinearL0L1_SampleProbeVolumeVert (half4 normal, float3 worldPos)
 			{
@@ -253,45 +239,102 @@
 
 				return x1;
 			}
-
-            fixed4 frag (g2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = 1.;
-				
-				float3 worldPos = i.wpos;//mul( unity_ObjectToWorld, float4( i.rpos.xyz, 1. ) ).xyz;
-
-				// For drawing barycentric lines.
-				const float extrathickness = -0.01;
-				const float sharpness = 5.;//1./100.0;
-				float baryo = min( min( i.bary.x, i.bary.y ), i.bary.z );
-				baryo = baryo;
-				baryo = ( baryo + extrathickness ) * sharpness / pow( length( ddx( i.bary ) ) * length( ddy( i.bary ) ), .25 );
-				baryo = clamp( baryo, 0.0, 1.0 );
-	
-				col.rgb = baryo;
-				
-				float2 tc = i.tc;
+			
+			float3 computeColor( float2 tc, float3 worldPos )
+			{
 				float4 SnowData = tex2Dlod(_SnowCalcCRT, float4(tc, 0.0, 0.) );
-
 				float3 normal;
 				float4 dnx = tex2Dlod(_SnowCalcCRT, float4(tc - float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) ) - 
 							tex2Dlod(_SnowCalcCRT, float4(tc + float2( _SnowCalcCRT_TexelSize.x, 0 ), 0.0, 0.) );
 				float4 dny = tex2Dlod(_SnowCalcCRT, float4(tc - float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) ) - 
 							tex2Dlod(_SnowCalcCRT, float4(tc + float2( 0, _SnowCalcCRT_TexelSize.y ), 0.0, 0.) );
-
 				float3 n = float3( dnx.y, .05, dny.y ); //0.02 controls the vividity of the normals.
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
-				
-				
-				col.rgb *= SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
-				//col.xyz = worldPos;
-				//XXX TODO: Fix normals here.
+				return SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
+			}
 
-				//col.rgb = (saturate(dot(_WorldSpaceLightPos0.xyz, normal))+.1)*.8;
+			
+			[maxvertexcount(3)]
+			void geo(triangle vtx p[3], inout TriangleStream<g2f> triStream, uint id : SV_PrimitiveID)
+			{
+				float3 n0, n1, n2;
+				float2 tc0, tc1, tc2;
+				float4 wp0 = 1, wp1 = 1, wp2 = 1;
+				float4 cp0 =  CalcPos( p[0].pos, tc0, wp0 );
+				float4 cp1 =  CalcPos( p[1].pos, tc1, wp1 );
+				float4 cp2 =  CalcPos( p[2].pos, tc2, wp2 );
 				
-                // apply fog
+				//if( length( cp0 ) == 0 || length( cp1 ) == 0 || length( cp2 ) == 0 ) return;
+				//if( length( float3( hp0 - hp1, hp1 - hp2, hp0 - hp2 ) ) > 0.2 ) return;
+				g2f pIn;
+				pIn.vertex = cp0;
+				pIn.rpos = p[0].pos;
+#ifdef VERTEX_LIGHTING
+				pIn.color = computeColor( tc0, wp0 );
+#else
+				pIn.wpos = wp0;
+#endif
+#ifdef SHOW_EDGES
+				pIn.bary = float3( 1, 0, 0 );
+#endif
+
+				pIn.tc = tc0;
+				triStream.Append(pIn);
+
+				pIn.vertex = cp1;
+				pIn.rpos = p[1].pos;
+#ifdef VERTEX_LIGHTING
+				pIn.color = computeColor( tc1, wp1 );
+#else
+				pIn.wpos = wp1;
+#endif
+#ifdef SHOW_EDGES
+				pIn.bary = float3( 0, 1, 0 );
+#endif
+				pIn.tc = tc1;
+				triStream.Append(pIn);
+
+				pIn.vertex = cp2;
+				pIn.rpos = p[2].pos;
+#ifdef VERTEX_LIGHTING
+				pIn.color = computeColor( tc2, wp2 );
+#else
+				pIn.wpos = wp2;
+#endif
+#ifdef SHOW_EDGES
+				pIn.bary = float3( 0, 0, 1 );
+#endif
+				pIn.tc = tc2;
+				triStream.Append(pIn);
+			}
+			
+			ENDCG
+			CGPROGRAM
+			
+
+            fixed4 frag (g2f i) : SV_Target
+            {
+                // sample the texture
+                fixed4 col = 1.;
+
+				// For drawing barycentric lines.
+				#ifdef SHOW_EDGES
+					const float extrathickness = -0.01;
+					const float sharpness = 5.;//1./100.0;
+					float baryo = min( min( i.bary.x, i.bary.y ), i.bary.z );
+					baryo = baryo;
+					baryo = ( baryo + extrathickness ) * sharpness / pow( length( ddx( i.bary ) ) * length( ddy( i.bary ) ), .25 );
+					baryo = clamp( baryo, 0.0, 1.0 );
+					col.rgb = baryo;
+				#endif
+				
+				#ifdef VERTEX_LIGHTING
+					col.rgb *= i.color.rgb;
+				#else
+					col.rgb *= computeColor( i.tc, i.wpos );
+				#endif
+
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
