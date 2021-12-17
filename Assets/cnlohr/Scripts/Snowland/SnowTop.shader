@@ -11,7 +11,7 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Opaque" "PreviewType"="Plane" }
 
         Pass
         {
@@ -35,6 +35,7 @@
             struct appdata
             {
                 float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
 				uint vertexID : SV_VertexID;
             };
 
@@ -72,6 +73,14 @@
             vtx vert (appdata v)
             {
                 vtx o;
+				// If using material preview, don't tessellate preview.
+				//if( length( v.uv ) >= .01 )
+				//{
+				//	o.pos = 0;
+				//	o.wpos = 0;
+				//	return o;
+				//}
+
                 o.pos = v.vertex;
                 UNITY_TRANSFER_FOG(o,o.vertex);
 				o.batchID = uint4( v.vertexID / 6, 0, 0, 0 );
@@ -95,8 +104,7 @@
 				#define tessellationAmountMin 0
 
 
-				float tm = 1;
-
+				float tm = 0;
 				// Only tessellate for normal cameras.
 				if( howOrtho < 0.5 )
 				{

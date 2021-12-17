@@ -111,7 +111,7 @@
 
 				float maxdepth = prev.w;
 				float deltottop = maxdepth - depth;
-				float peakdepth = csimplex3( float3( IN.localTexcoord.xy*15., 0.0 ) )*0.8+0.5; 
+				float peakdepth = csimplex3( float3( IN.localTexcoord.xy*15., 0.0 ) )*0.4+0.6; 
 
 				if( dat.z < 1.4 )
 					depth = peakdepth/2;
