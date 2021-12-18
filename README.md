@@ -424,7 +424,7 @@ o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 ```
 
 
-This SLERP function, found by ACiiL,
+## This SLERP function, found by ACiiL,
 ```c
         ////============================================================
         //// blend between two directions by %
