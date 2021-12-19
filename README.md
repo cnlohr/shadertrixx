@@ -794,11 +794,15 @@ NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) F
 
 ## My recommended packages and order:
 
-1. Import VRC SDK Worlds: https://vrchat.com/home/download
-2. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
-3. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
-4. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
-5. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
+1. Clone your repository and open it in Unity (note: use the empty default scene for these steps)
+2. Import VRC SDK Worlds: https://vrchat.com/home/download
+3. Import Udon Sharp: https://github.com/MerlinVR/UdonSharp/releases
+4. Import CyanEmu: https://github.com/CyanLaser/CyanEmu/releases
+5. Import VRWorld Toolkit: https://github.com/oneVR/VRWorldToolkit/releases
+6. Import AudioLink: https://github.com/llealloo/vrc-udon-audio-link/releases
+7. At this point, you can open the scene.  Many people close and reopen unity at this point.
+8. Under VR World Toolkit, run World Debugger and fix layers.
+9. You should be bable to build out scenes.
 
 Sometimes Esnya tools is useful, especially for finding broken refernces to Udon Scripts, etc. https://github.com/esnya/EsnyaUnityTools/releases 
 
