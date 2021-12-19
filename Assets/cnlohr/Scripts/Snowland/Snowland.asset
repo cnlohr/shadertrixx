@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: Snowland
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 9b8030e11eb98d441adc738ae8429409,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ca85fb11b4c11054bbfa7f11fe01aefc,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -43,7 +43,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 6
+      Data: 7
     - Name: 
       Entry: 7
       Data: 
@@ -169,7 +169,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rtDepthThrowawayColor
+      Data: rtDepthThrowawayColor1
     - Name: $v
       Entry: 7
       Data: 9|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -196,10 +196,10 @@ MonoBehaviour:
       Data: UnityEngineRenderTexture
     - Name: symbolOriginalName
       Entry: 1
-      Data: rtDepthThrowawayColor
+      Data: rtDepthThrowawayColor1
     - Name: symbolUniqueName
       Entry: 1
-      Data: rtDepthThrowawayColor
+      Data: rtDepthThrowawayColor1
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -232,7 +232,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rtTop
+      Data: rtDepthThrowawayColor2
     - Name: $v
       Entry: 7
       Data: 13|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -253,10 +253,10 @@ MonoBehaviour:
       Data: UnityEngineRenderTexture
     - Name: symbolOriginalName
       Entry: 1
-      Data: rtTop
+      Data: rtDepthThrowawayColor2
     - Name: symbolUniqueName
       Entry: 1
-      Data: rtTop
+      Data: rtDepthThrowawayColor2
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -289,7 +289,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rtBot
+      Data: rtTop
     - Name: $v
       Entry: 7
       Data: 16|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -310,10 +310,10 @@ MonoBehaviour:
       Data: UnityEngineRenderTexture
     - Name: symbolOriginalName
       Entry: 1
-      Data: rtBot
+      Data: rtTop
     - Name: symbolUniqueName
       Entry: 1
-      Data: rtBot
+      Data: rtTop
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -346,7 +346,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: bInitted
+      Data: rtBot
     - Name: $v
       Entry: 7
       Data: 19|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -354,8 +354,65 @@ MonoBehaviour:
       Entry: 7
       Data: 20|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
+      Entry: 9
+      Data: 11
+    - Name: declarationType
+      Entry: 3
+      Data: 1
+    - Name: syncMode
+      Entry: 3
+      Data: 0
+    - Name: symbolResolvedTypeName
+      Entry: 1
+      Data: UnityEngineRenderTexture
+    - Name: symbolOriginalName
+      Entry: 1
+      Data: rtBot
+    - Name: symbolUniqueName
+      Entry: 1
+      Data: rtBot
+    - Name: symbolDefaultValue
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: fieldAttributes
       Entry: 7
-      Data: 21|System.RuntimeType, mscorlib
+      Data: 21|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: userBehaviourSource
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: bInitted
+    - Name: $v
+      Entry: 7
+      Data: 22|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+    - Name: fieldSymbol
+      Entry: 7
+      Data: 23|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+    - Name: internalType
+      Entry: 7
+      Data: 24|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: System.Boolean, mscorlib
@@ -385,7 +442,7 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 22|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 25|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
       Data: 0

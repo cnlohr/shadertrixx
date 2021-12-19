@@ -8,6 +8,7 @@
 		_SnowlandOffset( "Snowland Offset", Vector) = (8.6, -3.3, -16.5, 0)
 		[Toggle(SHOW_EDGES)] SHOW_EDGES( "Show Edges", int ) = 0
 		[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
+		[Toggle(SIMPLE_LIGHTING)] SIMPLE_LIGHTING( "Simple Lighting", int ) = 0
     }
     SubShader
     {
@@ -26,11 +27,13 @@
 			
 			#pragma shader_feature_local SHOW_EDGES
 			#pragma shader_feature_local VERTEX_LIGHTING
+			#pragma shader_feature_local SIMPLE_LIGHTING
 
             // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
+			#include "UnityLightingCommon.cginc"
 
             struct appdata
             {
@@ -69,6 +72,7 @@
 			float _BottomCameraOffset;
 			float _CameraSpanDimension;
 			float4 _SnowlandOffset;
+
 
             vtx vert (appdata v)
             {
@@ -259,7 +263,11 @@
 				float3 n = float3( dnx.y, .05, dny.y ); //0.02 controls the vividity of the normals.
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
+			#ifdef SIMPLE_LIGHTING
+				return max( 0, dot( normal, _WorldSpaceLightPos0.xyz ) ) * _LightColor0.xyz;
+			#else
 				return SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
+			#endif
 			}
 
 			
