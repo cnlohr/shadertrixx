@@ -4,6 +4,8 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
+#if !EDITOR
+
 public class Snowland : UdonSharpBehaviour
 {
 	public Camera camTop;
@@ -20,7 +22,7 @@ public class Snowland : UdonSharpBehaviour
     {
         //rtTop = camTop.targetTexture;
         //rtBot = camBot.targetTexture;
-		
+		Debug.Log( "SNOWLAND START");
 		camTop.SetTargetBuffers( rtDepthThrowawayColorTop.colorBuffer, rtTop.depthBuffer );
 		camBot.SetTargetBuffers( rtDepthThrowawayColorBot.colorBuffer, rtBot.depthBuffer );
 
@@ -28,9 +30,10 @@ public class Snowland : UdonSharpBehaviour
 		//camTop.enabled = false;
 		//camBot.enabled = false;
 		
+		Debug.Log( "SNOWLAND DONE START");
     }
 	
-	public void Render()
+	public void LateUpdate()
 	{
 		if( bInitted == false )
 		{
@@ -43,3 +46,5 @@ public class Snowland : UdonSharpBehaviour
 		}
 	}
 }
+
+#endif
