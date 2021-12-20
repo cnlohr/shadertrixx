@@ -169,7 +169,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rtDepthThrowawayColor1
+      Data: rtDepthThrowawayColorTop
     - Name: $v
       Entry: 7
       Data: 9|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -196,10 +196,10 @@ MonoBehaviour:
       Data: UnityEngineRenderTexture
     - Name: symbolOriginalName
       Entry: 1
-      Data: rtDepthThrowawayColor1
+      Data: rtDepthThrowawayColorTop
     - Name: symbolUniqueName
       Entry: 1
-      Data: rtDepthThrowawayColor1
+      Data: rtDepthThrowawayColorTop
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -232,7 +232,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: rtDepthThrowawayColor2
+      Data: rtDepthThrowawayColorBot
     - Name: $v
       Entry: 7
       Data: 13|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -253,10 +253,10 @@ MonoBehaviour:
       Data: UnityEngineRenderTexture
     - Name: symbolOriginalName
       Entry: 1
-      Data: rtDepthThrowawayColor2
+      Data: rtDepthThrowawayColorBot
     - Name: symbolUniqueName
       Entry: 1
-      Data: rtDepthThrowawayColor2
+      Data: rtDepthThrowawayColorBot
     - Name: symbolDefaultValue
       Entry: 6
       Data: 

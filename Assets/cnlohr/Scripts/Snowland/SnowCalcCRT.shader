@@ -84,7 +84,7 @@
 
 				
 				// Allow snow to schluff from one cell to another if it's a significant slope.
-				#define maxslope 0.1
+				#define maxslope 0.03
 				float diffl = depth - pl.y;
 				float diffr = depth - pr.y;
 				float diffu = depth - pu.y;

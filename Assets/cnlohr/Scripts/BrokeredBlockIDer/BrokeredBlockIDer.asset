@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: BrokeredBlockIDer
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: ab9ca90571f7cee4d8fc05f777816210,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: b9deb8168684e6b4ca003ddd41f4ebc1,
     type: 2}
   udonAssembly: 
   assemblyError: 

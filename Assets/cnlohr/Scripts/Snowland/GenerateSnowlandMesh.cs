@@ -13,6 +13,8 @@ public class GenerateSnowlandMesh : MonoBehaviour
 		float dim_w=60;
 		float dim_h=60;
 		Vector3[] vertices = new Vector3[w*h];
+		Vector3[] normals = new Vector3[w*h];
+		Vector3[] tcs = new Vector3[w*h];
 		int x, y;
 		for( y = 0; y < h; y++ )
 		{
@@ -21,6 +23,12 @@ public class GenerateSnowlandMesh : MonoBehaviour
 				int idx = x+y*w;
 				vertices[idx].x = (x + 0.5f * (y % 2) - ((float)w-1)/2.0f)/(float)(w-1)*dim_w;
 				vertices[idx].z = (y - ((float)h-1)/2.0f)/(float)(w-1)*.866f*dim_h;
+				vertices[idx].y = 0;
+				normals[idx].x = normals[idx].z = 0;
+				normals[idx].y = 1;
+				tcs[idx].z = 0;
+				tcs[idx].x = x / ((float)w-1.0f);
+				tcs[idx].y = y / ((float)h-1.0f);
 				Debug.Log( vertices[idx] );
 			}
 		}

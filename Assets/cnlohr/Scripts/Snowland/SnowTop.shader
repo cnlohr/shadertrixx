@@ -108,7 +108,7 @@
 				#define tessellationAmountMin 0
 
 
-				float tm = 0;
+				float tm = 1;
 				// Only tessellate for normal cameras.
 				if( howOrtho < 0.5 )
 				{
@@ -264,7 +264,7 @@
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
 			#ifdef SIMPLE_LIGHTING
-				return max( 0, dot( normal, _WorldSpaceLightPos0.xyz ) ) * _LightColor0.xyz;
+				return max( 0.1, dot( normal, _WorldSpaceLightPos0.xyz )*0.7+0.3 ) * _LightColor0.xyz;
 			#else
 				return SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
 			#endif
