@@ -18,11 +18,10 @@
 #define HIGHQ
 #define BORDERIZE
 
-//More stable but not as blobby
-//#define FONTTHINNESS .33
-//#define FONTTHINNESS .16
-//#define FONTTHINNESS (sin(_Time.y)*.15+.25)
-#define FONTTHINNESS (.35-AudioLinkLerp( ALPASS_AUDIOLINK + float2( floor(guv.x) * 4, guv.y ) ).r*.5)
+#ifndef FONTTHINNESS
+//Neutral weight.
+#define FONTTHINNESS .3
+#endif
 	
 const static uint shader5x7[144] = {
 	0x00000000, 0x00000000, 0x000000f6, 0x60006000, 0xfe280000, 0x0028fe28, 0x92ff9264, 0xc8c6004c, 
@@ -84,27 +83,27 @@ const static uint ipow10[12] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000
 // Perform a fake "texel" lookup, and return all 4 cells.
 float4 g5x7d( int ch, float2 uv )
 {
-    uint2 cell = uint2(uv);
-    int x = ch * 6 + cell.x;
-    uint2 xres = uint2( x, x-1 );
-    // Fixup gross edges.
-    if( cell.x >= 6 ) xres.x = 0; //Special shader5x7 #0 is all zeroes.
-    uint2 cv = uint2( shader5x7[xres.x/4], shader5x7[xres.y/4] );
-    uint2 movfs = (xres%4)*8;
-    cv = (cv>>movfs)&0xff;
-    uint4 value  = uint4(
-        cv>>(cell.yy-1), 
-        cv>>(cell.yy+0))&1;
+	uint2 cell = uint2(uv);
+	int x = ch * 6 + cell.x;
+	uint2 xres = uint2( x, x-1 );
+	// Fixup gross edges.
+	if( cell.x >= 6 ) xres.x = 0; //Special shader5x7 #0 is all zeroes.
+	uint2 cv = uint2( shader5x7[xres.x/4], shader5x7[xres.y/4] );
+	uint2 movfs = (xres%4)*8;
+	cv = (cv>>movfs)&0xff;
+	uint4 value  = uint4(
+		cv>>(cell.yy-1), 
+		cv>>(cell.yy+0))&1;
 
-    return float4(value.yxwz);
+	return float4(value.yxwz);
 }
 
 
 float2 fast_inverse_smoothstep( float2 x )
 {
-    // Uncomment for blobbier letters
-    //return x;
-    return 0.5 - sin(asin(1.0-2.0*x)/3.0); //Inigo Quilez trick.
+	// Uncomment for blobbier letters
+	//return x;
+	return 0.5 - sin(asin(1.0-2.0*x)/3.0); //Inigo Quilez trick.
 }
 
 float2 roundstep( float2 x )
@@ -121,27 +120,27 @@ float2 roundstep( float2 x )
 float3 char5x7( int ch, float2 uv )
 {
 #ifdef BORDERIZE
-    uv *= float2( 7./6., 9./8. );
-    uv += float2( 0.0, 0.0);
+	uv *= float2( 7./6., 9./8. );
+	uv += float2( 0.0, 0.0);
 #else
-    uv += float2( 0., -.25);
+	uv += float2( 0., -.25);
 #endif
-    float4 d = g5x7d( ch, uv );
+	float4 d = g5x7d( ch, uv );
 
-    float2 lp;
-    lp = fast_inverse_smoothstep(frac( uv ));
+	float2 lp;
+	lp = fast_inverse_smoothstep(frac( uv ));
 
-    float top =  lerp( d.x, d.y, lp.x );
-    float bottom = lerp( d.z, d.w, lp.x );
-    float v = ( lerp( top, bottom, lp.y ) );
+	float top =  lerp( d.x, d.y, lp.x );
+	float bottom = lerp( d.z, d.w, lp.x );
+	float v = ( lerp( top, bottom, lp.y ) );
 
-    // This makes it be a harder edge (But still kinda soft)
-    v = (v-FONTTHINNESS)*( 4.+ 1./length( ddx(uv) + ddy(uv) ));
-    
-    v = clamp( v, 0., 1. );
-    
-    float3 col = lerp( float3( 0, 0, 0 )*.5, float3( uv.y+3., uv.y+3., 10.0 )/10.0, float(v) );
-    return col;
+	// This makes it be a harder edge (But still kinda soft)
+	v = (v-FONTTHINNESS)*( 4.+ 1./length( ddx(uv) + ddy(uv) ));
+	
+	v = clamp( v, 0., 1. );
+	
+	float3 col = lerp( float3( 0, 0, 0 )*.5, float3( uv.y+3., uv.y+3., 10.0 )/10.0, float(v) );
+	return col;
 
 }
 
@@ -151,18 +150,18 @@ float3 char5x7( int ch, float2 uv )
 float3 char5x7( int ch, float2 uv )
 {
 #ifdef BORDERIZE
-    uv *= float2( 7./6., 9./8. );
-    if( uv.x < 0. || uv.y < 0. || uv.x > 6. || uv.y > 8. ) return float3(0);
+	uv *= float2( 7./6., 9./8. );
+	if( uv.x < 0. || uv.y < 0. || uv.x > 6. || uv.y > 8. ) return float3(0);
 #endif
-    uint2 cell = uint2(uv);
-    int x = ch * 6 + int(cell.x);
-    int cv = shader5x7[x/4];
-    int movfs = (x%4)*8;
-    int value  = ((cv>>(movfs+cell.y))&1);
-    int value2 = ((cv>>(movfs+int(uv.y+.5)))&1);
-    if( uv.y >= 7.0 ) value2 = 0;
-    float3 col = mix( float3( value2, 0, value2 )*.5, float3( cell.y+3, cell.y+3, 10.0 )/10.0, float(value) );
-    return col;
+	uint2 cell = uint2(uv);
+	int x = ch * 6 + int(cell.x);
+	int cv = shader5x7[x/4];
+	int movfs = (x%4)*8;
+	int value  = ((cv>>(movfs+cell.y))&1);
+	int value2 = ((cv>>(movfs+int(uv.y+.5)))&1);
+	if( uv.y >= 7.0 ) value2 = 0;
+	float3 col = mix( float3( value2, 0, value2 )*.5, float3( cell.y+3, cell.y+3, 10.0 )/10.0, float(value) );
+	return col;
 }
 
 #endif
@@ -170,74 +169,73 @@ float3 char5x7( int ch, float2 uv )
 
 float3 print5x7int( int num, float2 uv, int places, int leadzero )
 {
-    float2 cuv = uv*float2( places, 1. );
-    float2 luv = cuv*float2( 6, 8. );
-    uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int marknegat = -1;
-    if( num < 0 )
-    {
-        marknegat = places-int(log(-float(num))/log(10.0))-2;
-    }
-    num = abs(num);
-    int nn = (num/calc_ipow10(places-posi-1));
-    if( posi == marknegat )
-        nn = -3;
-    else if( nn <= 0 && posi != places-1)
-        nn = leadzero;
-    else
-        nn %= 10;
-    int ch = nn+48-32;
-    return char5x7( ch, frac(cuv)*float2(6.,8.) );
+	float2 cuv = uv*float2( places, 1. );
+	float2 luv = cuv*float2( 6, 8. );
+	uint2 iuv = uint2( luv );
+	int posi = int(iuv.x/6);
+	int marknegat = -1;
+	if( num < 0 )
+	{
+		marknegat = places-int(log(-float(num))/log(10.0))-2;
+	}
+	num = abs(num);
+	uint nn = (num/calc_ipow10(places-posi-1));
+	if( posi == marknegat )
+		nn = -3;
+	else if( nn <= 0 && posi != places-1)
+		nn = leadzero;
+	else
+		nn %= 10;
+	int ch = nn+48-32;
+	return char5x7( ch, frac(cuv)*float2(6.,8.) );
 }
 
 // Zero Leading Integer Print
 float3 print5x7intzl( int num, float2 uv, int places )
 {
-    float2 cuv = uv*float2( places, 1. );
-    float2 luv = cuv*float2( 6, 8. );
-    uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int nn = (num/calc_ipow10(places-posi-1));
-    nn %= 10;
-    int ch = nn+48-32;
-    return char5x7( ch, frac(cuv)*float2(6.,8.) );
+	float2 cuv = uv*float2( places, 1. );
+	float2 luv = cuv*float2( 6, 8. );
+	uint2 iuv = uint2( luv );
+	int posi = int(iuv.x/6);
+	uint nn = (num/calc_ipow10(places-posi-1));
+	nn %= 10;
+	int ch = nn+48-32;
+	return char5x7( ch, frac(cuv)*float2(6.,8.) );
 }
 
 float3 print5x7float( float num, float2 uv, int wholecount, int decimalcount )
 {
-    float2 cuv = uv*float2( wholecount+decimalcount+1, 1. );
-    float2 luv = cuv*float2( 6, 8. );
-    uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int nn = -2;
-    
-    int marknegat = -1;
-    if( num < 0.0 )
-    {
-        marknegat = wholecount-2-int(log(-num)/log(10.0));
-    }
-    
-    num = abs(num);
-    num +=  pow(.1f,float(decimalcount))*.499;
-    int nv = int( num );
-    
-    if( posi < wholecount )
-    {
-        int wholediff = posi - wholecount+1;
-        float v = (pow( 10.0 , float(wholediff)));
-        int ni = int( float(nv) * v);
-        if( posi == marknegat ) nn = -3;
-        else if( ni <= 0 && wholediff != 0 ) nn = -16; //Blank out.
-        else         nn = ni%10;
-    }
-    else if( posi > wholecount )
-    {
-        num -= float(nv);
-        nn = int( num * pow( 10.0 , float(posi-wholecount)));
-        nn %= 10;
-    }
-    int ch = nn+48-32;
+	float2 cuv = uv*float2( wholecount+decimalcount+1, 1. );
+	float2 luv = cuv*float2( 6, 8. );
+	uint2 iuv = uint2( luv );
+	int posi = int(iuv.x/6.0);
+	int nn = -2;
+	
+	int marknegat = -1;
+	if( num < 0.0 )
+	{
+		marknegat = wholecount-2-int(log(-num)/log(10.0));
+	}
+	
+	num = abs(num);
+	num +=  pow(.1f,float(decimalcount))*.499;
+	int nv = int( num );
+	
+	if( posi < wholecount )
+	{
+		int wholediff = posi - wholecount+1;
+		float v = (pow( 10.0 , float(wholediff)));
+		uint ni = int( float(nv) * v);
+		if( posi == marknegat ) nn = -3;
+		else if( ni <= 0 && wholediff != 0 ) nn = -16; //Blank out.
+		else		 nn = ni%10;
+	}
+	else if( posi > wholecount )
+	{
+		num -= float(nv);
+		nn = uint( num * pow( 10.0 , float(posi-wholecount)))%10;
+	}
+	int ch = nn+48-32;
 
-    return char5x7( ch, frac(cuv)*float2( 6, 8. ));
+	return char5x7( ch, frac(cuv)*float2( 6, 8. ));
 }
