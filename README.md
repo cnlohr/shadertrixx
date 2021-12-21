@@ -506,7 +506,7 @@ sampler2D _CameraDepthTexture;
 
 ### Option 1: Use a varying, `screenPosition`
 
-**NOTE**: this `screenPosition` can also be used to access `_Grabpass`!
+**NOTE**: this `screenPosition` can also be used to access `_GrabTexture`!
 
 Struct:
 ```
