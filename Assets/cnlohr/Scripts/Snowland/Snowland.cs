@@ -27,8 +27,8 @@ public class Snowland : UdonSharpBehaviour
 		camBot.SetTargetBuffers( rtDepthThrowawayColorBot.colorBuffer, rtBot.depthBuffer );
 
 		bInitted = false;
-		//camTop.enabled = false;
-		//camBot.enabled = false;
+		camTop.enabled = false;
+		camBot.enabled = false;
 		
 		Debug.Log( "SNOWLAND DONE START");
     }

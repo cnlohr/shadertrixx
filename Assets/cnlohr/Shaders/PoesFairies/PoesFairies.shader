@@ -135,7 +135,8 @@ Shader "cnlohr/PoesFairies"
 				float3 direction = positional_offset_future - positional_offset;
 				localOffset += positional_offset;
 				
-				
+#if 0
+// This method is not safe for shadowcasting.
 #if defined(USING_STEREO_MATRICES)
 				float3 PlayerCenterCamera = (
 					float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
@@ -143,6 +144,24 @@ Shader "cnlohr/PoesFairies"
 #else
 				float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
 #endif
+#else
+				// Ben's method is much better for shadowcasting.
+				// I saw these ortho shadow substitutions in a few places, but bgolus explains them
+				// https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
+				float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+				float3 worldSpaceCameraPos = UNITY_MATRIX_I_V._m03_m13_m23; // instead of _WorldSpaceCameraPos
+				float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+				float3 cameraToVertex = worldPos - worldSpaceCameraPos;
+				float3 orthoFwd = -UNITY_MATRIX_I_V._m02_m12_m22; // often seen: -UNITY_MATRIX_V[2].xyz;
+				float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
+				// start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
+				float3 orthoCameraPos = worldPos - orthoRayDir;
+				float3 PlayerCenterCamera = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
+				//o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
+
+#endif
+
+
 				PlayerCenterCamera = lerp( _WorldSpaceCameraPos.xyz, PlayerCenterCamera, _EyeSeparation );
 				
 				

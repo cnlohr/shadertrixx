@@ -112,8 +112,9 @@
 					c = UNITY_SAMPLE_TEX2DARRAY( _MineTex, float4( coord, blockID, 0 ) );
 
 
-				//newuv += uvoffset;
-				//newuv.y = 1-newuv.y;
+				//Inspired roughly by this:  https://gitlab.com/s-ilent/pixelstandard/-/blob/master/Assets/Shaders/PixelStandard/PixelUnlit.shader
+				// Their's is better.
+
 				float2 uvbase = coord;//floor( newuv * 256 ) / 256.;
 				float2 dlxy = 1./16.;
 				float2 clxy = frac( coord * 16 );
@@ -122,6 +123,7 @@
 				float4 cob1c = UNITY_SAMPLE_TEX2DARRAY(_MineTex, float4( uvbase+float2(0,dlxy.y), blockID, 0 )) * _Color;
 				float4 cob1d = UNITY_SAMPLE_TEX2DARRAY(_MineTex, float4( uvbase+dlxy, blockID, 0 )) * _Color;
 				float4 cob1 = lerp( lerp( cob1a, cob1b, clxy.x ), lerp( cob1c, cob1d, clxy.x ), clxy.y );
+
 				o.Normal = normalize( float3( 0, 0, 1 ) + cob1.xyz*.5 );
 			
 			}
@@ -134,7 +136,6 @@
 				uint bvy = (uint)UNITY_ACCESS_INSTANCED_PROP(Props, _InstanceID).y;
 				uint blockID = bvy%256;
 				
-
 				int localblockid = floor( IN.uv_MineTex.x * 16 ) + floor( IN.uv_MineTex.y * 16 ) * 16;
 				float2 localuv = frac( IN.uv_MineTex * 16 );
 				//float2 newuv = (localuv/16) + (float2( localblockid % 16, localblockid / 16 )/16.0);
