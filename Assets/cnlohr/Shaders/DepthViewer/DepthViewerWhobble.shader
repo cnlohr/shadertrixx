@@ -12,8 +12,43 @@
 		Blend SrcAlpha OneMinusSrcAlpha
 		GrabPass
 		{
-			"_Grabpass"
+			"_GrabTexture"
 		}
+
+		// shadow caster rendering pass, implemented manually
+		// using macros from UnityCG.cginc
+		Pass
+		{
+			Tags {"LightMode"="ShadowCaster"}
+			Cull Off
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma multi_compile_shadowcaster
+			#pragma multi_compile_instancing
+			#include "UnityCG.cginc"
+
+			struct v2f { 
+				V2F_SHADOW_CASTER;
+				float4 uv : TEXCOORD0;
+			};
+
+			v2f vert(appdata_base v)
+			{
+				v2f o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+				o.uv = v.texcoord;
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
+
         Pass
         {
             CGPROGRAM
@@ -44,7 +79,7 @@
 
 			UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
             float4 _CameraDepthTexture_TexelSize;
-			sampler2D _Grabpass;
+			sampler2D _GrabTexture;
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
@@ -119,7 +154,7 @@
 				float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 
 				float lineism = 0;
-				float4 grab = tex2D( _Grabpass, screenUV.xy );
+				float4 grab = tex2D( _GrabTexture, screenUV.xy );
 				if( depth < 999 )
 					lineism = saturate( csimplex3( worldspace.xyz*.2 + 1000 + float3( 0, frac(AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_NETWORK_TIME )/5000)*200, 0 ))*(300./depth)+.5 );
 

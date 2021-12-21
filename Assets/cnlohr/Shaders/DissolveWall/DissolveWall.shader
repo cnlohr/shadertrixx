@@ -12,7 +12,6 @@
     }
     SubShader
     {
-	
 		// shadow caster rendering pass, implemented manually
 		// using macros from UnityCG.cginc
 		Pass
