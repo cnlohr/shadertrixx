@@ -9,10 +9,11 @@
 		[Toggle(SHOW_EDGES)] SHOW_EDGES( "Show Edges", int ) = 0
 		[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
 		[Toggle(SIMPLE_LIGHTING)] SIMPLE_LIGHTING( "Simple Lighting", int ) = 0
+		[Toggle(HANDLE_SHADOWMAP)] HANDLE_SHADOWMAP( "Handle Shadowmap", int ) = 0
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "PreviewType"="Plane" }
+        Tags { "RenderType"="Opaque" "PreviewType"="Plane" "LightMode"="ForwardBase"}
 
         Pass
         {
@@ -28,12 +29,19 @@
 			#pragma shader_feature_local SHOW_EDGES
 			#pragma shader_feature_local VERTEX_LIGHTING
 			#pragma shader_feature_local SIMPLE_LIGHTING
+			#pragma shader_feature_local HANDLE_SHADOWMAP
+
+			#pragma multi_compile_fwdadd_fullshadows
 
             // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
+			#include "AutoLight.cginc"
+			#include "Lighting.cginc"
+			#include "UnityShadowLibrary.cginc"
+			#include "UnityPBSLighting.cginc"
 
             struct appdata
             {
@@ -106,14 +114,14 @@
 				//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
 				#define tessellationAmountMax 10
 				#define tessellationAmountMin 0
-
+				#define TESSELLATION_COEFFICIENT 13.0
 
 				float tm = 1;
 				// Only tessellate for normal cameras.
 				if( howOrtho < 0.5 )
 				{
 					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) );
-					tm = 16./worldist-.05;
+					tm = float(TESSELLATION_COEFFICIENT)/worldist-.05;
 					tm = clamp( tm, tessellationAmountMin, tessellationAmountMax );
 				}
 				
@@ -251,6 +259,14 @@
 
 				return x1;
 			}
+
+			struct shadowHelper
+			{
+				float4 vertex;
+				float3 normal;
+				V2F_SHADOW_CASTER;
+			};
+
 			
 			float3 computeColor( float2 tc, float3 worldPos )
 			{
@@ -263,11 +279,31 @@
 				float3 n = float3( dnx.y, .05, dny.y ); //0.02 controls the vividity of the normals.
 				n = normalize( n );
 				normal = mul( unity_ObjectToWorld, n );
+				float3 rcolor = 0.0;
 			#ifdef SIMPLE_LIGHTING
-				return max( 0.1, dot( normal, _WorldSpaceLightPos0.xyz )*0.7+0.3 ) * _LightColor0.xyz;
+				rcolor = max( 0.1, dot( normal, _WorldSpaceLightPos0.xyz )*0.7+0.3 ) * _LightColor0.xyz;
 			#else
-				return SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
+				rcolor = SHEvalLinearL0L1_SampleProbeVolumeVert (float4(normal,1.), worldPos);
 			#endif
+			#ifdef HANDLE_SHADOWMAP
+			
+				float4 clipPos = mul(UNITY_MATRIX_VP, float4(worldPos, 1.0));
+				
+				// This trick from @d4rkpl4y3r
+				struct shadowonly
+				{
+					float4 pos;
+					float4 _LightCoord;
+					float4 _ShadowCoord;
+				} so;
+				so._LightCoord = 0.;
+				so.pos = clipPos;
+				so._ShadowCoord  = 0;
+				UNITY_TRANSFER_SHADOW( so, 0. );
+				rcolor *= LIGHT_ATTENUATION( so )*.9+.1;
+
+			#endif
+				return rcolor;
 			}
 
 			
