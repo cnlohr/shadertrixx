@@ -106,7 +106,6 @@ Shader "cnlohr/PoeFlame"
 				}
 	
 #if defined(USING_STEREO_MATRICES)
-
 				float3 PlayerCenterCamera = (
 					float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
 					float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;

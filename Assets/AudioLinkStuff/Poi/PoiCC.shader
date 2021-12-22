@@ -2,7 +2,7 @@
 {
     Properties
     {
-        _TANoiseTex ("TANoise", 2D) = "white" {}
+        [HideInInspector] _TANoiseTex ("TANoise", 2D) = "white" {}
         _TimeCompensation ("Time Compensation", float ) = .1
     }
     SubShader
@@ -83,7 +83,7 @@
                     float flip = (iuv.y > 0.5)?1.:-1.;
                     float extrathicc = 
                         //(AudioLinkLerp( ALPASS_AUTOCORRELATOR + uint2( 127-iuv.x*128, 0. )))*.3;
-                        sin( iuv.x*3.14*8-.1 )*.2-.1;
+                        sin( iuv.x*3.14*8-.1 )*.1;
                     ivertex.xyz += cross( inorm, itan ) * extrathicc * flip;
                     
                     o.vertex = UnityObjectToClipPos(ivertex);
@@ -108,7 +108,7 @@
                 fixed4 col = AudioLinkLerp( ALPASS_CCLIGHTS + float2( strippos, 0. ) );//float4( , 0, 0, 1 );
                 
                 float fadeoff = 1. - abs( i.uv.y - 0.5 ) * 2.;
-                col *= smoothstep( 0, 1, fadeoff )*2;
+                col *= smoothstep( 0, 1, fadeoff );
                 
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
