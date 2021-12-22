@@ -95,13 +95,6 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
                 o.color = v.color;
                 o.uv    = v.texcoord;
                 o.camrelpos = _WorldSpaceCameraPos - mul( unity_ObjectToWorld, v.vertex );
-                if( length( o.camrelpos ) > _FadeCull )
-                {
-                    o.pos = 0;
-                    o.color = 0;
-                    o.uv = 0;
-                    o.camrelpos = 0;
-                }
                 return o;
             }
 
@@ -135,6 +128,13 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
                 p[0].pos = UnityObjectToClipPos( v0+center );
                 p[1].pos = UnityObjectToClipPos( v1+center );
                 p[2].pos = UnityObjectToClipPos( v2+center );
+				
+				// Don't draw geometry if too far.
+				if( length( _WorldSpaceCameraPos - mul( unity_ObjectToWorld, center ) ) > _FadeCull )
+                {
+					return;
+                }
+				
                 triStream.Append( p[0] );
                 triStream.Append( p[1] );
                 triStream.Append( p[2] );

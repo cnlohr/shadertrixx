@@ -18,6 +18,7 @@ public class Snowland : UdonSharpBehaviour
 	public RenderTexture rtBot;
 	
 	private bool bInitted;
+	private bool bDisabled;
     void Start()
     {
         //rtTop = camTop.targetTexture;
@@ -30,19 +31,25 @@ public class Snowland : UdonSharpBehaviour
 		//camTop.enabled = false;
 		//camBot.enabled = false;
 		
-		Debug.Log( "SNOWLAND DONE START");
+		Debug.Log( "Snowland Start Done");
     }
 	
 	public void LateUpdate()
 	{
-		if( bInitted == false )
+		if( !bDisabled )
 		{
-			//camTop.Render();
-			bInitted = true;
-		}
-		else
-		{
-			//camBot.Render();
+			if( bInitted == false )
+			{
+				//camTop.Render();
+				bInitted = true;
+			}
+			else
+			{
+				camTop.gameObject.SetActive( false );
+				Debug.Log( "Disabled top camera.");
+				bDisabled = true;
+				//camBot.Render();
+			}
 		}
 	}
 }
