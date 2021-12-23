@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: hexitone-wall
   m_Shader: {fileID: 4800000, guid: 796d737a762f3e648ad67772ed38bbe2, type: 3}
-  m_ShaderKeywords: _ALPHAPREMULTIPLY_ON _use_hq_noise
+  m_ShaderKeywords: _ALPHAPREMULTIPLY_ON _AspectRatio _Brightness _Tiling _use_hq_noise
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -100,6 +100,7 @@ Material:
     - _is_floormode_local: 0
     - _is_torso_local: 0
     - _use_hq_noise: 1
+    - _use_hq_noise_local: 0
     m_Colors:
     - _BiasColor: {r: 0, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

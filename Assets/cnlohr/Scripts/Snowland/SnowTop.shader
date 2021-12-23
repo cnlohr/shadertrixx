@@ -5,9 +5,10 @@
         _SnowCalcCRT ("Texture", 2D) = "white" {}
 		_BottomCameraOffset( "Bottom Camera Y Offset", float ) = -0.5
 		_CameraSpanDimension( "Camera Span Dimension", float ) = 70.0
+		_MaxTessFactor("Max Tess Factor", float) =0.0
 		_SnowlandOffset( "Snowland Offset", Vector) = (8.6, -3.3, -16.5, 0)
 		[Toggle(SHOW_EDGES)] SHOW_EDGES( "Show Edges", int ) = 0
-		[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
+		//[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
 		[Toggle(SIMPLE_LIGHTING)] SIMPLE_LIGHTING( "Simple Lighting", int ) = 0
 		[Toggle(HANDLE_SHADOWMAP)] HANDLE_SHADOWMAP( "Handle Shadowmap", int ) = 0
     }
@@ -26,10 +27,10 @@
 			#pragma hull hull
 			#pragma domain dom
 			
-			#pragma shader_feature_local SHOW_EDGES
-			#pragma shader_feature_local VERTEX_LIGHTING
-			#pragma shader_feature_local SIMPLE_LIGHTING
-			#pragma shader_feature_local HANDLE_SHADOWMAP
+			#pragma multi_compile_local _ SHOW_EDGES
+		//	#pragma multi_compile_local _ VERTEX_LIGHTING
+			#pragma multi_compile_local _ SIMPLE_LIGHTING
+			#pragma multi_compile_local _ HANDLE_SHADOWMAP
 
 			#pragma multi_compile_fwdadd_fullshadows
 
@@ -80,7 +81,7 @@
 			float _BottomCameraOffset;
 			float _CameraSpanDimension;
 			float4 _SnowlandOffset;
-
+			float _MaxTessFactor;
 
             vtx vert (appdata v)
             {
@@ -112,9 +113,9 @@
 			
 				//Difference:              5   7    11    13    17     19    23    24?
 				//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
-				#define tessellationAmountMax 10
+				#define tessellationAmountMax _MaxTessFactor
 				#define tessellationAmountMin 0
-				#define TESSELLATION_COEFFICIENT 13.0
+				#define TESSELLATION_COEFFICIENT (_MaxTessFactor*1.5)
 
 				float tm = 1;
 				// Only tessellate for normal cameras.
