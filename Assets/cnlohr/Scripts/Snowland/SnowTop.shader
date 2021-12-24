@@ -167,7 +167,7 @@
 			}
 		 
 			[domain("tri")]
-			[partitioning("fractional_odd")] // Or fractional_odd
+			[partitioning("pow2")] // Or fractional_odd or integer or pow2
 			[outputtopology("triangle_cw")]
 			[patchconstantfunc("hullConstant")]
 			[outputcontrolpoints(3)]

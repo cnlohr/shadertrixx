@@ -197,7 +197,7 @@ namespace MaterialPropsContainer
 				else if( ValueMinMax[i].w > 0.5 )
 				{
 					SetMaterials[i].SetInt(Sliders[i].name, (int)(Sliders[i].value));
-					Texts[i].text = string.Format(Sliders[i].name + ":{0:n0}", Sliders[i].value);
+					Texts[i].text = string.Format(Sliders[i].name + ":{0:n0}", (int)Sliders[i].value);
 				}
 				else
 				{
