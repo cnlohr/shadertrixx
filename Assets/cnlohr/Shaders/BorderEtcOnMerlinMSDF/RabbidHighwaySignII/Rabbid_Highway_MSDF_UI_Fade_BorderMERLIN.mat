@@ -7,13 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Rabbid_Highway_MSDF_UI_Fade_Border
-  m_Shader: {fileID: 4800000, guid: 016fcb6c228ef794385e589c1529bbf7, type: 3}
+  m_Name: Rabbid_Highway_MSDF_UI_Fade_BorderMERLIN
+  m_Shader: {fileID: 4800000, guid: 42e41b6643ef1ea4bbe08766df1741cf, type: 3}
   m_ShaderKeywords: UNITY_UI_ALPHACLIP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 5000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -88,6 +88,6 @@ Material:
     - _UseUIAlphaClip: 1
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.4339623, g: 0.4339623, b: 0.4339623, a: 1}
     - _Colorize: {r: 0.88, g: 0.88, b: 0.88, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

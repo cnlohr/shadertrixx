@@ -106,7 +106,7 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
             void geom(triangle v2g p[3], inout TriangleStream<g2f> triStream, uint id : SV_PrimitiveID)
             {
 				// Expand quads around chars.
-				float extraborderize = 1.2;
+				float extraborderize = 1.1;
 				float2 uvcenter = (p[0].uv+p[1].uv+p[2].uv)/3;
 				float2 uv0 = p[0].uv-uvcenter;
 				float2 uv1 = p[1].uv-uvcenter;
@@ -166,8 +166,8 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
 				// Black outline			
 				float sigmux;
 				float MSDF = MSDFn( o.uv, sigmux );
-				colo.a = MSDF+.3*sigmux;
-				colo.rgb = MSDF-.1*sigmux;
+				colo.a = MSDF+.33*sigmux;
+				colo.rgb = MSDF-.2*sigmux;
 				colo = saturate(colo);
 				colo.a *= pow( saturate( 1 + (_FadeNear - length( o.camrelpos )) ), 2 );
 				o.color = colo;

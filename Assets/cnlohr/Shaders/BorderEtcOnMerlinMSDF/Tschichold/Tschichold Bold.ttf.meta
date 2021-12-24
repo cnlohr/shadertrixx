@@ -1,20 +1,19 @@
 fileFormatVersion: 2
-guid: 28ec0580ef59aca4dad009e21bf8924a
+guid: 9c87ae5f9c59f614cb1b6909bf8bbf44
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
-  fontSize: 58
+  fontSize: 80
   forceTextureCase: 0
   characterSpacing: 4
   characterPadding: 2
   includeFontData: 1
-  fontName: My Font
+  fontName: Tschichold
   fontNames:
-  - Rabbid Highway Sign II
-  fallbackFontReferences:
-  - {fileID: 12800000, guid: 3b9ea129eee98b543a258317b7c1562b, type: 3}
+  - Tschichold
+  fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 3
+  fontRenderingMode: 2
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1

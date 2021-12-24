@@ -1,7 +1,6 @@
-﻿Copyright (c) 2015, Robert Jablonski @ Cannot Into Space Fonts (cannotintospacefonts@gmail.com),
-with Reserved Font Name "Rabbid Highway Sign II".
+Copyright (c) 2014, CAT-Fonts, Peter Wiegel (http://www.catfonts.de | wiegel@peter-wiegel.de),
+with Reserved Font Name "Tschichold".
 
-NOTE: Modifications (c) 2021, little.sophia (from VRChat)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
@@ -94,3 +93,4 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
