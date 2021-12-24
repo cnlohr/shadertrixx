@@ -168,7 +168,14 @@ Determine vertical FoV.  Thanks @scruffyruffles
     float fov = atan(1.0f / t ) * 2.0 * Rad2Deg;
 ```
 
-### Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
+Thanks to several people in the shader discord... If in the `ShadowCaster` and you want to differentiate between rendering from the camera's point of view or from the light's point of view for a direcitonal light, you can check which you are running from with:
+
+* `any(unity_LightShadowBias) == false` if rendering `_CameraDepthTexture` (Camera's point of view)
+* `any(unity_LightShadowBias) == true`  if rendering some shadow map (From a light's point of view)
+
+
+
+Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
 
 Thanks, @dr4kpl4y3r
 

@@ -150,7 +150,7 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
 			float MSDFn( float2 texcoord, out float sigmux )
 			{
 				float2 msdfUnit = _PixelRange / _MSDFTex_TexelSize.zw;
-				float4 sampleCol = tex2D( _MSDFTex, texcoord ).rgba;
+				float4 sampleCol = ((tex2D( _MSDFTex, texcoord ).rgba)-.25)*2;
 				float sigDist = median(sampleCol.r, sampleCol.g, sampleCol.b) - 0.5;
 				sigmux = max(dot(msdfUnit, 0.5 / fwidth(texcoord)), 1);
 				sigDist *= sigmux; // Max to handle fading out to quads in the distance
