@@ -35,7 +35,7 @@
 			#pragma multi_compile_fwdadd_fullshadows
 
             // make fog work
-            #pragma multi_compile_fog
+            //#pragma multi_compile_fog
 
             #include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
@@ -53,27 +53,27 @@
 
             struct vtx
             {
-                UNITY_FOG_COORDS(1)
                 float4 pos : SV_POSITION;
-				float4 wpos : TEXCOORD4;
-				uint4 batchID : TEXCOORD5;
-				float tessamt : TEXCOORD6;
+				float4 wpos : TEXCOORD0;
+				uint4 batchID : TEXCOORD1;
+				float tessamt : TEXCOORD2;
+                UNITY_FOG_COORDS(1)
             };
 
             struct g2f
             {
+                float4 vertex : SV_POSITION;
                 float4 rpos : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
+				float2 tc : TEXCOORD1;
 #ifdef VERTEX_LIGHTING
-				float3 color : TEXCOORD6;
+				float3 color : TEXCOORD2;
 #else
-				float4 wpos : TEXCOORD5;
+				float4 wpos : TEXCOORD2;
 #endif
 #ifdef SHOW_EDGES
 				float3 bary : TEXCOORD3;
 #endif
-                float4 vertex : SV_POSITION;
-				float2 tc : TEXCOORD4;
+                UNITY_FOG_COORDS(1)
             };
 
             sampler2D _SnowCalcCRT;
@@ -121,7 +121,7 @@
 				// Only tessellate for normal cameras.
 				if( howOrtho < 0.5 )
 				{
-					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) );
+					float worldist = length( (o.wpos - PlayerCenterCamera) * float3( 1, .5, 1 ) )+.1;
 					tm = float(TESSELLATION_COEFFICIENT)/worldist-.05;
 					tm = clamp( tm, tessellationAmountMin, tessellationAmountMax );
 				}
@@ -143,13 +143,16 @@
 				float3 edges = float3( tm.y+tm.z, tm.x+tm.z, tm.x+tm.y );
 				edges = ( edges + 1.0 ) / 2.0;
 				edges = (floor( edges ) + pow( frac( edges ), 0.5 ))*2-1;
+				edges = clamp( edges, 1, 40.0 );
 				o.edgeTess[0] = edges.x;
 				o.edgeTess[1] = edges.y;
 				o.edgeTess[2] = edges.z;
 				float insidetess = (tm.x+tm.y+tm.z)/1.5;
 				insidetess = ( insidetess + 2.0 ) / 3.0;
 				insidetess = floor( insidetess ) + pow( frac( insidetess ), 0.5 );
-				o.insideTess = insidetess*3-2;
+				insidetess = insidetess *3-2;
+				insidetess = clamp( insidetess, 1, 40 );
+				o.insideTess = insidetess;
 
 				//	o.edgeTess[0] = o.edgeTess[1] = o.edgeTess[2] = 5; o.insideTess = 5;				
 				// edgeTess: 1 = unity.
@@ -167,7 +170,7 @@
 			}
 		 
 			[domain("tri")]
-			[partitioning("pow2")] // Or fractional_odd or integer or pow2
+			[partitioning("fractional_odd")] // Or fractional_odd or integer or pow2
 			[outputtopology("triangle_cw")]
 			[patchconstantfunc("hullConstant")]
 			[outputcontrolpoints(3)]

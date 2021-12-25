@@ -67,10 +67,10 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DualColorThreshold: 0.6
-    - _EyeSeparation: 0.6154278
+    - _EyeSeparation: 0.5
     - _FlameMagBase: 0.55
     - _FlameNoisyness: 1.1
-    - _FlamePositionalNoise: 8.04
+    - _FlamePositionalNoise: 8.03
     - _FlameSize: 1
     - _FlameSpeed: 8
     - _FlameTimeNoise: 1
@@ -88,7 +88,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TrackDownUp: 0.3450267
+    - _TrackDownUp: 0.5
     - _UVSec: 0
     - _UsePositionalSpaceToChangePhase: 1.4
     - _ZWrite: 1
