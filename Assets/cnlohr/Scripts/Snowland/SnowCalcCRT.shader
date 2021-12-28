@@ -3,41 +3,41 @@
 
 	//X and Y of target texture are bins per octave, and octaves respectively.
 
-    Properties
-    {
-        _DepthTop ("Top Depth", 2D) = "white" {}
-        _DepthBot ("Bottom Depth", 2D) = "white" {}
+	Properties
+	{
+		_DepthTop ("Top Depth", 2D) = "white" {}
+		_DepthBot ("Bottom Depth", 2D) = "white" {}
 		_ResetTrigger ("Reset Trigger (Set to 1 to reset)", float ) = 0.0
 		
 		_CameraSpanDimension( "Camera Span Dimension", float ) = 16.0
 		_CameraFar( "Camera Far", float ) = 20.0
-    }
-    SubShader
-    {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+	}
+	SubShader
+	{
+		Tags { "RenderType"="Opaque" }
+		LOD 100
 
 
 		Cull Off
-        Lighting Off		
+		Lighting Off		
 		ZWrite Off
 		ZTest Always
 
-        Pass
-        {
-            CGPROGRAM
+		Pass
+		{
+			CGPROGRAM
 
 			#define _SelfTexture2D _SelfTexture2D_Dummy
-            #include "UnityCustomRenderTexture.cginc"
+			#include "UnityCustomRenderTexture.cginc"
 			#undef _SelfTexture2D
 			
-            #pragma vertex CustomRenderTextureVertexShader
-            #pragma fragment frag
+			#pragma vertex CustomRenderTextureVertexShader
+			#pragma fragment frag
 			#pragma target 5.0
 
 			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 			
-            #include "UnityCG.cginc"
+			#include "UnityCG.cginc"
 			#include "/Assets/cnlohr/Shaders/hashwithoutsine/hashwithoutsine.cginc"
 			
 			Texture2D<float> _DepthTop;
@@ -48,8 +48,8 @@
 			float _CameraSpanDimension;
 			float _CameraFar;
 			
-            fixed4 frag (v2f_customrendertexture IN) : SV_Target
-            {
+			fixed4 frag (v2f_customrendertexture IN) : SV_Target
+			{
 				if( _ResetTrigger > 0.5 ) return fixed4( 0., 0., 0., 1. );
 				int2 licord = IN.localTexcoord.xy / _SelfTexture2D_TexelSize.xy;
 				int2 licordz = float2( licord.x, _SelfTexture2D_TexelSize.w - licord.y );
@@ -142,7 +142,7 @@
 			}
 
 
-            ENDCG
-        }
-    }
+			ENDCG
+		}
+	}
 }

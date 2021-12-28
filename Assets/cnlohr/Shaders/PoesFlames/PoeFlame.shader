@@ -4,13 +4,13 @@
 
 Shader "cnlohr/PoeFlame"
 {
-    Properties
-    {
-	    _Color1 ("Color1", Color) = (1,1,1,1)
+	Properties
+	{
+		_Color1 ("Color1", Color) = (1,1,1,1)
 		_DualColorThreshold("Dual Color Threshold", float) = 0.6
-	    _Color2 ("Color2", Color) = (1,1,1,1)
-        _MainTex ("Texture", 2D) = "white" {}
-        _TANoiseTex ("TANoise", 2D) = "white" {}
+		_Color2 ("Color2", Color) = (1,1,1,1)
+		_MainTex ("Texture", 2D) = "white" {}
+		_TANoiseTex ("TANoise", 2D) = "white" {}
 		
 		_FlamePositionalNoise ("Positional Noise", float) = 8.0
 		_FlameSpeed ("Flame Speed", float) = 8.0
@@ -29,47 +29,47 @@ Shader "cnlohr/PoeFlame"
 
 		_TrackDownUp ("Does the sprite rotate down and up to look at player", float) = 0.0
 		_EyeSeparation("Make billboard point to center of face", Range( 0, 1 ) ) = 0
-    }
-    SubShader
-    {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+	}
+	SubShader
+	{
+		Tags { "RenderType"="Opaque" }
+		LOD 100
 
-        Pass
-        {
-            Tags {"LightMode"="ForwardBase"}
+		Pass
+		{
+			Tags {"LightMode"="ForwardBase"}
 			AlphaToMask True 
 			//Alphatest Equal 1
 	
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            // make fog work
-            // #pragma alpha 
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			// make fog work
+			// #pragma alpha 
 
-            #include "UnityCG.cginc"
+			#include "UnityCG.cginc"
 
 			#define glsl_mod(x,y) abs(((x)-(y)*floor((x)/(y)))) 
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
-            };
+			};
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+			struct v2f
+			{
+				float2 uv : TEXCOORD0;
+				float4 vertex : SV_POSITION;
 				float3 worldpos : TEXCOORD1;
 				//UNITY_VERTEX_OUTPUT_STEREO
-            };
+			};
 
 			#include "/Assets/cnlohr/Shaders/tanoise/tanoise.cginc"
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			fixed4 _Color1, _Color2;
 			fixed _FlamePositionalNoise;
 			fixed _FlameSpeed;
@@ -87,13 +87,13 @@ Shader "cnlohr/PoeFlame"
 			fixed _TrackDownUp, _EyeSeparation;
 			fixed _UsePositionalSpaceToChangePhase;
 
-            v2f vert (appdata v)
-            {
-                v2f o;
+			v2f vert (appdata v)
+			{
+				v2f o;
 				UNITY_SETUP_INSTANCE_ID(i);
 				//UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
 				float2 uvoff = float2(v.uv.x-.5, .5-v.uv.y);
 
@@ -135,11 +135,11 @@ Shader "cnlohr/PoeFlame"
 						) * _BillboardSizeAdd;
 				o.vertex = mul( UNITY_MATRIX_VP, float4( BillboardVertex, 1.0 ) );
 
-                return o;
-            }
+				return o;
+			}
 
-            fixed4 frag (v2f i, float4 screenSpace : SV_Position) : SV_Target
-            {
+			fixed4 frag (v2f i, float4 screenSpace : SV_Position) : SV_Target
+			{
 				//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 				//We loop every 2,000 seconds, otherwise, when doing the 
 				//random math, it gets yucky.
@@ -161,10 +161,10 @@ Shader "cnlohr/PoeFlame"
 				
 				float inten = _FlameMagBase - attenmag*_FlameSize + intennoise*_FlameNoisyness;
 				
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, iuv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+				// sample the texture
+				fixed4 col = tex2D(_MainTex, iuv);
+				// apply fog
+				UNITY_APPLY_FOG(i.fogCoord, col);
 				
 				col *= lerp( _Color1, _Color2, clamp( inten - _DualColorThreshold, 0.0, 1.0 ) );
 
@@ -180,8 +180,8 @@ Shader "cnlohr/PoeFlame"
 					float isp = sv / 4. + _HalftoneyIntensity;
 					return col * float4( 1., 1., 1., inten>isp );
 				}
-            }
-            ENDCG
-        }
-    }
+			}
+			ENDCG
+		}
+	}
 }

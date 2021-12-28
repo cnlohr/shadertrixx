@@ -1,8 +1,8 @@
 ﻿Shader "Snowland/SnowTop"
 {
-    Properties
-    {
-        _SnowCalcCRT ("Texture", 2D) = "white" {}
+	Properties
+	{
+		_SnowCalcCRT ("Texture", 2D) = "white" {}
 		_BottomCameraOffset( "Bottom Camera Y Offset", float ) = -0.5
 		_CameraSpanDimension( "Camera Span Dimension", float ) = 70.0
 		_MaxTessFactor("Max Tess Factor", float) =0.0
@@ -11,18 +11,18 @@
 		//[Toggle(VERTEX_LIGHTING)] VERTEX_LIGHTING( "Vertex Lighting", int ) = 0
 		[Toggle(SIMPLE_LIGHTING)] SIMPLE_LIGHTING( "Simple Lighting", int ) = 0
 		[Toggle(HANDLE_SHADOWMAP)] HANDLE_SHADOWMAP( "Handle Shadowmap", int ) = 0
-    }
-    SubShader
-    {
-        Tags { "RenderType"="Opaque" "PreviewType"="Plane" "LightMode"="ForwardBase"}
+	}
+	SubShader
+	{
+		Tags { "RenderType"="Opaque" "PreviewType"="Plane" "LightMode"="ForwardBase"}
 
-        Pass
-        {
-            CGINCLUDE
+		Pass
+		{
+			CGINCLUDE
 			#pragma require geometry
 			#pragma require tessHW
-            #pragma vertex vert
-            #pragma fragment frag
+			#pragma vertex vert
+			#pragma fragment frag
 			#pragma geometry geo
 			#pragma hull hull
 			#pragma domain dom
@@ -34,36 +34,36 @@
 
 			#pragma multi_compile_fwdadd_fullshadows
 
-            // make fog work
-            //#pragma multi_compile_fog
+			// make fog work
+			//#pragma multi_compile_fog
 
-            #include "UnityCG.cginc"
+			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
 			#include "AutoLight.cginc"
 			#include "Lighting.cginc"
 			#include "UnityShadowLibrary.cginc"
 			#include "UnityPBSLighting.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
 				uint vertexID : SV_VertexID;
-            };
+			};
 
-            struct vtx
-            {
-                float4 pos : SV_POSITION;
+			struct vtx
+			{
+				float4 pos : SV_POSITION;
 				float4 wpos : TEXCOORD0;
 				uint4 batchID : TEXCOORD1;
 				float tessamt : TEXCOORD2;
-                UNITY_FOG_COORDS(1)
-            };
+				UNITY_FOG_COORDS(1)
+			};
 
-            struct g2f
-            {
-                float4 vertex : SV_POSITION;
-                float4 rpos : TEXCOORD0;
+			struct g2f
+			{
+				float4 vertex : SV_POSITION;
+				float4 rpos : TEXCOORD0;
 				float2 tc : TEXCOORD1;
 #ifdef VERTEX_LIGHTING
 				float3 color : TEXCOORD2;
@@ -73,19 +73,19 @@
 #ifdef SHOW_EDGES
 				float3 bary : TEXCOORD3;
 #endif
-                UNITY_FOG_COORDS(1)
-            };
+				UNITY_FOG_COORDS(1)
+			};
 
-            sampler2D _SnowCalcCRT;
+			sampler2D _SnowCalcCRT;
 			float4 _SnowCalcCRT_TexelSize;
 			float _BottomCameraOffset;
 			float _CameraSpanDimension;
 			float4 _SnowlandOffset;
 			float _MaxTessFactor;
 
-            vtx vert (appdata v)
-            {
-                vtx o;
+			vtx vert (appdata v)
+			{
+				vtx o;
 				// If using material preview, don't tessellate preview.
 				//if( length( v.uv ) >= .01 )
 				//{
@@ -94,8 +94,8 @@
 				//	return o;
 				//}
 
-                o.pos = v.vertex;
-                UNITY_TRANSFER_FOG(o,o.vertex);
+				o.pos = v.vertex;
+				UNITY_TRANSFER_FOG(o,o.vertex);
 				o.batchID = uint4( v.vertexID / 6, 0, 0, 0 );
 				//o.wpos = float4( mul( unity_ObjectToWorld, v.vertex.xyz, 1. );
 				o.wpos = mul( unity_ObjectToWorld,( v.vertex.xyzw ) );
@@ -111,8 +111,8 @@
 
 
 			
-				//Difference:              5   7    11    13    17     19    23    24?
-				//Number of subdivisons: 1   6   13    24    37     54    73    96	120?
+				//Difference:			  5   7	11	13	17	 19	23	24?
+				//Number of subdivisons: 1   6   13	24	37	 54	73	96	120?
 				#define tessellationAmountMax _MaxTessFactor
 				#define tessellationAmountMin 0
 				#define TESSELLATION_COEFFICIENT (_MaxTessFactor*1.5)
@@ -127,8 +127,8 @@
 				}
 				
 				o.tessamt = tm;
-                return o;
-            }
+				return o;
+			}
 
 			struct tessFactors
 			{
@@ -369,10 +369,10 @@
 			CGPROGRAM
 			
 
-            fixed4 frag (g2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = 1.;
+			fixed4 frag (g2f i) : SV_Target
+			{
+				// sample the texture
+				fixed4 col = 1.;
 
 				// For drawing barycentric lines.
 				#ifdef SHOW_EDGES
@@ -391,11 +391,11 @@
 					col.rgb *= computeColor( i.tc, i.wpos );
 				#endif
 
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
-            }
-            ENDCG
-        }
+				UNITY_APPLY_FOG(i.fogCoord, col);
+				return col;
+			}
+			ENDCG
+		}
 		
 		Pass
 		{
@@ -404,13 +404,13 @@
 			CGPROGRAM
 			
 
-            fixed4 frag (g2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = 1.;
-                return col;
-            }
-            ENDCG
+			fixed4 frag (g2f i) : SV_Target
+			{
+				// sample the texture
+				fixed4 col = 1.;
+				return col;
+			}
+			ENDCG
 		}
-    }
+	}
 }

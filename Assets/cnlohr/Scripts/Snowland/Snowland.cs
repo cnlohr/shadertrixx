@@ -19,10 +19,10 @@ public class Snowland : UdonSharpBehaviour
 	
 	private bool bInitted;
 	private bool bDisabled;
-    void Start()
-    {
-        //rtTop = camTop.targetTexture;
-        //rtBot = camBot.targetTexture;
+	void Start()
+	{
+		//rtTop = camTop.targetTexture;
+		//rtBot = camBot.targetTexture;
 		Debug.Log( "SNOWLAND START");
 		camTop.SetTargetBuffers( rtDepthThrowawayColorTop.colorBuffer, rtTop.depthBuffer );
 		camBot.SetTargetBuffers( rtDepthThrowawayColorBot.colorBuffer, rtBot.depthBuffer );
@@ -32,7 +32,7 @@ public class Snowland : UdonSharpBehaviour
 		//camBot.enabled = false;
 		
 		Debug.Log( "Snowland Start Done");
-    }
+	}
 	
 	public void LateUpdate()
 	{

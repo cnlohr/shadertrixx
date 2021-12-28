@@ -1,11 +1,11 @@
 ﻿Shader "Custom/GoosyPlaid"
 {
-    Properties
-    {
-        _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+	Properties
+	{
+		_Color ("Color", Color) = (1,1,1,1)
+		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_Glossiness ("Smoothness", Range(0,1)) = 0.5
+		_Metallic ("Metallic", Range(0,1)) = 0.0
 		_WorldScale ("World Scale", Range(0,10)) = 1.0
 		_StippleMix ("Stippality", Range(0,1)) = 0.5
 		_StippleFreq( "Stipple Frequency", float ) = 10.
@@ -13,9 +13,9 @@
 		_Emission ("Emission", float) = 0.
 		_Albedo ("Albedo", float ) = 1.
 		_Amplitude ("Amplitude", float) = 1
-    }
-    SubShader
-    {
+	}
+	SubShader
+	{
 		// shadow caster rendering pass, implemented manually
 		// using macros from UnityCG.cginc
 		Pass
@@ -50,43 +50,43 @@
 			ENDCG
 		}
 		
-        Tags { "RenderType"="Opaque" }
-        LOD 200
+		Tags { "RenderType"="Opaque" }
+		LOD 200
 
-        CGPROGRAM
-        // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows
+		CGPROGRAM
+		// Physically based Standard lighting model, and enable shadows on all light types
+		#pragma surface surf Standard fullforwardshadows
 		#pragma vertex vert
-        // Use shader model 3.0 target, to get nicer looking lighting
-        #pragma target 3.0
+		// Use shader model 3.0 target, to get nicer looking lighting
+		#pragma target 3.0
 
 		#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 
-        sampler2D _MainTex;
+		sampler2D _MainTex;
 
-        struct Input
-        {
-            float2 uv_MainTex;
+		struct Input
+		{
+			float2 uv_MainTex;
 			float3 localPos;
 			float3 worldPos;
-        };
+		};
 
-        half _Glossiness;
-        half _Metallic;
+		half _Glossiness;
+		half _Metallic;
 		half _StippleMix;
 		half _StippleFreq;
 		half _WorldScale;
 		half _Emission, _Albedo;
-        fixed4 _Color;
+		fixed4 _Color;
 		float _PlaidWatch;
 		float _Amplitude;
 
-        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-        // #pragma instancing_options assumeuniformscaling
-        UNITY_INSTANCING_BUFFER_START(Props)
-            // put more per-instance properties here
-        UNITY_INSTANCING_BUFFER_END(Props)
+		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+		// #pragma instancing_options assumeuniformscaling
+		UNITY_INSTANCING_BUFFER_START(Props)
+			// put more per-instance properties here
+		UNITY_INSTANCING_BUFFER_END(Props)
 
  
 		void vert (inout appdata_full v, out Input o) 
@@ -95,10 +95,10 @@
 			o.localPos = v.vertex.xyz;
 			o.worldPos =  mul(  unity_ObjectToWorld, v.vertex.xyzw );
 		}
-        void surf (Input IN, inout SurfaceOutputStandard o)
-        {
-            // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+		void surf (Input IN, inout SurfaceOutputStandard o)
+		{
+			// Albedo comes from a texture tinted by color
+			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			float3 worldpos = IN.worldPos*10.*_WorldScale;
 
 			static const float4 plaidoffsets[3] = {
@@ -139,10 +139,10 @@
 			float fpv = _PlaidWatch - fpi;
 
 			float4 plaidoffset   = lerp( plaidoffsets  [fpi], plaidoffsets  [fpi+1], fpv );
-			float4 plaidmuxA     = lerp( plaidmuxAs    [fpi], plaidmuxAs    [fpi+1], fpv );
-			float4 plaidmuxB     = lerp( plaidmuxBs    [fpi], plaidmuxBs    [fpi+1], fpv );
-			float4 plaidscalA    = lerp( plaidscalAs   [fpi], plaidscalAs   [fpi+1], fpv );
-			float4 plaidscalB    = lerp( plaidscalBs   [fpi], plaidscalBs   [fpi+1], fpv );
+			float4 plaidmuxA	 = lerp( plaidmuxAs	[fpi], plaidmuxAs	[fpi+1], fpv );
+			float4 plaidmuxB	 = lerp( plaidmuxBs	[fpi], plaidmuxBs	[fpi+1], fpv );
+			float4 plaidscalA	= lerp( plaidscalAs   [fpi], plaidscalAs   [fpi+1], fpv );
+			float4 plaidscalB	= lerp( plaidscalBs   [fpi], plaidscalBs   [fpi+1], fpv );
 			float4 plaidoffsetA  = lerp( plaidoffsetAs [fpi], plaidoffsetAs [fpi+1], fpv );
 			float4 plaidoffsetB  = lerp( plaidoffsetBs [fpi], plaidoffsetBs [fpi+1], fpv );
 			float4 wildcardColor = lerp( wildcardColors[fpi], wildcardColors[fpi+1], fpv );
@@ -203,14 +203,14 @@
 
 			float4 plaid = lerp( cnonstipple, cstipple, _StippleMix );
 			c = lerp( c, plaid, 1.-c.a);
-            o.Albedo = c.rgb * _Albedo * _Amplitude;
-            // Metallic and smoothness come from slider variables
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
+			o.Albedo = c.rgb * _Albedo * _Amplitude;
+			// Metallic and smoothness come from slider variables
+			o.Metallic = _Metallic;
+			o.Smoothness = _Glossiness;
 			o.Emission = c.rgb * _Emission * _Amplitude;
-            o.Alpha = c.a * _Amplitude;
-        }
-        ENDCG
-    }
-    FallBack "Diffuse"
+			o.Alpha = c.a * _Amplitude;
+		}
+		ENDCG
+	}
+	FallBack "Diffuse"
 }
