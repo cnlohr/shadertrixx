@@ -814,6 +814,8 @@ NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) F
 
 Sometimes Esnya tools is useful, especially for finding broken refernces to Udon Scripts, etc. https://github.com/esnya/EsnyaUnityTools/releases 
 
+MAJOR NOTE: EXPERIMENTAL: If you have prefabs missing script references, you will need to reimport your prefabs.  Simply select the prefab that is trobuled, click "Select Prefab Asset" then click "Reimport."  Alternatively, select the package your prefab is part of and say "reimport"
+
 ## When opening worlds from git using the .gitignore file from here
 
 1. Open project in Unity Hub for correct version of Unity.
