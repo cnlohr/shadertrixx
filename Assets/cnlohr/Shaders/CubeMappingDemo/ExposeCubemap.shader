@@ -1,4 +1,4 @@
-﻿Shader "cnlohr/ExposeSpheremap"
+﻿Shader "cnlohr/ExposeCubemap"
 {
 	Properties
 	{
