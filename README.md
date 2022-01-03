@@ -1048,6 +1048,16 @@ In your code:
 // Do stuff
 ```
 
+## Variants you can ditch (thanks, 3)
+
+If you're on an avatar you can likely ditch all these.
+
+```glsl
+#pragma skip_variants DYNAMICLIGHTMAP_ON LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING DIRLIGHTMAP_COMBINED
+```
+
+Also, it is likely `SHADOWS_SHADOWMASK` can be ignored, too.
+
 ## VRChat "Build & Test" Overrides
 
 You can insert additional parameters into VRC for "Build & Test" with the following (compiled TCC build of code included.) For instance, this one adds the `--fps=0` command-line parameter.
