@@ -33,6 +33,10 @@
 			#pragma multi_compile_local _ HANDLE_SHADOWMAP
 
 			#pragma multi_compile_fwdadd_fullshadows
+			
+			// 3's list of skippable variants.
+			#pragma skip_variants DYNAMICLIGHTMAP_ON LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING DIRLIGHTMAP_COMBINED
+			// SHADOWS_SHADOWMASK  // Potentially can be dropped.
 
 			// make fog work
 			//#pragma multi_compile_fog
