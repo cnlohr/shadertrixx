@@ -423,7 +423,7 @@ namespace UdonSharp
 					b.UpdateProxy();
 					if( b.brokeredUpdateManager == null )
 					{
-						Debug.LogError($"[<color=#FF00FF>BrokeredSync</color>] Missing brokeredUpdateManager reference on {b.gameObject.name}");
+						Debug.LogError($"[<color=#FF00FF>BrokeredSync</color>] Missing brokeredUpdateManager reference on {b.gameObject.name}", go);
 						typeof(UnityEditor.SceneView).GetMethod("ShowNotification", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static).Invoke(null, new object[] { $"BrokeredSync missing brokeredUpdateManager reference on {b.gameObject.name}" });
 						return false;				
 					}
