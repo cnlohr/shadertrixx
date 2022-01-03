@@ -400,9 +400,13 @@
 		Pass
 		{
 			Tags {"LightMode"="ShadowCaster"}
+
+			// DO NOT UNCOMMENT THIS IT WILL CRASH AMD USERS.
 			//Cull Off
+
 			CGPROGRAM
 			
+			// Vert, Tess, and Geo Shaders are in CGINC.
 
 			fixed4 frag (g2f i) : SV_Target
 			{
