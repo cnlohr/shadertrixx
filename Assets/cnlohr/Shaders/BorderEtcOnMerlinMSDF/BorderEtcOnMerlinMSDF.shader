@@ -13,6 +13,9 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
         _FadeNear ("Fade Near", float) = 2.0
         _FadeCull ("Fade Cull", float) = 3.0
         _FadeSharpness ("Fade Range", float ) = 1
+		_BorderStroke ("Border Stroke", float ) = 1
+		_FeatherHint( "Feather Hint", float ) = .33
+		[HDR]_BorderColor( "Border Color", Color) = (0,0,0,0)
         [HDR]_Colorize ("Colorize", Color) = (1,1,1,1)
 		[HideInInspector]_PixelRange("Pixel Range", Float) = 4.0
     }
@@ -66,6 +69,9 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
             float _FadeCull;
 			float _PixelRange;
             float _FadeNear, _FadeSharpness;
+			float _BorderStroke;
+			float4 _BorderColor;
+			float _FeatherHint;
 			sampler2D _MSDFTex; float4 _MSDFTex_TexelSize;
 
             
@@ -166,12 +172,13 @@ Shader "GUI/BorderEtcOnMerlinMSDF"
 				// Black outline			
 				float sigmux;
 				float MSDF = MSDFn( o.uv, sigmux );
-				colo.a = MSDF+.33*sigmux;
-				colo.rgb = MSDF-.2*sigmux;
-				colo = saturate(colo);
+				float inten = MSDF-.2*sigmux*_BorderStroke;
+				inten = saturate( inten );
+				colo.rgb = lerp( _BorderColor.rgb, _Colorize.rgb, inten );
+				colo.a = MSDF+_FeatherHint*sigmux*_BorderStroke;
 				colo.a *= pow( saturate( 1 + (_FadeNear - length( o.camrelpos )) ), 2 );
+				colo.a = saturate(colo.a);
 				o.color = colo;
-                o.color *= _Colorize;         
                 return o.color;
             }
             ENDCG
