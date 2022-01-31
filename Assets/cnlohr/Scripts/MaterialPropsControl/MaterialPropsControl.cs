@@ -176,33 +176,38 @@ namespace MaterialPropsContainer
 		public void _InternalSlideUpdate()
 		{
 			int i;
+			int m;
+			int NUM_MATS = SetMaterials.Length;
+			for (m = 0; m < NUM_MATS; m++ )
 			for (i = 0; i < NUM_ELEMS; i++)
 			{
 				if (!Sliders[i]) break;
 				if( ValueMinMax[i].w > 1.5 )
 				{
+					// .w == 2 -> enable/disable
 					if( Sliders[i].value > 0.5 )
 					{
-						SetMaterials[i].EnableKeyword(Sliders[i].name);
-						SetMaterials[i].SetInt(Sliders[i].name, 1);
-						Texts[i].text = Sliders[i].name + " Enable";
+						SetMaterials[m].EnableKeyword(Sliders[i].name);
+						SetMaterials[m].SetInt(Sliders[i].name, 1);
+						Texts[i].text = Sliders[i].name + " Enabled";
 					}
 					else
 					{
-						SetMaterials[i].DisableKeyword(Sliders[i].name);
-						SetMaterials[i].SetInt(Sliders[i].name, 0);
-						Texts[i].text = Sliders[i].name + " Disable";
+						SetMaterials[m].DisableKeyword(Sliders[i].name);
+						SetMaterials[m].SetInt(Sliders[i].name, 0);
+						Texts[i].text = Sliders[i].name + " Disabled";
 					}
 				}
 				else if( ValueMinMax[i].w > 0.5 )
 				{
-					SetMaterials[i].SetInt(Sliders[i].name, (int)(Sliders[i].value));
+					// .w == 1 -> Integer
+					SetMaterials[m].SetInt(Sliders[i].name, (int)(Sliders[i].value));
 					Texts[i].text = string.Format(Sliders[i].name + ":{0:n0}", (int)Sliders[i].value);
 				}
 				else
 				{
 					Texts[i].text = string.Format(Sliders[i].name + ":{0:n3}", Sliders[i].value);
-					SetMaterials[i].SetFloat(Sliders[i].name, Sliders[i].value);
+					SetMaterials[m].SetFloat(Sliders[i].name, Sliders[i].value);
 				}
 				if( Global )
 				{
