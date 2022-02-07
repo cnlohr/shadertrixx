@@ -9,10 +9,10 @@ namespace MaterialPropsContainer
 	public class MaterialPropsSlider : UdonSharpBehaviour
 	{
 		public GameObject ToCall;
-		public void _SlideUpdate()
+		public void _ValueUpdate()
 		{
 			MaterialPropsControl mpc = (MaterialPropsControl)ToCall.GetComponent<MaterialPropsControl>();
-			mpc._SlideUpdate();
+			mpc._ValueUpdate();
 		}
 		void Start()
 		{

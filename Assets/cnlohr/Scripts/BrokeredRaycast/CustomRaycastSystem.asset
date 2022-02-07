@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: CustomRaycastSystem
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 2037050e42884d24b8d7a9b35307c810,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: bae84222c9b052247ad5e213681fe43c,
     type: 2}
   udonAssembly: 
   assemblyError: 

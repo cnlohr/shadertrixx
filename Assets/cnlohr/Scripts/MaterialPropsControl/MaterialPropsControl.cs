@@ -19,8 +19,6 @@ namespace MaterialPropsContainer
 	[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 	public class MaterialPropsControl : UdonSharpBehaviour
 	{
-		
-		
 		public string [] ParameterNames;
 		public Vector4 [] ValueMinMax;
 		public Material [] SetMaterials;
@@ -41,15 +39,38 @@ namespace MaterialPropsContainer
 		#region SlidersAndText
 		public GameObject TemplateSlider;
 		public GameObject TemplateText;
+		public GameObject TemplateToggle;
 
 		private int NUM_ELEMS = 10;
 
 		private Slider[] Sliders;
-		private int NumSliders;
+		private Toggle[] Toggles;
+		private int NumSlidersOrToggles;
 		private Text[] Texts;
 		private int NumTexts;
 		private float StartTime;
 		private bool bStarted = false;
+
+		Toggle SpawnToggle(string name, Vector2 location)
+		{
+			GameObject _ToggleGO = VRCInstantiate( TemplateToggle );
+			_ToggleGO.SetActive(true);
+			_ToggleGO.transform.SetParent(transform, false);
+			_ToggleGO.transform.transform.GetChild(0).localPosition = location;
+
+			Transform so = _ToggleGO.GetComponent<Transform>().Find("Toggle");
+			Toggle t = so.GetComponent<Toggle>();
+
+			MaterialPropsSlider sl = so.GetComponent<MaterialPropsSlider>();
+			if( Utilities.IsValid( sl ) )
+				sl.ToCall = gameObject;
+
+			t.name = name;
+			Toggles[NumSlidersOrToggles++] = t;
+
+			return t;
+		}
+
 
 		Slider SpawnSlider(string name, Vector2 location)
 		{
@@ -66,7 +87,7 @@ namespace MaterialPropsContainer
 				sl.ToCall = gameObject;
 
 			s.name = name;
-			Sliders[NumSliders++] = s;
+			Sliders[NumSlidersOrToggles++] = s;
 			return s;
 		}
 
@@ -93,6 +114,7 @@ namespace MaterialPropsContainer
 			return null;
 		}
 
+/*
 		Slider GetSliderByName(string name)
 		{
 			int i;
@@ -103,19 +125,29 @@ namespace MaterialPropsContainer
 			}
 			return null;
 		}
+*/
 
 		/*USEFUL:
 		 *	t.transform.transform.localPosition
 		 */
 		#endregion
 
-		void SpawnProp( string name, int line, float value, float min, float max )
+		void SpawnProp( string name, int line, float value, float min, float max, bool bSlider )
 		{
-			Slider s = SpawnSlider( name, new Vector2(140, line));
-			Text t = SpawnText( name+"Text", new Vector2(-120, line-8));
-			s.minValue = min;
-			s.maxValue = max;
-			s.value = value;
+			if( bSlider )
+			{
+				Slider s = SpawnSlider( name, new Vector2(140, line));
+				Text t = SpawnText( name+"Text", new Vector2(-120, line-8));
+				s.minValue = min;
+				s.maxValue = max;
+				s.value = value;
+			}
+			else
+			{
+				Toggle t = SpawnToggle( name, new Vector2(180, line-10 ));
+				Text x = SpawnText( name+"Text", new Vector2(-120, line-8));
+				t.isOn = value>0.5;
+			}
 		}
 
 		void Start()
@@ -123,12 +155,15 @@ namespace MaterialPropsContainer
 			StartTime = Time.time;
 			NUM_ELEMS = ParameterNames.Length;
 			Sliders = new Slider[NUM_ELEMS];
+			Toggles = new Toggle[NUM_ELEMS];
 			Texts = new Text[NUM_ELEMS];
+
 			int i;
 			for( i = 0; i < NUM_ELEMS; i++ )
 			{
-				SpawnProp(ParameterNames[i], -i*30, ValueMinMax[i].x, ValueMinMax[i].y, ValueMinMax[i].z);			
+				SpawnProp( ParameterNames[i], -i*30, ValueMinMax[i].x, ValueMinMax[i].y, ValueMinMax[i].z, (ValueMinMax[i].w<=1.5) );
 			}
+
 			if( Networking.IsMaster )
 			{
 				for (i = 0; i < NUM_ELEMS; i++)
@@ -147,7 +182,8 @@ namespace MaterialPropsContainer
 				Networking.SetOwner( Networking.LocalPlayer, gameObject );
 				RequestSerialization();
 			}
-			_InternalSlideUpdate();
+
+			_InternalSlideUpdate( false );
 			bStarted = true;
 		}
 		
@@ -158,22 +194,22 @@ namespace MaterialPropsContainer
 				int i;
 				for (i = 0; i < NUM_ELEMS; i++)
 				{
-					if( i == 0 ) { Sliders[i].value = v0; }
-					if( i == 1 ) { Sliders[i].value = v1; }
-					if( i == 2 ) { Sliders[i].value = v2; }
-					if( i == 3 ) { Sliders[i].value = v3; }
-					if( i == 4 ) { Sliders[i].value = v4; }
-					if( i == 5 ) { Sliders[i].value = v5; }
-					if( i == 6 ) { Sliders[i].value = v6; }
-					if( i == 7 ) { Sliders[i].value = v7; }
-					if( i == 8 ) { Sliders[i].value = v8; }
-					if( i == 9 ) { Sliders[i].value = v9; }
+					if( i == 0 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v0>0.5; else Sliders[i].value = v0; }
+					if( i == 1 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v1>0.5; else Sliders[i].value = v1; }
+					if( i == 2 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v2>0.5; else Sliders[i].value = v2; }
+					if( i == 3 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v3>0.5; else Sliders[i].value = v3; }
+					if( i == 4 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v4>0.5; else Sliders[i].value = v4; }
+					if( i == 5 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v5>0.5; else Sliders[i].value = v5; }
+					if( i == 6 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v6>0.5; else Sliders[i].value = v6; }
+					if( i == 7 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v7>0.5; else Sliders[i].value = v7; }
+					if( i == 8 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v8>0.5; else Sliders[i].value = v8; }
+					if( i == 9 ) { if( ValueMinMax[i].w > 1.5 ) Toggles[i].isOn = v9>0.5; else Sliders[i].value = v9; }
 				}
-				_InternalSlideUpdate();
+				_InternalSlideUpdate( false );
 			}
 		}
 
-		public void _InternalSlideUpdate()
+		public void _InternalSlideUpdate( bool doSync )
 		{
 			int i;
 			int m;
@@ -181,55 +217,67 @@ namespace MaterialPropsContainer
 			for (m = 0; m < NUM_MATS; m++ )
 			for (i = 0; i < NUM_ELEMS; i++)
 			{
-				if (!Sliders[i]) break;
+				float value = 0;
+
 				if( ValueMinMax[i].w > 1.5 )
 				{
+					if( !Toggles[i] ) break;
+
+					value = Toggles[i].isOn?1:0;
+
 					// .w == 2 -> enable/disable
-					if( Sliders[i].value > 0.5 )
+					if( value > 0.5 )
 					{
-						SetMaterials[m].EnableKeyword(Sliders[i].name);
-						SetMaterials[m].SetInt(Sliders[i].name, 1);
-						Texts[i].text = Sliders[i].name + " Enabled";
+						SetMaterials[m].EnableKeyword(Toggles[i].name);
+						SetMaterials[m].SetInt(Toggles[i].name, 1);
+						Texts[i].text = Toggles[i].name + " Enabled";
 					}
 					else
 					{
-						SetMaterials[m].DisableKeyword(Sliders[i].name);
-						SetMaterials[m].SetInt(Sliders[i].name, 0);
-						Texts[i].text = Sliders[i].name + " Disabled";
+						SetMaterials[m].DisableKeyword(Toggles[i].name);
+						SetMaterials[m].SetInt(Toggles[i].name, 0);
+						Texts[i].text = Toggles[i].name + " Disabled";
 					}
 				}
 				else if( ValueMinMax[i].w > 0.5 )
 				{
+					if (!Sliders[i]) break;
 					// .w == 1 -> Integer
-					SetMaterials[m].SetInt(Sliders[i].name, (int)(Sliders[i].value));
-					Texts[i].text = string.Format(Sliders[i].name + ":{0:n0}", (int)Sliders[i].value);
+					value = Sliders[i].value;
+					SetMaterials[m].SetInt( Sliders[i].name, (int)(value));
+					Texts[i].text = string.Format( Sliders[i].name + ":{0:n0}", (int)value );
 				}
 				else
 				{
-					Texts[i].text = string.Format(Sliders[i].name + ":{0:n3}", Sliders[i].value);
-					SetMaterials[m].SetFloat(Sliders[i].name, Sliders[i].value);
+					if (!Sliders[i]) break;
+					value = Sliders[i].value;
+					Texts[i].text = string.Format( Sliders[i].name + ":{0:n3}", value );
+					SetMaterials[m].SetFloat( Sliders[i].name, value );
 				}
-				if( Global )
+				
+				if( Global && doSync )
 				{
-					if( i == 0 ) { v0 = Sliders[i].value; }
-					if( i == 1 ) { v1 = Sliders[i].value; }
-					if( i == 2 ) { v2 = Sliders[i].value; }
-					if( i == 3 ) { v3 = Sliders[i].value; }
-					if( i == 4 ) { v4 = Sliders[i].value; }
-					if( i == 5 ) { v5 = Sliders[i].value; }
-					if( i == 6 ) { v6 = Sliders[i].value; }
-					if( i == 7 ) { v7 = Sliders[i].value; }
-					if( i == 8 ) { v8 = Sliders[i].value; }
-					if( i == 9 ) { v9 = Sliders[i].value; }
+					if( i == 0 ) { v0 = value; }
+					if( i == 1 ) { v1 = value; }
+					if( i == 2 ) { v2 = value; }
+					if( i == 3 ) { v3 = value; }
+					if( i == 4 ) { v4 = value; }
+					if( i == 5 ) { v5 = value; }
+					if( i == 6 ) { v6 = value; }
+					if( i == 7 ) { v7 = value; }
+					if( i == 8 ) { v8 = value; }
+					if( i == 9 ) { v9 = value; }
 				}
 			}
 		}
 
-		public void _SlideUpdate()
+		public void _ValueUpdate()
 		{
-			_InternalSlideUpdate();
+			_InternalSlideUpdate( StartTime + 5 < Time.time  );
+			Debug.Log( StartTime + 5 < Time.time  );
+			Debug.Log( "VALUE UPDATE\n" );
 			// Don't allow settings to be changed for first 5 seconds of load, so we can get a sync from others.
-			if( bStarted && Global && StartTime + 5 < Time.time )
+			if( bStarted && Global )
 			{
 				Networking.SetOwner( Networking.LocalPlayer, gameObject );
 				RequestSerialization();
