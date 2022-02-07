@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: MaterialPropsControl
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: dc3de25373c89404581df4c3212e170c,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 0d48de8b1a7f4d041a492ebfe511cc8b,
     type: 2}
   udonAssembly: 
   assemblyError: 
