@@ -51,18 +51,21 @@ Shader "bgolus/WorldNormalFromDepth"
             // https://github.com/keijiro/DepthInverseProjection
             // constructs view space ray at the far clip plane from the screen uv
             // then multiplies that ray by the linear 01 depth
-            float3 viewSpacePosAtScreenUV(float2 uv)
-            {
-#if defined(USING_STEREO_MATRICES)
-                float3 viewSpaceRay = mul(unity_StereoCameraInvProjection[UNITY_MATRIX_P._13 < 0], float4(uv * 2.0 - 1.0, 1.0, 1.0) * _ProjectionParams.z);
-#else
-                float3 viewSpaceRay = mul(unity_CameraInvProjection, float4(uv * 2.0 - 1.0, 1.0, 1.0) * _ProjectionParams.z);
-#endif
-                float rawDepth = Linear01Depth( getRawDepth(uv) );
+			// later modified by DocMe for VR.
+			float3 viewSpacePosAtScreenUV(float2 uv)
+			{
+				float rawDepth = Linear01Depth( getRawDepth(uv) );
+				#ifdef UNITY_SINGLE_PASS_STEREO
+					uv -= unity_StereoScaleOffset[unity_StereoEyeIndex].zw;
+					uv /= unity_StereoScaleOffset[unity_StereoEyeIndex].xy;
+				#endif
+				float3 viewSpaceRay = mul(unity_CameraInvProjection, float4(uv * 2.0 - 1.0, 1.0, 1.0) * _ProjectionParams.z);
+
                 // Added by CNL - discard skybox.
                 if( rawDepth >= .99999 ) discard;
-                return viewSpaceRay * rawDepth;
-            }
+				return viewSpaceRay * rawDepth;
+			}
+
             float3 viewSpacePosAtPixelPosition(float2 vpos)
             {
                 float2 uv = vpos * _CameraDepthTexture_TexelSize.xy;
