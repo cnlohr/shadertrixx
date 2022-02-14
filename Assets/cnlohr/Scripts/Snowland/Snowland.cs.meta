@@ -1,9 +1,17 @@
 fileFormatVersion: 2
-guid: 62837ee33c6ce654d9de2e5a01727f9c
+guid: ffe0d75adb4df2f41b96b0390e389255
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - camTop: {instanceID: 0}
+  - camBot: {instanceID: 0}
+  - rtDepthThrowawayColorTop: {fileID: 8400000, guid: eb181d2b548fb6141b43b942142780b9,
+      type: 2}
+  - rtDepthThrowawayColorBot: {fileID: 8400000, guid: d30257fcfd34c50439ffbe9c609d54db,
+      type: 2}
+  - rtTop: {fileID: 8400000, guid: f53a5501f7a955c43b5f47480bcc4af3, type: 2}
+  - rtBot: {fileID: 8400000, guid: 7e54ef662d317664ebefee50f0f34c76, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

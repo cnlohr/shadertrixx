@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SnowCalcCRT
-  m_Shader: {fileID: 4800000, guid: e56b22ea412d9154d80308312b0ba2cf, type: 3}
+  m_Shader: {fileID: 4800000, guid: f4e16fc4e0dfb8d408f5e10e924f382b, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -77,7 +77,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ResetTrigger: 0
+    - _ResetTrigger: -0.26
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

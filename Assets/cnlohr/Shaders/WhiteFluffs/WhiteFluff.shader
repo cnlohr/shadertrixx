@@ -113,9 +113,12 @@
 
 
 				//We don't use unity_StereoCameraToWorld here because we don't want things to look like flat impostors.
-				float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
-				
-				
+				#if defined(USING_STEREO_MATRICES)
+					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
+				#else
+					float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
+				#endif
+
 				float3 worldpos = glsl_mod( (iworldpos/ingridsize)*outgridsize/nrelem - PlayerCenterCamera, outgridsize )
 					+ PlayerCenterCamera - outgridsize/2.;
 				float3 worldfloor = floor(worldpos+0.5)*outgridsize;
@@ -143,7 +146,7 @@
 				//hitworld = calcworld;
 				
 				
-				float fadeout = max3( abs(_WorldSpaceCameraPos-hitworld) / farview );
+				float fadeout = max3( abs(PlayerCenterCamera-hitworld) / farview );
 				//If fadeout approaches 1 - need to fade out.  Otherwise we're close.
 				
 				float fadeamount = pow( min( max(maxfaderatio-fadeout,0.)/fadeoutdistratio, 1.),.99);
@@ -154,7 +157,7 @@
 				o.debugcolor = float4(gicolor, 1.)*1.4*fadeamount.xxxx;
 				//o.debugcolor = fadeamount.xxxx * fluffcolor;
 				
-				float3 hitworld_relative_to_camera = -hitworld + _WorldSpaceCameraPos;
+				float3 hitworld_relative_to_camera = -hitworld + PlayerCenterCamera;
 				float3 viewangle = normalize( hitworld_relative_to_camera );
 				float3 down = float3( 0, -1, 0 );
 				float3 left = normalize( cross( down, viewangle ) );
@@ -167,7 +170,7 @@
 				float3 usedown = ldown;//lerp( down, ldown, _TrackDownUp );
 
 				float3 BillboardVertex = 
-					-hitworld_relative_to_camera + _WorldSpaceCameraPos+
+					-hitworld_relative_to_camera + PlayerCenterCamera+
 						( 
 							float4(rcuv.x * left, 0 ) +
 							float4(-rcuv.y * usedown, 0 ) 
