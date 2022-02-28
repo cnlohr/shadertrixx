@@ -90,6 +90,25 @@ bool isPanorama() {
 }
 ```
 
+Layers!  Thanks, Lyuma
+```
+First of all, make sure you have layers set up,
+The common practice now is to add them by hand, using this reference:
+
+http://vrchat.wikidot.com/worlds:layers
+
+(The numbers are what matter). Edit -> Project Settings... -> Tags and Layers on the left pane.
+The only important ones for avatars are:
+9 -> Player
+10 -> PlayerLocal
+12 -> UIMenu
+18 -> MirrorReflection
+PlayerLocal = your local avatar with head chopped off
+MirrorReflection = your local avatar as it appears in mirrors and cameras
+Player = remote players
+UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera preview)
+```
+
 Get eye / in / not in VR by D4rkPl4y3r, vetted by III
 
  * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
