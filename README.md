@@ -1124,6 +1124,7 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
+ * https://ambientcg.com/list << For PBR materials (Normal/Bump, Displacement, Diffuse, Roughness)
  * https://quaternius.com/
  * https://www.kenney.nl/assets
  * https://www.davidoreilly.com/library
