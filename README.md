@@ -16,7 +16,7 @@ Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum p
 
 ## Alert for early 2022
 
-VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I.  From ERROR.mdl: "Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below."
+VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I. Do the following: Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below.
 
 ## Struggling with shader type mismatches?
 
