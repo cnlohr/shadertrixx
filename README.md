@@ -527,7 +527,7 @@ Note: Don't forget to add `alpha` if you are using alpha!
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
 ```glsl
-sampler2D _CameraDepthTexture;
+UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 ```
 
 ### Option 1: Use a varying, `screenPosition`
@@ -699,6 +699,8 @@ grabuv.y = 1 - grabuv.y;
 #endif
 fixed4 col = tex2D(_GrabTexture, grabuv);
 ```
+
+NOTE: In the below we use Texture2D - but this will go away soon.  You should use `UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );` in all situations moving forward
 
 Or, alternatively, if you would like pixel-perfect operations:
 ```glsl
