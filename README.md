@@ -784,6 +784,20 @@ foreach( UnityEngine.GameObject go in GameObject.FindObjectsOfType(typeof(GameOb
 
 `GetUdonSharpComponentsInChildren` is the magic thing.  **PLEASE NOTE** You must use `UpdateProxy()` before reading from and `ApplyProxyModifications()` when done.
 
+## Using CRTs with integer indexing:
+
+```glsl
+            // This changes _SelfTexture2D in 'UnityCustomRenderTexture.cginc' to Texture2D instead of sampler2D
+            // Thanks Lyuma!
+            #define _SelfTexture2D _JunkTexture
+            #include "UnityCustomRenderTexture.cginc"
+            #undef _SelfTexture2D
+            Texture2D<float4>   _SelfTexture2D;
+
+            #include "UnityCG.cginc"
+            #include "AudioLink.cginc"
+            uniform half4 _SelfTexture2D_TexelSize;
+```
 
 ## MRT
 
