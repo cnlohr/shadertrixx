@@ -14,6 +14,10 @@ Also note: Using this trick in some situations actually produces smaller code th
 
 Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
 
+## Alert for early 2022
+
+VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I.  From ERROR.mdl: "Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below."
+
 ## Struggling with shader type mismatches?
 
 You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
