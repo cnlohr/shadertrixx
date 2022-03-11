@@ -18,6 +18,22 @@ Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum p
 
 VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I. Do the following: Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below.
 
+### Converting Camera Depth Texture
+```glsl
+Was:
+  sampler2D _CameraDepthTexture;
+  float depth = LinearEyeDepth( UNITY_SAMPLE_DEPTH( tex2D( _CameraDepthTexture, screenUV ) ) );
+
+Or
+
+  Texture2D _CameraDepthTexture;
+  float depth = LinearEyeDepth( _CameraDepthTexture.Sample( sampler_CameraDepthTexture, screenUV ) );
+
+Now:
+  UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
+  float depth = LinearEyeDepth( SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV) );
+```
+
 ## Struggling with shader type mismatches?
 
 You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
