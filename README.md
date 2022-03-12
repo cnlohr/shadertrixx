@@ -20,6 +20,11 @@ VRChat is switching to SPS-I.  Please perform the following to test your shaders
 
 ### Add instancing support
 
+Add this to your appdata:
+```glsl
+	UNITY_VERTEX_INPUT_INSTANCE_ID;
+```
+
 Add this to your `v2f` struct:
 ```glsl
 	UNITY_VERTEX_OUTPUT_STEREO;
