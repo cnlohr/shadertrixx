@@ -443,6 +443,11 @@ Just wrap your stuff in a
 #endif
 ```
 
+## Surface Shader Pragmas
+
+This contains a comprehensive list of pragmas you can use with surface shaders: https://docs.unity3d.com/Manual/SL-SurfaceShaders.html I.e. `nometa` `fullforwardshadows` `alpha`.
+
+
 ## Default Texture Parameters
 
 Default values available for texture properties:
