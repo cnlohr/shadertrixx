@@ -18,14 +18,33 @@ Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum p
 
 VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I. Do the following: Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below.
 
+### Add instancing support
+
+Add this to your `v2f` struct:
+```glsl
+	UNITY_VERTEX_OUTPUT_STEREO;
+```
+
+Add this to your `vertex` shader:
+```glsl
+	UNITY_SETUP_INSTANCE_ID( v );
+	UNITY_INITIALIZE_OUTPUT( v2f, o );
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+```
+
+In your `fragment` shader:
+```glsl
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
+```
+
+
 ### Converting Camera Depth Texture
 ```glsl
 Was:
   sampler2D _CameraDepthTexture;
   float depth = LinearEyeDepth( UNITY_SAMPLE_DEPTH( tex2D( _CameraDepthTexture, screenUV ) ) );
 
-Or
-
+Or:
   Texture2D _CameraDepthTexture;
   float depth = LinearEyeDepth( _CameraDepthTexture.Sample( sampler_CameraDepthTexture, screenUV ) );
 
