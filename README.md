@@ -434,6 +434,8 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
 ```
 ## Surface Shaders hate advanced features
 
+Are you trying to use Texture.Load with a surface shader? Does it say something like `Unexpected identifier "Texture2D". Expected one of: typedef const void inline uniform nointerpolation extern shared static volatile row_major column_major struct or a user-defined type`
+
 Just wrap your stuff in a
 ```
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
