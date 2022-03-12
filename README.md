@@ -37,11 +37,16 @@ Add this to your `vertex` shader:
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 ```
 
-In your `fragment` shader:
+In your `fragment` - or ANY other shaders that ostensibly take in the `v2f` struct, i.e. `patch`, `hull`:
 ```glsl
 	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 ```
 
+If you are using a `domain` shader, you will need something like this:
+```glsl
+	UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
+```
 
 ### Converting Camera Depth Texture
 ```glsl
