@@ -710,6 +710,177 @@ Shader "Unlit/meme"
 }
 ```
 
+## Tessellation Shader Examples
+
+ERROR.mdl provides this tessellation shader:
+
+```glsl
+
+Shader "Error.mdl/Single Pass Stereo Instancing Example" {
+Properties {
+
+	_TesselationUniform("Tesselation Factor", Float) = 1
+	_Color("Color", color) = (0,0.7,0.9,1)
+}
+
+SubShader {
+	Tags { "RenderType"="Opaque" "Queue"="Transparent+50" }
+	LOD 100
+	Blend SrcAlpha OneMinusSrcAlpha
+
+	
+	Pass {  
+		CGPROGRAM
+			#include "UnityCG.cginc"
+			#pragma vertex VertexProgram
+			#pragma hull HullProgram
+			#pragma domain DomainProgram
+			#pragma geometry GeometryProgram
+			#pragma fragment frag
+			#pragma target 5.0
+			
+
+			struct appdata_t {
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+				float3 normal : NORMAL;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+			
+			struct appdata_tess {
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+				float3 normal : NORMAL;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
+
+			struct v2f {
+				float4 vertex : SV_POSITION;
+				float2 texcoord : TEXCOORD0;
+				float3 normal : NORMAL;
+				float3 wPos : TEXCOORD1;
+				UNITY_FOG_COORDS(2)
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
+
+			struct TesFact
+			{
+				float edge[3] : SV_TessFactor;
+				float inside : SV_InsideTessFactor;
+			};
+
+			float4 _Color;
+			float _TesselationUniform;
+
+			appdata_tess VertexProgram (appdata_t v)
+			{
+				appdata_tess t;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_INITIALIZE_OUTPUT(appdata_tess, t);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+
+				t.vertex = v.vertex;
+				t.texcoord = v.texcoord;
+				t.normal = v.normal;
+
+				return t;
+			}
+
+			TesFact PatchConstFunc(InputPatch<appdata_tess, 3> patch)
+			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
+				TesFact f;
+				float tessFactor = _TesselationUniform;
+				f.edge[0] = tessFactor;
+				f.edge[1] = tessFactor;
+				f.edge[2] = tessFactor;
+				f.inside = tessFactor;
+				return f;
+			}
+
+			//Not the actual vertex program, is function called by the domain program to do all the stuff the vertex normally does 
+			v2f DomainVert(appdata_tess v)
+			{
+				v2f o;
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+				o.texcoord = v.texcoord;
+				//float4 offset = tex2Dlod(_DepthTex, float4(o.texcoord.x,o.texcoord.y,0,0));
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.normal = UnityObjectToWorldNormal(v.normal);
+				o.wPos = mul(unity_ObjectToWorld, v.vertex);
+				UNITY_TRANSFER_FOG(o, o.vertex);
+				return o;
+			}
+
+
+			[UNITY_domain("tri")]
+			[UNITY_outputcontrolpoints(3)]
+			[UNITY_outputtopology("triangle_cw")]
+			[UNITY_partitioning("fractional_odd")]
+			[UNITY_patchconstantfunc("PatchConstFunc")]
+			appdata_tess HullProgram(InputPatch<appdata_tess, 3> patch,
+				uint id : SV_OutputControlPointID)
+			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[id]);
+				return patch[id];
+			}
+
+			[UNITY_domain("tri")]
+			v2f DomainProgram(
+				TesFact factors,
+				OutputPatch<appdata_tess, 3> patch,
+				float3 barycentrCoords : SV_DomainLocation,
+				uint pid : SV_PrimitiveID
+			) {
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
+
+				appdata_tess data;
+
+#define DOMAIN_INTERPOLATE(fieldName) data.fieldName = \
+		patch[0].fieldName * barycentrCoords.x + \
+		patch[1].fieldName * barycentrCoords.y + \
+		patch[2].fieldName * barycentrCoords.z;
+
+				DOMAIN_INTERPOLATE(vertex);
+				DOMAIN_INTERPOLATE(texcoord);
+				DOMAIN_INTERPOLATE(normal);
+
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
+				
+				return DomainVert(data);
+			}
+
+
+			[maxvertexcount(3)]
+			void GeometryProgram(triangle v2f p[3], inout LineStream<v2f> triStream)
+			{
+
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[0]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[1]);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[2]);
+
+				triStream.Append(p[0]);
+				triStream.Append(p[1]);
+				triStream.Append(p[2]);
+			}
+			
+			float4 frag(v2f i) : SV_Target
+			{
+				float facing = sign(dot(i.normal, _WorldSpaceCameraPos - i.wPos));
+				return facing > 0 ? _Color : float4(0,0,0,0.2);
+			}
+		ENDCG
+	}
+}
+}
+```
+
 ## Using depth cameras on avatars.
 
 If an avatar has a grab pass, and you're using a depth camera, you may fill people's logs with this:
