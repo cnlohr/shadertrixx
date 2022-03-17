@@ -1365,6 +1365,7 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 | --watch-avatars | reload avatars when updating (local testing only!) |
 | --watch-worlds | reload worlds when updating (local testing only!) |
 | --enable-verbose-logging | Enable detailed logging |
+| --profile=# | where # is a profile slot number to allow you to have multiple logins and you can select one. |
 
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
