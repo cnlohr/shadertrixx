@@ -1362,10 +1362,9 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 | -screen-height 720 | screen nheight |
 | --midi=tounity | specify midi input |
 | -screen-fullscreen 1 | specify window full screen |
-| --log-debug-levels="Always;API;AssetBundleDownloadManager;ContentCreator;All;NetworkTransport;NetworkData;NetworkProcessing" | dunno, from 3 |
 | --watch-avatars | reload avatars when updating (local testing only!) |
 | --watch-worlds | reload worlds when updating (local testing only!) |
-
+| --enable-verbose-logging | Enable detailed logging |
 
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
