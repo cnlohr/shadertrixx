@@ -1369,6 +1369,8 @@ Then, in VRC SDK Settings, set the path to the VRC Exe to be vrc-uncapped.exe
 | --osc=inPort:senderIP:outPort | Default is: --osc=9000:127.0.0.1:9001 |
 | vrchat://launch?id= | Specify launch instance |
 
+Other interesting command-line parameters are listed here: https://github.com/Float3/VRCLauncher/blob/main/README.md
+
 ## 3D CC0 / Public Domain Resources (Compatible with MIT-licensed projects)
 
 ### For PBR materials (Normal/Bump, Displacement, Diffuse, Roughness)
