@@ -1284,6 +1284,10 @@ In your properties block:
 
 In your shader block, add:
 ```
+#pragma multi_compile_local _ _is_torso_local
+```
+or, if you only want to build used features,
+```
 #pragma shader_feature_local _is_torso_local
 ```
 
