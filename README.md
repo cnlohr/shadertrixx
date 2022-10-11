@@ -63,6 +63,8 @@ Now:
   float depth = LinearEyeDepth( SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV) );
 ```
 
+*NOTE*: You may want to consider `GetLinearZFromZDepth_WorksWithMirrors` (see below).
+
 ## Struggling with shader type mismatches?
 
 You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
@@ -530,18 +532,73 @@ From error.mdl - This fixes issues where shaders need to get access to their loc
             Tags {  "DisableBatching"="true"}
 ```
 
-## Convert detph function:
+## Best practice for getting depth of a given pixel from the depth texture.
+
+Because `LinearEyeDepth` doesn't work in mirrors because it uses oblique matricies, it's recommended to use `GetLinearZFromZDepth_WorksWithMirrors`
+
 ```c
-     //Convert to Corrected LinearEyeDepth by DJ Lukis
-     float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
+UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 
-     //Convert from Corrected Linear Eye Depth to Raw Depth 
-     //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
+// Inspired by Internal_ScreenSpaceeShadow implementation.  This was adapted by lyuma.
+// This code can be found on google if you search for "computeCameraSpacePosFromDepthAndInvProjMat"
+// Note: The output of this will still need to be adjusted.  It is NOT in world space units.
+float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV)
+{
+	#if defined(UNITY_REVERSED_Z)
+	zDepthFromMap = 1 - zDepthFromMap;
+			
+	// When using a mirror, the far plane is whack.  This just checks for it and aborts.
+	if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
+	#endif
 
-     depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
-     //Convert to Linear01Depth
-     depth = Linear01Depth(depth);
+	float4 clipPos = float4(screenUV.xy, zDepthFromMap, 1.0);
+	clipPos.xyz = 2.0f * clipPos.xyz - 1.0f;
+	float4 camPos = mul(unity_CameraInvProjection, clipPos);
+	return -camPos.z / camPos.w;
+}
 ```
+
+In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
+
+```c
+	float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
+
+	// Compute projective scaling factor.
+	// perspectiveFactor is 1.0 for the center of the screen, and goes above 1.0 toward the edges,
+	// as the frustum extent is further away than if the zfar in the center of the screen
+	// went to the edges.
+	float perspectiveDivide = 1.0f / i.vertex.w;
+	float perspectiveFactor = length( fullVectorFromEyeToGeometry * perspectiveDivide );
+
+	// Calculate our UV within the screen (for reading depth buffer)
+	float2 screenUV = i.screenPosition.xy * perspectiveDivide;
+	float eyeDepthWorld =
+		GetLinearZFromZDepth_WorksWithMirrors( 
+			SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV), 
+			screenUV ) * perspectiveFactor;
+
+```
+
+You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` shader as:
+
+```c
+	o.vertex = UnityObjectToClipPos(v.vertex);
+	o.uv = v.uv;
+...
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+
+	// Save the clip space position so we can use it later.
+	// This also handles situations where the Y is flipped.
+	float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
+							
+	// Tricky, constants like the 0.5 and the second paramter
+	// need to be premultiplied by o.vertex.w.
+	o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w );
+```
+
+NOTE: You must have a depth light on your scene, this is accomplished by having a directional light with shadows.  The light can be black.  If using hard shadows, it will be better.
+NOTE: Only shaders with a shadowcaster pass will appear in the depth texture.
+
 
 ## Surface Shader Extra Parameters
 
