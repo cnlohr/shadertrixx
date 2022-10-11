@@ -598,7 +598,7 @@ You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` 
 
 NOTE: You must have a depth light on your scene, this is accomplished by having a directional light with shadows.  The light can be black.  If using hard shadows, it will be better.
 NOTE: Only shaders with a shadowcaster pass will appear in the depth texture.
-
+NOTE: screenPosition can also be used to access `_GrabTexture`!
 
 ## Surface Shader Extra Parameters
 
@@ -634,89 +634,6 @@ Note: Don't forget to add `alpha` if you are using alpha!
       void surf (Input IN, inout SurfaceOutput o) {
           o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
       }
-```
-
-## Depth Textures & Getting Worldspace Info
-
-If you define a sampler2D the following way, you can read the per-pixel depth.
-```glsl
-UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
-```
-
-### Option 1: Use a varying, `screenPosition`
-
-**NOTE**: this `screenPosition` can also be used to access `_GrabTexture`!
-
-Struct:
-```
-float4 screenPosition : TEXCOORD1; // Trivially refactorable to a float2
-float3 worldDirection : TEXCOORD2;
-```
-
-Vertex Shader:
-```glsl
-// Subtract camera position from vertex position in world
-// to get a ray pointing from the camera to this vertex.
-o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
-
-// Save the clip space position so we can use it later.
-// This also handles situations where the Y is flipped.
-float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
-				
-// Tricky, constants like the 0.5 and the second paramter
-// need to be premultiplied by o.vertex.w.
-o.screenPosition = float4( TransformStereoScreenSpaceTex(
-	suv+0.5*o.vertex.w, o.vertex.w), 0, o.vertex.w );
-
-```
-
-Fragment Shader:
-```glsl
-// Compute projective scaling factor...
-float perspectiveDivide = 1.0f / i.vertex.w;
-
-// Calculate our UV within the screen (for reading depth buffer)
-float2 screenUV = i.screenPosition.xy * perspectiveDivide;
-
-// Read depth, linearizing into worldspace units.
-float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
-
-// Scale our view ray to unit depth.
-float3 direction = i.worldDirection * perspectiveDivide;
-float3 worldspace = direction * depth + _WorldSpaceCameraPos;
-```
-
-### Option 2: Re-use .vertex
-
-This approach is slower by about 8-10 fragment ops, but requires no additional varying if all you want is the screenUV for depth or grab passes.  If you want world space, you will still need to compute that in the vertex shader and use one varying.  It would require multiple matrix-vector multiplies and the needed matricies are unavailable in the normal pipeline.
-
-Vertex Shader:
-```glsl
-// Subtract camera position from vertex position in world
-// to get a ray pointing from the camera to this vertex.
-o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
-```
-
-Fragment Shader:
-
-```glsl
-// Compute projective scaling factor...
-float perspectiveDivide = 1.0f / i.vertex.w;
-
-// Scale our view ray to unit depth.
-float3 direction = i.worldDirection * perspectiveDivide;
-
-// Calculate our UV within the screen (for reading depth buffer)
-float2 screenUV = (i.vertex.xy / _ScreenParams.xy);
-
-// Flip y in any situation where y needs to be flipped for reading depth. (OpenGL, no-MSAA, no-HDR)
-screenUV = float2( screenUV.x*.5, _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x );
-
-// Read depth, linearizing into worldspace units.    
-float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
-
-// VR stereo support
-screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
 
 ## Doing full-screen effects.
@@ -1607,4 +1524,88 @@ NOTE: If you are going from a fresh git tree of a project, you should open a bla
 
 			GetAllUdonSharpPrograms();
 		}
+```
+
+
+## Depth Textures & Getting Worldspace Info
+
+If you define a sampler2D the following way, you can read the per-pixel depth.
+```glsl
+UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
+```
+
+### Option 1: Use a varying, `screenPosition`
+
+**NOTE**: this `screenPosition` can also be used to access `_GrabTexture`!
+
+Struct:
+```
+float4 screenPosition : TEXCOORD1; // Trivially refactorable to a float2
+float3 worldDirection : TEXCOORD2;
+```
+
+Vertex Shader:
+```glsl
+// Subtract camera position from vertex position in world
+// to get a ray pointing from the camera to this vertex.
+o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
+
+// Save the clip space position so we can use it later.
+// This also handles situations where the Y is flipped.
+float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
+				
+// Tricky, constants like the 0.5 and the second paramter
+// need to be premultiplied by o.vertex.w.
+o.screenPosition = float4( TransformStereoScreenSpaceTex(
+	suv+0.5*o.vertex.w, o.vertex.w), 0, o.vertex.w );
+
+```
+
+Fragment Shader:
+```glsl
+// Compute projective scaling factor...
+float perspectiveDivide = 1.0f / i.vertex.w;
+
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = i.screenPosition.xy * perspectiveDivide;
+
+// Read depth, linearizing into worldspace units.
+float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
+
+// Scale our view ray to unit depth.
+float3 direction = i.worldDirection * perspectiveDivide;
+float3 worldspace = direction * depth + _WorldSpaceCameraPos;
+```
+
+### Option 2: Re-use .vertex
+
+This approach is slower by about 8-10 fragment ops, but requires no additional varying if all you want is the screenUV for depth or grab passes.  If you want world space, you will still need to compute that in the vertex shader and use one varying.  It would require multiple matrix-vector multiplies and the needed matricies are unavailable in the normal pipeline.
+
+Vertex Shader:
+```glsl
+// Subtract camera position from vertex position in world
+// to get a ray pointing from the camera to this vertex.
+o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
+```
+
+Fragment Shader:
+
+```glsl
+// Compute projective scaling factor...
+float perspectiveDivide = 1.0f / i.vertex.w;
+
+// Scale our view ray to unit depth.
+float3 direction = i.worldDirection * perspectiveDivide;
+
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = (i.vertex.xy / _ScreenParams.xy);
+
+// Flip y in any situation where y needs to be flipped for reading depth. (OpenGL, no-MSAA, no-HDR)
+screenUV = float2( screenUV.x*.5, _ProjectionParams.x * .5 + .5 - screenUV.y * _ProjectionParams.x );
+
+// Read depth, linearizing into worldspace units.    
+float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, screenUV)));
+
+// VR stereo support
+screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
