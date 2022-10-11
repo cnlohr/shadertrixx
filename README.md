@@ -558,27 +558,6 @@ float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV
 }
 ```
 
-In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
-
-```c
-	float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
-
-	// Compute projective scaling factor.
-	// perspectiveFactor is 1.0 for the center of the screen, and goes above 1.0 toward the edges,
-	// as the frustum extent is further away than if the zfar in the center of the screen
-	// went to the edges.
-	float perspectiveDivide = 1.0f / i.vertex.w;
-	float perspectiveFactor = length( fullVectorFromEyeToGeometry * perspectiveDivide );
-
-	// Calculate our UV within the screen (for reading depth buffer)
-	float2 screenUV = i.screenPosition.xy * perspectiveDivide;
-	float eyeDepthWorld =
-		GetLinearZFromZDepth_WorksWithMirrors( 
-			SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV), 
-			screenUV ) * perspectiveFactor;
-
-```
-
 You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` shader as:
 
 ```c
@@ -594,6 +573,30 @@ You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` 
 	// Tricky, constants like the 0.5 and the second paramter
 	// need to be premultiplied by o.vertex.w.
 	o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w );
+```
+
+In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
+
+```c
+	float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
+	float3 worldSpaceDirection = normalize( i.worldPos - _WorldSpaceCameraPos );
+
+	// Compute projective scaling factor.
+	// perspectiveFactor is 1.0 for the center of the screen, and goes above 1.0 toward the edges,
+	// as the frustum extent is further away than if the zfar in the center of the screen
+	// went to the edges.
+	float perspectiveDivide = 1.0f / i.vertex.w;
+	float perspectiveFactor = length( fullVectorFromEyeToGeometry * perspectiveDivide );
+
+	// Calculate our UV within the screen (for reading depth buffer)
+	float2 screenUV = i.screenPosition.xy * perspectiveDivide;
+	float eyeDepthWorld =
+		GetLinearZFromZDepth_WorksWithMirrors( 
+			SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV), 
+			screenUV ) * perspectiveFactor;
+	// eyeDepthWorld is in meters.
+	
+	float3 worldPosEyeHitInDepthTexture = _WorldSpaceCameraPos + eyeDepthWorld * worldSpaceDirection;
 ```
 
 NOTE: You must have a depth light on your scene, this is accomplished by having a directional light with shadows.  The light can be black.  If using hard shadows, it will be better.
