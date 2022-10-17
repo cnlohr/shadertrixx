@@ -351,42 +351,42 @@ https://gist.github.com/cnlohr/c88980e560ecb403cae6c6525b05ab2f
 
 ## Shadowcasting
 
-Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader.
+Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader. This handles everything for SPS-I.
 
 ```glsl
-		// shadow caster rendering pass, implemented manually
-		// using macros from UnityCG.cginc
-		Pass
-		{
-			Tags {"LightMode"="ShadowCaster"}
-			Cull Off
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_shadowcaster
-			#pragma multi_compile_instancing
-			#include "UnityCG.cginc"
+	Pass {
+		Tags {"LightMode" = "ShadowCaster"}
+		CGPROGRAM
+		#pragma vertex vert
+		#pragma fragment frag
+		#pragma multi_compile_shadowcaster
+		#include "UnityCG.cginc"
 
-			struct v2f { 
-				V2F_SHADOW_CASTER;
-				float4 uv : TEXCOORD0;
-			};
+		struct appdata {
+			float4 vertex : POSITION;
+			UNITY_VERTEX_INPUT_INSTANCE_ID
+		};
 
-			v2f vert(appdata_base v)
-			{
-				v2f o;
-				UNITY_SETUP_INSTANCE_ID(v);
-				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
-				o.uv = v.texcoord;
-				return o;
-			}
+		struct v2f {
+			float4 pos : SV_POSITION;
+			UNITY_VERTEX_INPUT_INSTANCE_ID 
+			UNITY_VERTEX_OUTPUT_STEREO
+		};
 
-			float4 frag(v2f i) : SV_Target
-			{
-				SHADOW_CASTER_FRAGMENT(i)
-			}
-			ENDCG
+		v2f vert (appdata v){
+			v2f o = (v2f)0;
+			UNITY_SETUP_INSTANCE_ID(v);
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+			o.pos = UnityObjectToClipPos(v.vertex);
+			return o;
 		}
+
+		float4 frag (v2f i) : SV_Target {
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+			return 0;
+		}
+		ENDCG
+	}
 ```
 
 ## Instancing
