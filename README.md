@@ -353,17 +353,21 @@ https://gist.github.com/cnlohr/c88980e560ecb403cae6c6525b05ab2f
 
 Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader. This handles everything for SPS-I.
 
+This is credit to @mochie
+
 ```glsl
 	Pass {
 		Tags {"LightMode" = "ShadowCaster"}
 		CGPROGRAM
 		#pragma vertex vert
 		#pragma fragment frag
+		#pragma multi_compile_instancing
 		#pragma multi_compile_shadowcaster
 		#include "UnityCG.cginc"
 
 		struct appdata {
 			float4 vertex : POSITION;
+			float3 normal : NORMAL;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 		};
 
@@ -377,7 +381,7 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 			v2f o = (v2f)0;
 			UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-			o.pos = UnityObjectToClipPos(v.vertex);
+			TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 			return o;
 		}
 
