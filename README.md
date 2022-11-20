@@ -90,8 +90,9 @@ Unity's overview page: https://docs.unity3d.com/2019.4/Documentation/Manual/shad
 From @Lyuma
  * [flatten] (UNITY_FLATTEN macro) to force both cases of an if statement or
  * force a branch with [branch] (UNITY_BRANCH macro);
- * force loop to unroll with [unroll] (UNITY_UNROLL) or
- * force a loop with [loop] (UNITY_LOOP)
+ * force loop to unroll with `[unroll]` (UNITY_UNROLL) or
+ * force a loop with `[loop]` (UNITY_LOOP)
+ * force a jump table with `[forcecase]`
  * there's also [call] for if or switch statements I think, not sure exactly how it works.
 
 ### Lyuma Beautiful Retro Pixels Technique
