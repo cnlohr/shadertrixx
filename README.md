@@ -1121,6 +1121,11 @@ Using LERP to do good noise / motion IIR filtering:
  * Fast/Noisy: `a = lerp( a, b, 0.9f)`
  * Adaptive: `a = lerp( a, b, k*(abs(a-b)))`
 
+Time-invariant IIR Lerp for smooth motion in a framerate-dependent way.
+ * `constant = `how quickly you approach the value
+ * `coeff = exp( -unity_DeltaTime * constant );`
+ * coeff is very close to one for small timesteps, farther for bigger timesteps, so...
+ * `a = lerp( b, a, coeff )`
 
 ### Not-shaders
 
