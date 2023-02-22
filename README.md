@@ -161,7 +161,7 @@ Player = remote players
 UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera preview)
 ```
 
-Get eye / in / not in VR by D4rkPl4y3r, vetted by III
+Get eye / in / not in VR by d4rkpl4y3r, vetted by III
 
  * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
  * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
@@ -248,7 +248,7 @@ Thanks to several people in the shader discord... If in the `ShadowCaster` and y
 
 Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
 
-Thanks, @dr4kpl4y3r
+Thanks, @d4rkpl4y3r
 
 ```glsl	
 #if defined(USING_STEREO_MATRICES)
