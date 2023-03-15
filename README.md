@@ -161,7 +161,7 @@ Player = remote players
 UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera preview)
 ```
 
-Get eye / in / not in VR by d4rkpl4y3r, vetted by III
+Get eye / in / not in VR by d4rkpl4y3r, vetted by Hill
 
  * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
  * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
