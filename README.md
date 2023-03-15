@@ -161,7 +161,7 @@ Player = remote players
 UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera preview)
 ```
 
-Get eye / in / not in VR by d4rkpl4y3r, vetted by Hill
+Get eye / in / not in VR by d4rkpl4y3r, vetted by Three
 
  * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
  * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
@@ -1303,7 +1303,7 @@ In your code:
 // Do stuff
 ```
 
-## Variants you can ditch (thanks, 3)
+## Variants you can ditch (thanks, Three)
 
 If you're on an avatar you can likely ditch all these.
 
