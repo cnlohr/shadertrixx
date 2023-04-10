@@ -1622,3 +1622,14 @@ float depth = LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, scree
 // VR stereo support
 screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
+## Fullscreening a quad from it's UVs
+
+```glsl
+v2f vert(appdata v)
+{
+	v2f o;
+	o.pos = float4(float2(1, -1) * (v.uv * 2 - 1), 0, 1);
+
+	return o;
+}
+```
