@@ -279,6 +279,20 @@ bool IsInMirror()
 }
 ```
 
+Or a more succinct but confusing way from @OwenTheProgrammer
+```glsl
+bool IsInMirror() {
+    //return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+    return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
+}
+```
+Which translates to:
+```
+   0: or r0.x, cb0[6].z, cb0[7].z
+   1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
+   2: ret 
+```
+
 ## tanoise
 
 Very efficient noise based on Toocanzs noise. https://github.com/cnlohr/shadertrixx/tree/main/Assets/cnlohr/Shaders/tanoise
@@ -345,6 +359,25 @@ any(abs(i.uvs-.5)>.5)
    5: ret 
 ```
 (From @scruffyruffles)
+
+Or even more succinct, but very confusing:
+```glsl
+saturate(v) == v
+```
+```
+   0: mov_sat r0.xy, v1.xyxx
+   1: eq r0.xy, r0.xyxx, v1.xyxx
+   2: and r0.x, r0.x, r0.y
+   3: and o0.xyzw, r0.xxxx, l(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000)
+   4: ret 
+```
+But because you may not have the prototype you want you may need to add something like:
+```glsl
+inline int withinUnitSquare(float2 uv) {
+	return (saturate(uv.x) == uv.x) & (saturate(uv.y) == uv.y);
+}
+```
+(From @OwenTheProgrammer)
 
 ## Write Unity Texture Assets from C
 
