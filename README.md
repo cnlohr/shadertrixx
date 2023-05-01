@@ -235,8 +235,7 @@ float4x4 clipToWorld()
 Determine vertical FoV.  Thanks @scruffyruffles
 ```glsl
     float t = unity_CameraProjection[1][1];
-    const float Rad2Deg = 180 / UNITY_PI;
-    float fov = atan(1.0f / t ) * 2.0 * Rad2Deg;
+    float fov = degrees( atan( 1.0 / t ) );
 ```
 
 Thanks to several people in the shader discord... If in the `ShadowCaster` and you want to differentiate between rendering from the camera's point of view or from the light's point of view for a direcitonal light, you can check which you are running from with:
