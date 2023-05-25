@@ -243,7 +243,7 @@ Thanks to several people in the shader discord... If in the `ShadowCaster` and y
 * `any(unity_LightShadowBias) == false` if rendering `_CameraDepthTexture` (Camera's point of view)
 * `any(unity_LightShadowBias) == true`  if rendering some shadow map (From a light's point of view)
 
-
+### Eye Center Position
 
 Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
 
