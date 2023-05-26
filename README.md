@@ -302,6 +302,9 @@ The "magic ratio" is `view_y = head_to_wrist / 0.4537` (in t-pose) all unitless.
 
 "It's mentioned many places that armspan is the defining scale, but that comment is more specific (armspan is 2 * head_to_wrist, and the ratio to height)" - Ben
 
+## single-file C header library for unity texture writing
+
+https://gist.github.com/cnlohr/c88980e560ecb403cae6c6525b05ab2f
 
 ## Multiply vector-by-quaterion
 
