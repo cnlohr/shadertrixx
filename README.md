@@ -105,6 +105,8 @@ float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
 i.tex.xy += (saturate((fr-(1-fw)*0.5)/fw) - fr) * _MainTex_TexelSize.xy;
 ```
 
+Note: This technique is based off of this shader here: https://gist.github.com/lyuma/18bf52da92428340bab524a025b24101 which is originally based off of a shader by Lox.
+
 ### Detecting if you are on Desktop, VR, Camera, etc.
 
 Thanks, @scruffyruffles for this!
