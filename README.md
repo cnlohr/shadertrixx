@@ -109,26 +109,23 @@ Note: This technique is based off of this shader here: https://gist.github.com/l
 
 You should also see Pixel Standard by S-ilent. https://twitter.com/silent0264/status/1386150307386720256
 
-### Detecting if you are on Desktop, VR, Camera, etc.
-
-Thanks, @scruffyruffles for this!
+### Are you in a mirror?
 
 ```glsl
-bool isVR() {
-    // USING_STEREO_MATRICES
-    #if UNITY_SINGLE_PASS_STEREO
-        return true;
-    #else
-        return false;
-    #endif
-}
+uniform float _VRChatMirrorMode;
+bool IsMirror() { return _VRChatMirrorMode != 0; }
+```
+
+### Detecting if you are on Desktop, VR, Camera, etc.
+
+Thanks, @scruffyruffles for this!  
+(Update: Also check out the VRChat shader globals https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals)
+
+```glsl
+uniform float _VRChatCameraMode;
 
 bool isVRHandCamera() {
-    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
-}
-
-bool isDesktop() {
-    return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005;
+    return _VRChatCameraMode == 1;
 }
 
 bool isVRHandCameraPreview() {
@@ -144,6 +141,35 @@ bool isPanorama() {
     // FOV=90=camproj=[1][1]
     return unity_CameraProjection[1][1] == 1 && _ScreenParams.x == 1075 && _ScreenParams.y == 1025;
 }
+```
+
+left-eye / right-eye and in / not-in VR by d4rkpl4y3r and error.mdl, vetted by techanon  
+Desktop will have left-eye/right-eye always be respectively true/false.
+
+```glsl
+uniform float _VRChatMirrorMode;
+uniform float3 _VRChatMirrorCameraPos;
+
+bool IsVR() {
+    #if defined(USING_STEREO_MATRICES)
+    return true;
+    #else
+    return _VRChatMirrorMode == 1;
+    #endif
+}
+
+bool IsRightEye()
+{
+    #if defined(USING_STEREO_MATRICES)
+    return unity_StereoEyeIndex == 1;
+    #else
+    return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
+    #endif
+}
+
+bool IsLeftEye() { return !IsRightEye(); }
+
+bool IsDesktop() { return !IsVR(); }
 ```
 
 Layers!  Thanks, Lyuma
@@ -164,12 +190,6 @@ MirrorReflection = your local avatar as it appears in mirrors and cameras
 Player = remote players
 UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera preview)
 ```
-
-Get eye / in / not in VR by d4rkpl4y3r, vetted by Three
-
- * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
- * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
- * `if( UNITY_MATRIX_P._13 == 0 )` -> not vr
 
 
 Three's Utility Functions
@@ -268,32 +288,6 @@ For stereo view:
     float3 PlayerCenterCamera = (
         float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
         float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
-```
-
-
-### Are you in a mirror?
-
-Thanks, @Lyuma and @merlinvr for this one.
-
-```glsl
-bool IsInMirror()
-{
-    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-}
-```
-
-Or a more succinct but confusing way from @OwenTheProgrammer
-```glsl
-bool IsInMirror() {
-    //return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-    return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
-}
-```
-Which translates to:
-```
-   0: or r0.x, cb0[6].z, cb0[7].z
-   1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
-   2: ret 
 ```
 
 ## tanoise
