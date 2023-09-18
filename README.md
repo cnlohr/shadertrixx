@@ -125,7 +125,7 @@ Thanks, @scruffyruffles for this!
 uniform float _VRChatCameraMode;
 
 bool isVRHandCamera() {
-    return _VRChatVameraMode == 1;
+    return _VRChatCameraMode == 1;
 }
 
 bool isVRHandCameraPreview() {
