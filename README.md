@@ -1573,6 +1573,56 @@ NOTE: If you are going from a fresh git tree of a project, you should open a bla
 ```
 
 
+## Legacy Functions (For if you are in non-VRChat situations)
+
+bool isVR() {
+    // USING_STEREO_MATRICES
+    #if UNITY_SINGLE_PASS_STEREO
+        return true;
+    #else
+        return false;
+    #endif
+}
+bool isVRHandCamera() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
+}
+
+bool isDesktop() {
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005;
+}
+
+Get eye / in / not in VR by d4rkpl4y3r, vetted by Three
+
+ * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
+ * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
+ * `if( UNITY_MATRIX_P._13 == 0 )` -> not vr
+
+
+Thanks, @Lyuma and @merlinvr for this one.
+
+```glsl
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+```
+
+Or a more succinct but confusing way from @OwenTheProgrammer
+```glsl
+bool IsInMirror() {
+    //return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+    return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
+}
+```
+Which translates to:
+```
+   0: or r0.x, cb0[6].z, cb0[7].z
+   1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
+   2: ret 
+```
+
+
+
 ## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
