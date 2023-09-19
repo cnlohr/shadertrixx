@@ -2,6 +2,11 @@
 
 CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  This largely contains stuff made by other people but I have kind of collected.
 
+Quick links to other useful resources and infodumps. Some information may be duplicated between locations.
+- https://shaderwiki.skuld.moe/index.php/Main_Page
+- https://github.com/pema99/shader-knowledge
+- https://tips.orels.sh
+
 ## The most important trick
 
 ```glsl
@@ -118,16 +123,9 @@ bool IsMirror() { return _VRChatMirrorMode != 0; }
 
 ### Detecting if you are on Desktop, VR, Camera, etc.
 
-Get eye / in / not in VR by d4rkpl4y3r, vetted by Three
+For detecting eyes it is recommended to use the canonical [unity_StereoEyeIndex and related macros](https://docs.unity3d.com/Manual/SinglePassInstancing.html) for getting the correct information.
 
-- `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
-- `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
-- `if( UNITY_MATRIX_P._13 == 0 )` -> not vr
-
-Note: The above is imperfect due to some uncommon HMD configurations causing the `_P._13` value to be opposite of what this is expecting.
-It is much more reliable to use the canonical [unity_StereoEyeIndex and related macros](https://docs.unity3d.com/Manual/SinglePassInstancing.html) for getting the correct information.
-
-A helpful comment from error.mdl:
+A helpful comment from error.mdl on why the old `UNITY_MATRIX_P._13` method is not reliable for detecting eyes:
 > That component (UNITY_MATRIX_P._13) represents how much the projection center is shifted towards the left or right ((r + l) / (r -l)). 
 > In most cases the projection center is always closer to the user's nose giving the widest peripheral vision, and this is what you're relying on. 
 > However for single-screen headsets like the quest 2 and rift-s, (I think?) changing the IPD to larger values 
@@ -188,7 +186,7 @@ bool isLeftEye() { return !isRightEye(); }
 bool isDesktop() { return !isVR(); }
 ```
 
-With the above, add camera detection  
+Add camera detection to the mix.  
 Thanks, @scruffyruffles for this!
 (Updated with [vrchat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals))
 
@@ -204,10 +202,6 @@ bool isVRHandCamera() {
 
 bool isVRHandCameraPreview() {
     return isVRHandCamera() && _ScreenParams.y == 720;
-}
-
-bool isVRHandCameraPicture() {
-    return isVRHandCamera() && _ScreenParams.y == 1080;
 }
 
 bool isPanorama() {
