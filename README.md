@@ -2,6 +2,11 @@
 
 CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  This largely contains stuff made by other people but I have kind of collected.
 
+Quick links to other useful resources and infodumps. Some information may be duplicated between locations.
+- https://shaderwiki.skuld.moe/index.php/Main_Page
+- https://github.com/pema99/shader-knowledge
+- https://tips.orels.sh
+
 ## The most important trick
 
 ```glsl
@@ -110,30 +115,112 @@ Note: This technique is based off of this shader here: https://gist.github.com/l
 You should also see Pixel Standard by S-ilent. https://twitter.com/silent0264/status/1386150307386720256
 
 ### Are you in a mirror?
+Thanks, @Lyuma and @merlinvr for this one.
+
+```glsl
+bool isMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+```
+
+Or a more succinct but confusing way from @OwenTheProgrammer
+```glsl
+bool isMirror() {
+    //return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+    return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
+}
+```
+Which translates to:
+```
+   0: or r0.x, cb0[6].z, cb0[7].z
+   1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
+   2: ret 
+```
+
+For VRChat specifically we can use the shader globals more more a reliable mirror check.
 
 ```glsl
 uniform float _VRChatMirrorMode;
-bool IsMirror() { return _VRChatMirrorMode != 0; }
+bool isMirror() { return _VRChatMirrorMode != 0; }
 ```
 
 ### Detecting if you are on Desktop, VR, Camera, etc.
 
-Thanks, @scruffyruffles for this!  
-(Update: Also check out the VRChat shader globals https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals)
+For detecting eyes it is recommended to use the canonical [unity_StereoEyeIndex and related macros](https://docs.unity3d.com/Manual/SinglePassInstancing.html) for getting the correct information.
+
+A helpful comment from error.mdl on why the old `UNITY_MATRIX_P._13` method is not reliable for detecting eyes:
+> That component (UNITY_MATRIX_P._13) represents how much the projection center is shifted towards the left or right ((r + l) / (r -l)). 
+> In most cases the projection center is always closer to the user's nose giving the widest peripheral vision, and this is what you're relying on. 
+> However for single-screen headsets like the quest 2 and rift-s, (I think?) changing the IPD to larger values 
+> shifts the center of the projection matrix outward, and for very high IPDs it could actually be inverted.
+
+With that and some additional advice from d4rkpl4y3r and vetting from techanon we get:
 
 ```glsl
-uniform float _VRChatCameraMode;
+bool isVR() {
+    #if defined(USING_STEREO_MATRICES)
+    return true;
+    #else
+    return false;
+    #endif
+}
 
+bool isRightEye()
+{
+    #if defined(USING_STEREO_MATRICES)
+    return unity_StereoEyeIndex == 1;
+    #else
+    return false;
+    #endif
+}
+
+bool isLeftEye() { return !isRightEye(); }
+bool isDesktop() { return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005; }
+```
+
+We use `#if defined(USING_STEREO_MATRICES)` instead of `#if UNITY_SINGLE_PASS_STEREO` 
+in order to cover situations where multiview is involved, such as Quest.
+
+For VRChat specifically, we can update the methods to use some shader globals to handle mirror situations more reliably.
+Desktop will have left-eye/right-eye always be respectively true/false.
+
+```glsl
+uniform float _VRChatMirrorMode;
+uniform float3 _VRChatMirrorCameraPos;
+
+bool isMirror() {
+    return _VRChatMirrorMode > 0;
+}
+
+bool isVR() {
+    #if defined(USING_STEREO_MATRICES)
+    return true;
+    #else
+    return _VRChatMirrorMode == 1;
+    #endif
+}
+
+bool isRightEye()
+{
+    #if defined(USING_STEREO_MATRICES)
+    return unity_StereoEyeIndex == 1;
+    #else
+    return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
+    #endif
+}
+```
+
+Add camera detection to the mix.  
+Thanks, @scruffyruffles for this!
+
+```glsl
 bool isVRHandCamera() {
-    return _VRChatCameraMode == 1;
+    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
 }
 
 bool isVRHandCameraPreview() {
     return isVRHandCamera() && _ScreenParams.y == 720;
-}
-
-bool isVRHandCameraPicture() {
-    return isVRHandCamera() && _ScreenParams.y == 1080;
 }
 
 bool isPanorama() {
@@ -143,36 +230,22 @@ bool isPanorama() {
 }
 ```
 
-left-eye / right-eye and in / not-in VR by d4rkpl4y3r and error.mdl, vetted by techanon  
-Desktop will have left-eye/right-eye always be respectively true/false.
+
+With [vrchat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals) we can update one of the methods for more reliability.
 
 ```glsl
-uniform float _VRChatMirrorMode;
-uniform float3 _VRChatMirrorCameraPos;
+uniform float _VRChatCameraMode;
 
-bool IsVR() {
-    #if defined(USING_STEREO_MATRICES)
-    return true;
-    #else
-    return _VRChatMirrorMode == 1;
-    #endif
+bool isVRHandCamera() {
+    // old method
+    // return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
+    // new method using vrchat shader global
+    return _VRChatCameraMode == 1;
 }
-
-bool IsRightEye()
-{
-    #if defined(USING_STEREO_MATRICES)
-    return unity_StereoEyeIndex == 1;
-    #else
-    return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
-    #endif
-}
-
-bool IsLeftEye() { return !IsRightEye(); }
-
-bool IsDesktop() { return !IsVR(); }
 ```
 
-Layers!  Thanks, Lyuma
+### Layers
+Thanks, Lyuma!
 ```
 First of all, make sure you have layers set up,
 The common practice now is to add them by hand, using this reference:
@@ -192,7 +265,7 @@ UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera p
 ```
 
 
-Three's Utility Functions
+### Three's Utility Functions
 ```glsl
 //invert function from https://answers.unity.com/questions/218333/shader-inversefloat4x4-function.html, thank you d4rk
 float4x4 inverse(float4x4 input)
@@ -1571,57 +1644,6 @@ NOTE: If you are going from a fresh git tree of a project, you should open a bla
 			GetAllUdonSharpPrograms();
 		}
 ```
-
-
-## Legacy Functions (For if you are in non-VRChat situations)
-
-bool isVR() {
-    // USING_STEREO_MATRICES
-    #if UNITY_SINGLE_PASS_STEREO
-        return true;
-    #else
-        return false;
-    #endif
-}
-bool isVRHandCamera() {
-    return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
-}
-
-bool isDesktop() {
-    return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005;
-}
-
-Get eye / in / not in VR by d4rkpl4y3r, vetted by Three
-
- * `if( UNITY_MATRIX_P._13 < 0 )` -> left eye
- * `if( UNITY_MATRIX_P._13 > 0 )` -> right eye
- * `if( UNITY_MATRIX_P._13 == 0 )` -> not vr
-
-
-Thanks, @Lyuma and @merlinvr for this one.
-
-```glsl
-bool IsInMirror()
-{
-    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-}
-```
-
-Or a more succinct but confusing way from @OwenTheProgrammer
-```glsl
-bool IsInMirror() {
-    //return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-    return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
-}
-```
-Which translates to:
-```
-   0: or r0.x, cb0[6].z, cb0[7].z
-   1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
-   2: ret 
-```
-
-
 
 ## Depth Textures & Getting Worldspace Info
 
