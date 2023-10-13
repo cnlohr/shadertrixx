@@ -1419,6 +1419,10 @@ If you're on an avatar you can likely ditch all these.
 
 Also, it is likely `SHADOWS_SHADOWMASK` can be ignored, too.
 
+## Unity keeps editing my shader files!
+
+If Unity keeps editing your files on disk (changing semantics) and you want it to stop, use the `UNITY_SHADER_NO_UPGRADE` macro somewhere in your shader.
+
 ## VRChat "Build & Test" Overrides
 
 You can insert additional parameters into VRC for "Build & Test" with the following (compiled TCC build of code included.) For instance, this one adds the `--fps=0` command-line parameter.
