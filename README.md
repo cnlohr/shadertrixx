@@ -402,6 +402,17 @@ Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other
 			return fixed2x2(a, -a.y, a.x);
 		}
 ```
+## Create a quaternion from two axes
+
+Assuming to/from are normalized.
+
+```glsl
+	vec3 half = normalize( from + to );
+	vec4 quat( cross( to, half ), dot( to, half ) );
+```
+
+Note that this does not do well in heavy opposition.
+
 
 ## Is your UV within the unit square?
 
