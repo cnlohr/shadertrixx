@@ -628,7 +628,13 @@ float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
 o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 ```
+## How to compute camera forward in object space
 
+Thanks, @orels1
+
+```c
+	viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
+```
 
 ## This SLERP function, found by ACiiL,
 ```c
