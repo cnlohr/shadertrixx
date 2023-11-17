@@ -1802,4 +1802,21 @@ uint3 UnpackData(uint4 data)
 
 Please note that if you use MRT, this scales to up to 24 IDs. 
 
+This is an improvement over my up-to-two IDs per cell.
+
+```c
+        // .r = original.r * Zero + new.r * DstAlpha;
+        // .a = original.a * Zero + new.a * One
+        
+        // On the first pixel,              VALUE = ( 0, 0, 0, ID0 );
+        // On the first overlapping pixel,  VALUE = ( ID0, ID0, ID0, ID1 );
+        // On the second overlapping pixel, VALUE = ( ID1, ID1, ID1, ID2 );
+        
+        // DstAlpha = original.a
+
+        Blend DstAlpha Zero, One Zero
+
+...
+        return float4( 1, 1, 1, ID );
+```
 
