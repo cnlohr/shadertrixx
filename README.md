@@ -1763,3 +1763,43 @@ v2f vert(appdata v)
 	return o;
 }
 ```
+
+# Wicked awesome trick to read-modify-write from a shader
+
+This can store up to 3 IDs per pixel, and it maintains the last 3.
+
+This was done to handle ball hashing with dense grids, to support up to 3 ball hash collisons per cell before losing a ball.
+
+This is from @d4rkpl4y3r.
+
+
+```c
+BlendOp Add, Add
+Blend One SrcAlpha, One One
+
+float4 PackIndex(uint index)
+{
+    uint3 packed = uint3(index, (index >> 7), (index >> 14)) & 0x7F;
+    return float4(packed, 256);
+}
+uint UnpackScalar(uint3 data)
+{
+    data = data & 0x7F;
+    return data.x | (data.y << 7) | (data.z << 14);
+}
+uint3 UnpackData(uint4 data)
+{
+    float4 raw = asfloat(data);
+    raw.xyz *= exp2(-max(0, raw.w / 256 * 8 - 3 * 8));
+    uint3 packed = (uint3)raw.xyz;
+    uint3 indices = uint3(
+        UnpackScalar(packed),
+        UnpackScalar(packed >> 8),
+        UnpackScalar(packed >> 16));
+    return indices;
+}
+```
+
+Please note that if you use MRT, this scales to up to 24 IDs. 
+
+
