@@ -1383,6 +1383,10 @@ ENDCG
 
 Keywords can be used to create variants of a shader to avoid runtime branches.  Never ever use `[Toggle(...)]` unless you are operating with a local keyword or a reserved keyword.  Even using local leywords are discouraged, in most situations, it is encouraged instead to use `[ToggleUI]` and branch based on the value.
 
+**WARNING**
+ > #pragma multi_compile and #pragma shader_feature lines in .cginc / .hlsl files are entirely ignored. They must be in the .shader file.
+ > https://forum.unity.com/threads/how-to-put-all-the-pragma-multi_compile-in-an-include-file.1097356/
+
 To use a non-local keyword, use from the following list: https://pastebin.com/83fQvZ3n
 
 To use a local keyword, here is an example
