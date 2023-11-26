@@ -87,10 +87,14 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 * Unity's built-in shader variables: https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
 * Defining parameters for your shader/material: https://docs.unity3d.com/Manual/SL-Properties.html
 * Unity surface shader examples: https://docs.unity3d.com/Manual/SL-SurfaceShaderExamples.html
+* List of all pragmas that you can use in shaders, become familiar with these: https://docs.unity3d.com/Manual/SL-PragmaDirectives.html
 
 Unity's overview page: https://docs.unity3d.com/2019.4/Documentation/Manual/shader-writing.html
 
 ## Additional tricks
+
+CNLohr Notes:
+ * If you are going crazy fighting with the compiler, just try to use `#pragma skip_optimizations d3d11` and it will sometimes produce much clearer errors.
 
 From @Lyuma
  * [flatten] (UNITY_FLATTEN macro) to force both cases of an if statement or
