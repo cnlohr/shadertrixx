@@ -95,6 +95,7 @@ Unity's overview page: https://docs.unity3d.com/2019.4/Documentation/Manual/shad
 
 CNLohr Notes:
  * If you are going crazy fighting with the compiler, just try to use `#pragma skip_optimizations d3d11` and it will sometimes produce much clearer errors.
+ * Sometimes adding `#pragma enable_d3d11_debug_symbols` will get the compiler to stop misbehaving.
 
 From @Lyuma
  * [flatten] (UNITY_FLATTEN macro) to force both cases of an if statement or
