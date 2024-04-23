@@ -669,7 +669,13 @@ From error.mdl - This fixes issues where shaders need to get access to their loc
 
 There's a page here https://docs.unity3d.com/2020.1/Documentation/Manual/SinglePassInstancing.html that describes the SPS-I process for using screen space textures. 
 
-For completeness, in spite of brevity, here is the example the above website provides:
+pema notes:
+ * On unity 2022, you can only use multipass and SPS-I, but VRChat has a custom build of unity, so they can additionally use SPS, which they do
+ * SPS = 1 double-wide frame buffer, ping pong between the side of the frame buffer each draw call
+ * SPS-I = texture2Darray framebuffer, 1 slice per eye, each drawcall is an instanced drawcall which renders to both slices simultaneously
+ * Multipass = texture2Darray framebuffer, 1 slicer per eye, render one eye and then the other eye 
+
+For completeness, in spite of brevity, here is the example the aforementioned website provides:
 
 ```c
 struct appdata
