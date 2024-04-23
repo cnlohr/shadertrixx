@@ -665,6 +665,50 @@ From error.mdl - This fixes issues where shaders need to get access to their loc
             Tags {  "DisableBatching"="true"}
 ```
 
+## Screen Space Texture with SPS-I
+
+There's a page here https://docs.unity3d.com/2020.1/Documentation/Manual/SinglePassInstancing.html that describes the SPS-I process for using screen space textures. 
+
+For completeness, in spite of brevity, here is the example the above website provides:
+
+```c
+struct appdata
+{
+    float4 vertex : POSITION;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
+};
+
+struct v2f //v2f output struct
+{
+    float2 uv : TEXCOORD0;
+    float4 vertex : SV_POSITION;
+    UNITY_VERTEX_OUTPUT_STEREO //Insert
+};
+
+v2f vert (appdata v)
+{
+    v2f o;
+    UNITY_SETUP_INSTANCE_ID(v); //Insert
+    UNITY_INITIALIZE_OUTPUT(v2f, o); //Insert
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert
+    o.vertex = UnityObjectToClipPos(v.vertex);
+    o.uv = v.uv;
+    return o;
+}
+
+UNITY_DECLARE_SCREENSPACE_TEXTURE(_MainTex); //Insert
+
+fixed4 frag (v2f i) : SV_Target
+{
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); //Insert
+    fixed4 col = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_MainTex, i.uv); //Insert
+    // invert the colors
+    col = 1 - col; 
+    return col;
+}
+```
+
 ## Best practice for getting depth of a given pixel from the depth texture.
 
 Because `LinearEyeDepth` doesn't work in mirrors because it uses oblique matricies, it's recommended to use `GetLinearZFromZDepth_WorksWithMirrors`
