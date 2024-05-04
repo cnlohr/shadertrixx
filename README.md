@@ -468,10 +468,6 @@ inline int withinUnitSquare(float2 uv) {
 ```
 (From @OwenTheProgrammer)
 
-## Write Unity Texture Assets from C
-
-https://gist.github.com/cnlohr/c88980e560ecb403cae6c6525b05ab2f
-
 ## Shadowcasting
 
 Make sure to add a shadowcast to your shader, otherwise shadows will look super weird on you.  Just paste this bad boy in your subshader. This handles everything for SPS-I.
