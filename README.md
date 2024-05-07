@@ -716,9 +716,16 @@ fixed4 frag (v2f i) : SV_Target
 Use the technique here: https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4a7fcdacab3
 
 Then for instance, you could do the following to get to object space:
-```
+```c
 po.cppos = mul( mul( clipToViewMatrix, cp ), UNITY_MATRIX_IT_MV );
 ```
+or
+```c
+float4 vs = ClipToViewPos( cp );
+vs /= vs.w;
+po.cppos = mul( vs, UNITY_MATRIX_IT_MV );
+```
+
 
 ## Best practice for getting depth of a given pixel from the depth texture.
 
