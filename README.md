@@ -711,6 +711,15 @@ fixed4 frag (v2f i) : SV_Target
 }
 ```
 
+## Mechanism for converting from clip space to view/object/world space.
+
+Use the technique here: https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4a7fcdacab3
+
+Then for instance, you could do the following to get to object space:
+```
+po.cppos = mul( mul( clipToViewMatrix, cp ), UNITY_MATRIX_IT_MV );
+```
+
 ## Best practice for getting depth of a given pixel from the depth texture.
 
 Because `LinearEyeDepth` doesn't work in mirrors because it uses oblique matricies, it's recommended to use `GetLinearZFromZDepth_WorksWithMirrors`
