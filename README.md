@@ -715,6 +715,8 @@ fixed4 frag (v2f i) : SV_Target
 
 Use the technique here: https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4a7fcdacab3
 
+**WARNING**: The above code is not mobile-compliant. And may not work on Quest.  If you have a quest version please contact me.
+
 Then for instance, you could do the following to get to object space:
 ```c
 po.cppos = mul( mul( clipToViewMatrix, cp ), UNITY_MATRIX_IT_MV );
