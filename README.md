@@ -348,18 +348,10 @@ Thanks to several people in the shader discord... If in the `ShadowCaster` and y
 ### Eye Center Position
 
 Compute the position of the center of someone's face, for making effects that involve camera position changing geometry but are stereo fusable.
+VRChat also provides a few global uniforms that we can use to make the PlayerCenterCamera work as expected in mirrors.
 
 Thanks, @d4rkpl4y3r
 
-```glsl	
-#if defined(USING_STEREO_MATRICES)
-    float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
-#else
-    float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
-#endif
-```
-
-VRChat now provides a few global uniforms that we can use to make the PlayerCenterCamera work as expected in mirrors.
 ```glsl
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
