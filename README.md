@@ -637,12 +637,12 @@ o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 
 Thanks, @orels1
 
-```c
+```glsl
 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 ```
 
 ## This SLERP function, found by ACiiL,
-```c
+```glsl
 ////============================================================
 //// blend between two directions by %
 //// https://www.shadertoy.com/view/4sV3zt
@@ -677,7 +677,7 @@ pema notes:
 
 For completeness, in spite of brevity, here is the example the aforementioned website provides:
 
-```c
+```glsl
 struct appdata
 {
 	float4 vertex : POSITION;
@@ -722,11 +722,11 @@ Use the technique here: https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4
 **WARNING**: The above code is not mobile-compliant. And may not work on Quest.  If you have a quest version please contact me.
 
 Then for instance, you could do the following to get to object space:
-```c
+```glsl
 po.cppos = mul( mul( clipToViewMatrix, cp ), UNITY_MATRIX_IT_MV );
 ```
 or
-```c
+```glsl
 float4 vs = ClipToViewPos( cp );
 vs /= vs.w;
 po.cppos = mul( vs, UNITY_MATRIX_IT_MV );
@@ -737,7 +737,7 @@ po.cppos = mul( vs, UNITY_MATRIX_IT_MV );
 
 Because `LinearEyeDepth` doesn't work in mirrors because it uses oblique matricies, it's recommended to use `GetLinearZFromZDepth_WorksWithMirrors`
 
-```c
+```glsl
 UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 
 // Inspired by Internal_ScreenSpaceeShadow implementation.  This was adapted by lyuma.
@@ -761,7 +761,7 @@ float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV
 
 You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` shader as:
 
-```c
+```glsl
 o.vertex = UnityObjectToClipPos(v.vertex);
 o.uv = v.uv;
 ...
@@ -778,7 +778,7 @@ o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w
 
 In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
 
-```c
+```glsl
 float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
 float3 worldSpaceDirection = normalize( i.worldPos - _WorldSpaceCameraPos );
 
@@ -810,7 +810,7 @@ Sometimes when using surface shaders you want more than just `uv_MainTex`?  This
 
 Note: Don't forget to add `alpha` if you are using alpha!
 
-```
+```glsl
 #pragma surface surf Lambert vertex:vert
 struct Input {
 	float3 viewDir;
@@ -1077,7 +1077,7 @@ CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.d
 
 You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
 
-```
+```glsl
 Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 
 GrabPass
@@ -1116,7 +1116,7 @@ SamplerState sampler_CameraDepthTexture;
 uniform float4 _CameraDepthTexture_TexelSize;
 ```
 ...
-```
+```glsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 	ScreenDepth = LinearEyeDepth(_CameraDepthTexture.Sample(sampler_CameraDepthTexture, screenPosNorm.xy));
 #else
@@ -1124,7 +1124,7 @@ uniform float4 _CameraDepthTexture_TexelSize;
 #endif
 ```
 And to check it:
-```
+```glsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 _CameraDepthTexture.GetDimensions(width, width);
 #endif
@@ -1377,7 +1377,7 @@ From @lox9973
 
 BIG WARNING: After a lot of testing, we've found that this is slower than reading from a texture if doing intensive reads.  If you need to read from like 100 of these in a shader, probably best to move it into a texture first.
 
-```c
+```glsl
 cbuffer SampleBuffer {
 	float _Samples[1023*4] : packoffset(c0);
 	float _Samples0[1023] : packoffset(c0);
@@ -1412,7 +1412,7 @@ void Update() {
 https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants
 
 CBuffers:
-```
+```glsl
 Properties {
 ...
 
@@ -1462,21 +1462,21 @@ To use a non-local keyword, use from the following list: https://pastebin.com/83
 To use a local keyword, here is an example
 
 In your properties block: 
-```
+```glsl
 [Toggle(_is_torso_local)] _is_torso_local ( "Torso (check)/Wall (uncheck)", int ) = 0
 ```
 
 In your shader block, add:
-```
+```glsl
 #pragma multi_compile_local _ _is_torso_local
 ```
 or, if you only want to build used features,
-```
+```glsl
 #pragma shader_feature_local _is_torso_local
 ```
 
 And in your shader
-```
+```glsl
 #if _is_torso_local
  // Do something
 #endif
@@ -1485,17 +1485,17 @@ And in your shader
 If you have a sort of radio button option, you can use it like the following:
 
 In your properties block:
-```
+```glsl
 [KeywordEnum(None, Simple, High Quality)] _SunDisk ("Sun", Int) = 2
 ```
 
 In your shader block:
-```
+```glsl
 #pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
 ```
 
 In your code:
-```
+```glsl
 #if defined(_SUNDISK_SIMPLE)
 // Do stuff
 ```
@@ -1751,7 +1751,7 @@ UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 **NOTE**: this `screenPosition` can also be used to access `_GrabTexture`!
 
 Struct:
-```
+```glsl
 float4 screenPosition : TEXCOORD1; // Trivially refactorable to a float2
 float3 worldDirection : TEXCOORD2;
 ```
@@ -1842,7 +1842,7 @@ This was done to handle ball hashing with dense grids, to support up to 3 ball h
 This is from @d4rkpl4y3r.
 
 
-```c
+```glsl
 BlendOp Add, Add
 Blend One SrcAlpha, One One
 
@@ -1873,7 +1873,7 @@ Please note that if you use MRT, this scales to up to 24 IDs.
 
 This is an improvement over my up-to-two IDs per cell.
 
-```c
+```glsl
 // .r = original.r * Zero + new.r * DstAlpha;
 // .a = original.a * Zero + new.a * One;
 
