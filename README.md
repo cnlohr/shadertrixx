@@ -27,30 +27,30 @@ VRChat is switching to SPS-I.  Please perform the following to test your shaders
 
 Add this to your appdata:
 ```glsl
-	UNITY_VERTEX_INPUT_INSTANCE_ID;
+UNITY_VERTEX_INPUT_INSTANCE_ID;
 ```
 
 Add this to your `v2f` struct:
 ```glsl
-	UNITY_VERTEX_OUTPUT_STEREO;
+UNITY_VERTEX_OUTPUT_STEREO;
 ```
 
 Add this to your `vertex` shader:
 ```glsl
-	UNITY_SETUP_INSTANCE_ID( v );
-	UNITY_INITIALIZE_OUTPUT( v2f, o );
-	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+UNITY_SETUP_INSTANCE_ID( v );
+UNITY_INITIALIZE_OUTPUT( v2f, o );
+UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 ```
 
 In your `fragment` - or ANY other shaders that ostensibly take in the `v2f` struct, i.e. `patch`, `hull`:
 ```glsl
-	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 ```
 
 If you are using a `domain` shader, you will need something like this:
 ```glsl
-	UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
-	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
+UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
 ```
 
 ### Converting Camera Depth Texture
@@ -138,9 +138,9 @@ bool isMirror() {
 ```
 Which translates to:
 ```
-	0: or r0.x, cb0[6].z, cb0[7].z
-	1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
-	2: ret 
+0: or r0.x, cb0[6].z, cb0[7].z
+1: movc o0.xyzw, r0.xxxx, l(1.000000,1.000000,1.000000,1.000000), l(0,0,0,0)
+2: ret 
 ```
 
 For VRChat specifically we can use the shader globals more more a reliable mirror check.
@@ -336,8 +336,8 @@ float4x4 clipToWorld()
 
 Determine vertical FoV.  Thanks @scruffyruffles
 ```glsl
-	float t = unity_CameraProjection[1][1];
-	float fov = degrees( atan( 1.0 / t ) );
+float t = unity_CameraProjection[1][1];
+float fov = degrees( atan( 1.0 / t ) );
 ```
 
 Thanks to several people in the shader discord... If in the `ShadowCaster` and you want to differentiate between rendering from the camera's point of view or from the light's point of view for a direcitonal light, you can check which you are running from with:
@@ -367,9 +367,9 @@ Alternatively to get the raw value (I do not know why it was originally written 
 
 For stereo view:
 ```
-	float3 PlayerCenterCamera = (
-		float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
-		float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
+float3 PlayerCenterCamera = (
+	float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
+	float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
 ```
 
 ## tanoise
@@ -405,19 +405,19 @@ float3 vector_quat_unrotate( float3 v, float4 q )
 
 Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other swizzle.  Not sure where this one came from
 ```glsl
-		fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
-		{
-			fixed2 a = sin(fixed2(1.5707963, 0) + th);
-			return fixed2x2(a, -a.y, a.x);
-		}
+fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
+{
+	fixed2 a = sin(fixed2(1.5707963, 0) + th);
+	return fixed2x2(a, -a.y, a.x);
+}
 ```
 ## Create a quaternion from two axes
 
 Assuming to/from are normalized.
 
 ```glsl
-	vec3 half = normalize( from + to );
-	vec4 quat( cross( to, half ), dot( to, half ) );
+vec3 half = normalize( from + to );
+vec4 quat( cross( to, half ), dot( to, half ) );
 ```
 
 Note that this does not do well in heavy opposition.
@@ -429,13 +429,13 @@ Note that this does not do well in heavy opposition.
 any(i.uvs < 0 || i.uvs > 1)
 ```
 ```
-	0: lt r0.xy, v0.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
-	1: lt r0.zw, l(0.000000, 0.000000, 1.000000, 1.000000), v0.xxxy
-	2: or r0.xy, r0.zwzz, r0.xyxx
-	3: or r0.x, r0.y, r0.x
-	4: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
-	5: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
-	6: ret 
+0: lt r0.xy, v0.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
+1: lt r0.zw, l(0.000000, 0.000000, 1.000000, 1.000000), v0.xxxy
+2: or r0.xy, r0.zwzz, r0.xyxx
+3: or r0.x, r0.y, r0.x
+4: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
+5: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
+6: ret 
 ```
 (From @d4rkpl4y3r)
 
@@ -444,12 +444,12 @@ And the much less readable and more ambiguous on edge conditions version:
 any(abs(i.uvs-.5)>.5)
 ```
 ```
-	0: add r0.xy, v0.xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
-	1: lt r0.xy, l(0.500000, 0.500000, 0.000000, 0.000000), |r0.xyxx|
-	2: or r0.x, r0.y, r0.x
-	3: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
-	4: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
-	5: ret 
+0: add r0.xy, v0.xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
+1: lt r0.xy, l(0.500000, 0.500000, 0.000000, 0.000000), |r0.xyxx|
+2: or r0.x, r0.y, r0.x
+3: sample_indexable(texture2d)(float,float,float,float) r0.y, v0.xyxx, t0.xwyz, s0
+4: movc o0.xyzw, r0.xxxx, l(0,0,0,0), r0.yyyy
+5: ret 
 ```
 (From @scruffyruffles)
 
@@ -458,11 +458,11 @@ Or even more succinct, but very confusing:
 saturate(v) == v
 ```
 ```
-	0: mov_sat r0.xy, v1.xyxx
-	1: eq r0.xy, r0.xyxx, v1.xyxx
-	2: and r0.x, r0.x, r0.y
-	3: and o0.xyzw, r0.xxxx, l(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000)
-	4: ret 
+0: mov_sat r0.xy, v1.xyxx
+1: eq r0.xy, r0.xyxx, v1.xyxx
+2: and r0.x, r0.x, r0.y
+3: and o0.xyzw, r0.xxxx, l(0x3f800000, 0x3f800000, 0x3f800000, 0x3f800000)
+4: ret 
 ```
 But because you may not have the prototype you want you may need to add something like:
 ```glsl
@@ -479,41 +479,41 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 This is credit to @mochie
 
 ```glsl
-	Pass {
-		Tags {"LightMode" = "ShadowCaster"}
-		CGPROGRAM
-		#pragma vertex vert
-		#pragma fragment frag
-		#pragma multi_compile_instancing
-		#pragma multi_compile_shadowcaster
-		#include "UnityCG.cginc"
+Pass {
+	Tags {"LightMode" = "ShadowCaster"}
+	CGPROGRAM
+	#pragma vertex vert
+	#pragma fragment frag
+	#pragma multi_compile_instancing
+	#pragma multi_compile_shadowcaster
+	#include "UnityCG.cginc"
 
-		struct appdata {
-			float4 vertex : POSITION;
-			float3 normal : NORMAL;
-			UNITY_VERTEX_INPUT_INSTANCE_ID
-		};
+	struct appdata {
+		float4 vertex : POSITION;
+		float3 normal : NORMAL;
+		UNITY_VERTEX_INPUT_INSTANCE_ID
+	};
 
-		struct v2f {
-			float4 pos : SV_POSITION;
-			UNITY_VERTEX_INPUT_INSTANCE_ID 
-			UNITY_VERTEX_OUTPUT_STEREO
-		};
+	struct v2f {
+		float4 pos : SV_POSITION;
+		UNITY_VERTEX_INPUT_INSTANCE_ID 
+		UNITY_VERTEX_OUTPUT_STEREO
+	};
 
-		v2f vert (appdata v){
-			v2f o = (v2f)0;
-			UNITY_SETUP_INSTANCE_ID(v);
-			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-			TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
-			return o;
-		}
-
-		float4 frag (v2f i) : SV_Target {
-			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-			return 0;
-		}
-		ENDCG
+	v2f vert (appdata v){
+		v2f o = (v2f)0;
+		UNITY_SETUP_INSTANCE_ID(v);
+		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+		TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+		return o;
 	}
+
+	float4 frag (v2f i) : SV_Target {
+		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+		return 0;
+	}
+	ENDCG
+}
 ```
 
 ## Instancing
@@ -522,18 +522,18 @@ To enable instancing, you must have in your shader:
  * `#pragma multi_compile_instancing` in all all passes.
  * Optionally
 ```glsl
-		UNITY_INSTANCING_BUFFER_START(Props)
-			// put more per-instance properties here
-		UNITY_INSTANCING_BUFFER_END(Props)
+UNITY_INSTANCING_BUFFER_START(Props)
+	// put more per-instance properties here
+UNITY_INSTANCING_BUFFER_END(Props)
 ```
  * An example thing you could put there, in the middle is:
 ```glsl
-	UNITY_DEFINE_INSTANCED_PROP( float4, _InstanceID)
+UNITY_DEFINE_INSTANCED_PROP( float4, _InstanceID)
 ```
  * I've found it to be super janky to try to access the variable in the fragment/surf shader, but it does seem to work in the vertex shader.
  * In your vertex shader:
 ```glsl
-	UNITY_SETUP_INSTANCE_ID(v);
+UNITY_SETUP_INSTANCE_ID(v);
 ```
  * Access variables with `UNITY_ACCESS_INSTANCED_PROP(Props, _InstanceID).x;`
  * Access which instance it is in the list with `unity_InstanceID` - note this will change from frame to frame.
@@ -638,23 +638,23 @@ o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 Thanks, @orels1
 
 ```c
-	viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
+viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 ```
 
 ## This SLERP function, found by ACiiL,
 ```c
-		////============================================================
-		//// blend between two directions by %
-		//// https://www.shadertoy.com/view/4sV3zt
-		//// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
-		float3 slerp(float3 start, float3 end, float percent)
-		{
-			float d		= dot(start, end);
-			d			= clamp(d, -1.0, 1.0);
-			float theta	= acos(d)*percent;
-			float3 RelativeVec = normalize(end - start*d);
-			return		((start*cos(theta)) + (RelativeVec*sin(theta)));
-		}
+////============================================================
+//// blend between two directions by %
+//// https://www.shadertoy.com/view/4sV3zt
+//// https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+float3 slerp(float3 start, float3 end, float percent)
+{
+	float d = dot(start, end);
+	d = clamp(d, -1.0, 1.0);
+	float theta = acos(d)*percent;
+	float3 RelativeVec = normalize(end - start*d);
+	return ((start*cos(theta)) + (RelativeVec*sin(theta)));
+}
 ```
 
 ## Disable Batching
@@ -662,7 +662,7 @@ Thanks, @orels1
 From error.mdl - This fixes issues where shaders need to get access to their local coordinates at the cost of a small amount of performance.
 
 ```
-			Tags { "DisableBatching"="true" }
+Tags { "DisableBatching"="true" }
 ```
 
 ## Screen Space Texture with SPS-I
@@ -762,42 +762,42 @@ float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV
 You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` shader as:
 
 ```c
-	o.vertex = UnityObjectToClipPos(v.vertex);
-	o.uv = v.uv;
+o.vertex = UnityObjectToClipPos(v.vertex);
+o.uv = v.uv;
 ...
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
-	// Save the clip space position so we can use it later.
-	// This also handles situations where the Y is flipped.
-	float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
+// Save the clip space position so we can use it later.
+// This also handles situations where the Y is flipped.
+float2 suv = o.vertex * float2( 0.5, 0.5*_ProjectionParams.x);
 
-	// Tricky, constants like the 0.5 and the second paramter
-	// need to be premultiplied by o.vertex.w.
-	o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w );
+// Tricky, constants like the 0.5 and the second paramter
+// need to be premultiplied by o.vertex.w.
+o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w );
 ```
 
 In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
 
 ```c
-	float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
-	float3 worldSpaceDirection = normalize( i.worldPos - _WorldSpaceCameraPos );
+float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
+float3 worldSpaceDirection = normalize( i.worldPos - _WorldSpaceCameraPos );
 
-	// Compute projective scaling factor.
-	// perspectiveFactor is 1.0 for the center of the screen, and goes above 1.0 toward the edges,
-	// as the frustum extent is further away than if the zfar in the center of the screen
-	// went to the edges.
-	float perspectiveDivide = 1.0f / i.vertex.w;
-	float perspectiveFactor = length( fullVectorFromEyeToGeometry * perspectiveDivide );
+// Compute projective scaling factor.
+// perspectiveFactor is 1.0 for the center of the screen, and goes above 1.0 toward the edges,
+// as the frustum extent is further away than if the zfar in the center of the screen
+// went to the edges.
+float perspectiveDivide = 1.0f / i.vertex.w;
+float perspectiveFactor = length( fullVectorFromEyeToGeometry * perspectiveDivide );
 
-	// Calculate our UV within the screen (for reading depth buffer)
-	float2 screenUV = i.screenPosition.xy * perspectiveDivide;
-	float eyeDepthWorld =
-		GetLinearZFromZDepth_WorksWithMirrors( 
-			SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV), 
-			screenUV ) * perspectiveFactor;
-	// eyeDepthWorld is in meters.
+// Calculate our UV within the screen (for reading depth buffer)
+float2 screenUV = i.screenPosition.xy * perspectiveDivide;
+float eyeDepthWorld =
+	GetLinearZFromZDepth_WorksWithMirrors( 
+		SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV), 
+		screenUV ) * perspectiveFactor;
+// eyeDepthWorld is in meters.
 
-	float3 worldPosEyeHitInDepthTexture = _WorldSpaceCameraPos + eyeDepthWorld * worldSpaceDirection;
+float3 worldPosEyeHitInDepthTexture = _WorldSpaceCameraPos + eyeDepthWorld * worldSpaceDirection;
 ```
 
 NOTE: You must have a depth light on your scene, this is accomplished by having a directional light with shadows.  The light can be black.  If using hard shadows, it will be better.
@@ -811,33 +811,33 @@ Sometimes when using surface shaders you want more than just `uv_MainTex`?  This
 Note: Don't forget to add `alpha` if you are using alpha!
 
 ```
-	#pragma surface surf Lambert vertex:vert
-	struct Input {
-		float3 viewDir;
-	float4 color : COLOR;
-	float2 uv_MainTex;
-		float2 uv_Detail;
-	float2 uv_BumpMap;
-		float3 worldRefl;
-		float3 worldPos;
-	float4 screenPos;
-		INTERNAL_DATA
+#pragma surface surf Lambert vertex:vert
+struct Input {
+	float3 viewDir;
+float4 color : COLOR;
+float2 uv_MainTex;
+	float2 uv_Detail;
+float2 uv_BumpMap;
+	float3 worldRefl;
+	float3 worldPos;
+float4 screenPos;
+	INTERNAL_DATA
 
-		// Note: Additional parameters may be added here.
-		float3 customColor;
-	};
+	// Note: Additional parameters may be added here.
+	float3 customColor;
+};
 
 
-	float _Amount;
-	void vert (inout appdata_full v, out Input o) {
-		v.vertex.xyz += v.normal * _Amount;
-		UNITY_INITIALIZE_OUTPUT(Input,o);
-		o.customColor = abs(v.normal);
-	}
-	sampler2D _MainTex;
-	void surf (Input IN, inout SurfaceOutput o) {
-		o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
-	}
+float _Amount;
+void vert (inout appdata_full v, out Input o) {
+	v.vertex.xyz += v.normal * _Amount;
+	UNITY_INITIALIZE_OUTPUT(Input,o);
+	o.customColor = abs(v.normal);
+}
+sampler2D _MainTex;
+void surf (Input IN, inout SurfaceOutput o) {
+	o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
+}
 ```
 
 ## Doing full-screen effects.
@@ -908,150 +908,150 @@ SubShader {
 
 	Pass {
 		CGPROGRAM
-			#include "UnityCG.cginc"
-			#pragma vertex VertexProgram
-			#pragma hull HullProgram
-			#pragma domain DomainProgram
-			#pragma geometry GeometryProgram
-			#pragma fragment frag
-			#pragma target 5.0
-			
-
-			struct appdata_t {
-				float4 vertex : POSITION;
-				float2 texcoord : TEXCOORD0;
-				float3 normal : NORMAL;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-			
-			struct appdata_tess {
-				float4 vertex : POSITION;
-				float2 texcoord : TEXCOORD0;
-				float3 normal : NORMAL;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
-			};
-
-			struct v2f {
-				float4 vertex : SV_POSITION;
-				float2 texcoord : TEXCOORD0;
-				float3 normal : NORMAL;
-				float3 wPos : TEXCOORD1;
-				UNITY_FOG_COORDS(2)
-				UNITY_VERTEX_OUTPUT_STEREO
-			};
-
-			struct TesFact
-			{
-				float edge[3] : SV_TessFactor;
-				float inside : SV_InsideTessFactor;
-			};
-
-			float4 _Color;
-			float _TesselationUniform;
-
-			appdata_tess VertexProgram (appdata_t v)
-			{
-				appdata_tess t;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(appdata_tess, t);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
-
-				t.vertex = v.vertex;
-				t.texcoord = v.texcoord;
-				t.normal = v.normal;
-
-				return t;
-			}
-
-			TesFact PatchConstFunc(InputPatch<appdata_tess, 3> patch)
-			{
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
-				TesFact f;
-				float tessFactor = _TesselationUniform;
-				f.edge[0] = tessFactor;
-				f.edge[1] = tessFactor;
-				f.edge[2] = tessFactor;
-				f.inside = tessFactor;
-				return f;
-			}
-
-			//Not the actual vertex program, is function called by the domain program to do all the stuff the vertex normally does 
-			v2f DomainVert(appdata_tess v)
-			{
-				v2f o;
-				UNITY_INITIALIZE_OUTPUT(v2f, o);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-				o.texcoord = v.texcoord;
-				//float4 offset = tex2Dlod(_DepthTex, float4(o.texcoord.x,o.texcoord.y,0,0));
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.normal = UnityObjectToWorldNormal(v.normal);
-				o.wPos = mul(unity_ObjectToWorld, v.vertex);
-				UNITY_TRANSFER_FOG(o, o.vertex);
-				return o;
-			}
+		#include "UnityCG.cginc"
+		#pragma vertex VertexProgram
+		#pragma hull HullProgram
+		#pragma domain DomainProgram
+		#pragma geometry GeometryProgram
+		#pragma fragment frag
+		#pragma target 5.0
 
 
-			[UNITY_domain("tri")]
-			[UNITY_outputcontrolpoints(3)]
-			[UNITY_outputtopology("triangle_cw")]
-			[UNITY_partitioning("fractional_odd")]
-			[UNITY_patchconstantfunc("PatchConstFunc")]
-			appdata_tess HullProgram(InputPatch<appdata_tess, 3> patch,
-				uint id : SV_OutputControlPointID)
-			{
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[id]);
-				return patch[id];
-			}
+		struct appdata_t {
+			float4 vertex : POSITION;
+			float2 texcoord : TEXCOORD0;
+			float3 normal : NORMAL;
+			UNITY_VERTEX_INPUT_INSTANCE_ID
+		};
 
-			[UNITY_domain("tri")]
-			v2f DomainProgram(
-				TesFact factors,
-				OutputPatch<appdata_tess, 3> patch,
-				float3 barycentrCoords : SV_DomainLocation,
-				uint pid : SV_PrimitiveID
-			) {
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
+		struct appdata_tess {
+			float4 vertex : POSITION;
+			float2 texcoord : TEXCOORD0;
+			float3 normal : NORMAL;
+			UNITY_VERTEX_INPUT_INSTANCE_ID
+			UNITY_VERTEX_OUTPUT_STEREO
+		};
 
-				appdata_tess data;
+		struct v2f {
+			float4 vertex : SV_POSITION;
+			float2 texcoord : TEXCOORD0;
+			float3 normal : NORMAL;
+			float3 wPos : TEXCOORD1;
+			UNITY_FOG_COORDS(2)
+			UNITY_VERTEX_OUTPUT_STEREO
+		};
+
+		struct TesFact
+		{
+			float edge[3] : SV_TessFactor;
+			float inside : SV_InsideTessFactor;
+		};
+
+		float4 _Color;
+		float _TesselationUniform;
+
+		appdata_tess VertexProgram (appdata_t v)
+		{
+			appdata_tess t;
+			UNITY_SETUP_INSTANCE_ID(v);
+			UNITY_INITIALIZE_OUTPUT(appdata_tess, t);
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+
+			t.vertex = v.vertex;
+			t.texcoord = v.texcoord;
+			t.normal = v.normal;
+
+			return t;
+		}
+
+		TesFact PatchConstFunc(InputPatch<appdata_tess, 3> patch)
+		{
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
+			TesFact f;
+			float tessFactor = _TesselationUniform;
+			f.edge[0] = tessFactor;
+			f.edge[1] = tessFactor;
+			f.edge[2] = tessFactor;
+			f.inside = tessFactor;
+			return f;
+		}
+
+		//Not the actual vertex program, is function called by the domain program to do all the stuff the vertex normally does 
+		v2f DomainVert(appdata_tess v)
+		{
+			v2f o;
+			UNITY_INITIALIZE_OUTPUT(v2f, o);
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+			o.texcoord = v.texcoord;
+			//float4 offset = tex2Dlod(_DepthTex, float4(o.texcoord.x,o.texcoord.y,0,0));
+			o.vertex = UnityObjectToClipPos(v.vertex);
+			o.normal = UnityObjectToWorldNormal(v.normal);
+			o.wPos = mul(unity_ObjectToWorld, v.vertex);
+			UNITY_TRANSFER_FOG(o, o.vertex);
+			return o;
+		}
+
+
+		[UNITY_domain("tri")]
+		[UNITY_outputcontrolpoints(3)]
+		[UNITY_outputtopology("triangle_cw")]
+		[UNITY_partitioning("fractional_odd")]
+		[UNITY_patchconstantfunc("PatchConstFunc")]
+		appdata_tess HullProgram(InputPatch<appdata_tess, 3> patch,
+			uint id : SV_OutputControlPointID)
+		{
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[id]);
+			return patch[id];
+		}
+
+		[UNITY_domain("tri")]
+		v2f DomainProgram(
+			TesFact factors,
+			OutputPatch<appdata_tess, 3> patch,
+			float3 barycentrCoords : SV_DomainLocation,
+			uint pid : SV_PrimitiveID
+		) {
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
+
+			appdata_tess data;
 
 #define DOMAIN_INTERPOLATE(fieldName) data.fieldName = \
-		patch[0].fieldName * barycentrCoords.x + \
-		patch[1].fieldName * barycentrCoords.y + \
-		patch[2].fieldName * barycentrCoords.z;
+	patch[0].fieldName * barycentrCoords.x + \
+	patch[1].fieldName * barycentrCoords.y + \
+	patch[2].fieldName * barycentrCoords.z;
 
-				DOMAIN_INTERPOLATE(vertex);
-				DOMAIN_INTERPOLATE(texcoord);
-				DOMAIN_INTERPOLATE(normal);
+			DOMAIN_INTERPOLATE(vertex);
+			DOMAIN_INTERPOLATE(texcoord);
+			DOMAIN_INTERPOLATE(normal);
 
-				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
-				
-				return DomainVert(data);
-			}
-
-
-			[maxvertexcount(3)]
-			void GeometryProgram(triangle v2f p[3], inout LineStream<v2f> triStream)
-			{
-
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[0]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[1]);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[2]);
-
-				triStream.Append(p[0]);
-				triStream.Append(p[1]);
-				triStream.Append(p[2]);
-			}
+			UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
 			
-			float4 frag(v2f i) : SV_Target
-			{
-				float facing = sign(dot(i.normal, _WorldSpaceCameraPos - i.wPos));
-				return facing > 0 ? _Color : float4(0,0,0,0.2);
-			}
+			return DomainVert(data);
+		}
+
+
+		[maxvertexcount(3)]
+		void GeometryProgram(triangle v2f p[3], inout LineStream<v2f> triStream)
+		{
+
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[0]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[1]);
+			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(p[2]);
+
+			triStream.Append(p[0]);
+			triStream.Append(p[1]);
+			triStream.Append(p[2]);
+		}
+
+		float4 frag(v2f i) : SV_Target
+		{
+			float facing = sign(dot(i.normal, _WorldSpaceCameraPos - i.wPos));
+			return facing > 0 ? _Color : float4(0,0,0,0.2);
+		}
 		ENDCG
 	}
 }
@@ -1069,7 +1069,7 @@ Warning    -  RenderTexture.Create: Depth|ShadowMap RenderTexture requested with
 A way around this is to create a junk R8 texture with no depth buffer `rtDepthThrowawayColor`, and your normal depth buffer, `rtBotDepth` and frankenbuffer it into a camera.  NOTE: This will break camrea depth, so be sure to call `SetTargetBuffers()` in the order you want the camreas to evaluate.
 
 ```cs
-	CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
+CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.depthBuffer );
 ```
 
 
@@ -1078,12 +1078,12 @@ A way around this is to create a junk R8 texture with no depth buffer `rtDepthTh
 You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
 
 ```
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 
-		GrabPass
-		{
-			"_GrabTexture"
-		}
+GrabPass
+{
+	"_GrabTexture"
+}
 ```
 
 You should use the `_GrabTexture` name so that it only has to get executed once instead of once for every material.
@@ -1092,7 +1092,7 @@ You can then index into it as a sampler2D.
 
 
 ```glsl
-			sampler2D _GrabTexture;
+sampler2D _GrabTexture;
 ```
 ...
 ```glsl
@@ -1134,11 +1134,11 @@ Or, if you want to grab into it from its place on the screen, like to do a scree
 
 in Vertex shader:
 ```glsl
-	o.grabposs = ComputeGrabScreenPos( o.vertex );
+o.grabposs = ComputeGrabScreenPos( o.vertex );
 ```
 in Fragment shader:
 ```glsl
-	col = tex2Dproj(_GrabTexture, i.grabposs );
+col = tex2Dproj(_GrabTexture, i.grabposs );
 ```
 
 Or use the method above to get grab coordinates.
@@ -1186,16 +1186,16 @@ foreach( UnityEngine.GameObject go in GameObject.FindObjectsOfType(typeof(GameOb
 ## Using CRTs with integer indexing:
 
 ```glsl
-			// This changes _SelfTexture2D in 'UnityCustomRenderTexture.cginc' to Texture2D instead of sampler2D
-			// Thanks Lyuma!
-			#define _SelfTexture2D _JunkTexture
-			#include "UnityCustomRenderTexture.cginc"
-			#undef _SelfTexture2D
-			Texture2D<float4> _SelfTexture2D;
+// This changes _SelfTexture2D in 'UnityCustomRenderTexture.cginc' to Texture2D instead of sampler2D
+// Thanks Lyuma!
+#define _SelfTexture2D _JunkTexture
+#include "UnityCustomRenderTexture.cginc"
+#undef _SelfTexture2D
+Texture2D<float4> _SelfTexture2D;
 
-			#include "UnityCG.cginc"
-			#include "AudioLink.cginc"
-			uniform half4 _SelfTexture2D_TexelSize;
+#include "UnityCG.cginc"
+#include "AudioLink.cginc"
+uniform half4 _SelfTexture2D_TexelSize;
 ```
 
 ## MRT
@@ -1216,14 +1216,13 @@ OPTION 1: Cameras ignore their depth and render order when you do this.  Instead
 NOTE: OPTION 2: TEST IT WITHOUT EXPLICIT ORDERING (manually executing .Render) FIRST AS THIS WILL SLOW THINGS DOWN  You will need to explicitly execute the order you want for all the cameras.  You can only do this in `Update` or `LateUpdate`, i.e.
 
 ```cs
-		CamCalcA.enabled = false;
-		CamCalcA.SetReplacementShader( <shader>, "" );
-		RenderBuffer[] renderBuffersA = new RenderBuffer[] { rtPositionA.colorBuffer, rtVelocityA.colorBuffer };
-		CamCalcA.SetTargetBuffers(renderBuffersA, rtPositionA.depthBuffer);
+CamCalcA.enabled = false;
+CamCalcA.SetReplacementShader( <shader>, "" );
+RenderBuffer[] renderBuffersA = new RenderBuffer[] { rtPositionA.colorBuffer, rtVelocityA.colorBuffer };
+CamCalcA.SetTargetBuffers(renderBuffersA, rtPositionA.depthBuffer);
 ..
-
-		CamCalcA.Render()
-		CamCalcB.Render()
+CamCalcA.Render()
+CamCalcB.Render()
 ```
 
 
@@ -1270,7 +1269,7 @@ Side note:  If you want something like CyanEmu (to simulate vrchat in Unity) htt
 10. Close and reopen Unity
 11. Open Scene
 12. EsnyaTools -> Repair Udon
-13. VRWorldToolkit -> World Debugger 
+13. VRWorldToolkit -> World Debugger
 14. Fix all errors.
 
 ## Additional Links
@@ -1347,7 +1346,7 @@ float4 pixelToClipPos(float2 pixelPos)
 
 Eh, just try using a different shader model, add a 
 ```glsl
-#pragma  target 5.0
+#pragma target 5.0
 ```
 in your code or something.  Heck 5.0's been supported since the GeForce 400 in 2010.
 
@@ -1380,7 +1379,7 @@ BIG WARNING: After a lot of testing, we've found that this is slower than readin
 
 ```c
 cbuffer SampleBuffer {
-	float _Samples[1023*4] : packoffset(c0);  
+	float _Samples[1023*4] : packoffset(c0);
 	float _Samples0[1023] : packoffset(c0);
 	float _Samples1[1023] : packoffset(c1023);
 	float _Samples2[1023] : packoffset(c2046);
@@ -1417,23 +1416,23 @@ CBuffers:
 Properties {
 ...
 
-	_Spread00 ("Spine",			Vector) = (40, 40, 40, 1)
-	_Spread01 ("Head",			Vector) = (40, 40, 80, 1)
+	_Spread00 ("Spine", Vector) = (40, 40, 40, 1)
+	_Spread01 ("Head", Vector) = (40, 40, 80, 1)
 	...
-	_Spread50 ("IndexProximal",	Vector) = (45, 20,  9, 1)
-	_Spread51 ("IndexDistal",	Vector) = (45,  9,  9, 1)
+	_Spread50 ("IndexProximal", Vector) = (45, 20,  9, 1)
+	_Spread51 ("IndexDistal", Vector) = (45,  9,  9, 1)
 
-	_Finger00 ("LeftThumb",		Vector) = (0, 0, 0, 0)
-	_Finger01 ("RightThumb",	Vector) = (0, 0, 0, 0)
+	_Finger00 ("LeftThumb", Vector) = (0, 0, 0, 0)
+	_Finger01 ("RightThumb", Vector) = (0, 0, 0, 0)
 	...
-	_Finger40 ("LeftLittle",	Vector) = (0, 0, 0, 0)
-	_Finger41 ("RightLittle",	Vector) = (0, 0, 0, 0)
+	_Finger40 ("LeftLittle", Vector) = (0, 0, 0, 0)
+	_Finger41 ("RightLittle", Vector) = (0, 0, 0, 0)
 }
 
 CGPROGRAM
 ...
 cbuffer SpreadBuffer {
-	float4 _Spread[6][2] : packoffset(c0);  
+	float4 _Spread[6][2] : packoffset(c0);
 	float4 _Spread00 : packoffset(c0);
 	float4 _Spread01 : packoffset(c1);
 	...
@@ -1441,7 +1440,7 @@ cbuffer SpreadBuffer {
 	float4 _Spread51 : packoffset(c11);
 };
 cbuffer FingerBuffer {
-	float4 _Finger[10] : packoffset(c0);  
+	float4 _Finger[10] : packoffset(c0);
 	float4 _Finger00 : packoffset(c0);
 	...
 	float4 _Finger40 : packoffset(c8);
@@ -1705,39 +1704,39 @@ NOTE: If you are going from a fresh git tree of a project, you should open a bla
 
 --> TODO --> Include in PR.
 ```cs
-		[MenuItem("Window/Udon Sharp/Refresh All UdonSharp Assets")]
-		static public void UdonSharpCheckAbsent()
+[MenuItem("Window/Udon Sharp/Refresh All UdonSharp Assets")]
+static public void UdonSharpCheckAbsent()
+{
+	Debug.Log( "Checking Absent" );
+
+	string[] udonSharpDataAssets = AssetDatabase.FindAssets($"t:{nameof(UdonSharpProgramAsset)}");
+	string[] udonSharpNames = new string[udonSharpDataAssets.Length];
+	Debug.Log( $"Found {udonSharpDataAssets.Length} assets." );
+
+	_programAssetCache = new UdonSharpProgramAsset[udonSharpDataAssets.Length];
+
+	for (int i = 0; i < _programAssetCache.Length; ++i)
+	{
+		udonSharpDataAssets[i] = AssetDatabase.GUIDToAssetPath(udonSharpDataAssets[i]);
+	}
+
+	foreach(string s in AssetDatabase.GetAllAssetPaths() )
+	{
+		if(!udonSharpDataAssets.Contains(s))
 		{
-			Debug.Log( "Checking Absent" );
-
-			string[] udonSharpDataAssets = AssetDatabase.FindAssets($"t:{nameof(UdonSharpProgramAsset)}");
-			string[] udonSharpNames = new string[udonSharpDataAssets.Length];
-			Debug.Log( $"Found {udonSharpDataAssets.Length} assets." );
-
-			_programAssetCache = new UdonSharpProgramAsset[udonSharpDataAssets.Length];
-
-			for (int i = 0; i < _programAssetCache.Length; ++i)
+			Type t = AssetDatabase.GetMainAssetTypeAtPath(s);
+			if (t != null && t.FullName == "UdonSharp.UdonSharpProgramAsset")
 			{
-				udonSharpDataAssets[i] = AssetDatabase.GUIDToAssetPath(udonSharpDataAssets[i]);
+				Debug.Log( $"Trying to recover {s}" );
+				Selection.activeObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(s);
 			}
-
-			foreach(string s in AssetDatabase.GetAllAssetPaths() )
-			{
-				if(!udonSharpDataAssets.Contains(s))
-				{
-					Type t = AssetDatabase.GetMainAssetTypeAtPath(s);
-					if (t != null && t.FullName == "UdonSharp.UdonSharpProgramAsset")
-					{
-						Debug.Log( $"Trying to recover {s}" );
-						Selection.activeObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(s);
-					}
-				}
-			}
-
-			ClearProgramAssetCache();
-
-			GetAllUdonSharpPrograms();
 		}
+	}
+
+	ClearProgramAssetCache();
+
+	GetAllUdonSharpPrograms();
+}
 ```
 
 ## Depth Textures & Getting Worldspace Info
@@ -1875,18 +1874,18 @@ Please note that if you use MRT, this scales to up to 24 IDs.
 This is an improvement over my up-to-two IDs per cell.
 
 ```c
-		// .r = original.r * Zero + new.r * DstAlpha;
-		// .a = original.a * Zero + new.a * One;
-		
-		// On the first pixel,				VALUE = ( 0, 0, 0, ID0 );
-		// On the first overlapping pixel,	VALUE = ( ID0, ID0, ID0, ID1 );
-		// On the second overlapping pixel,	VALUE = ( ID1, ID1, ID1, ID2 );
-		
-		// DstAlpha = original.a
+// .r = original.r * Zero + new.r * DstAlpha;
+// .a = original.a * Zero + new.a * One;
 
-		Blend DstAlpha Zero, One Zero
+// On the first pixel,				VALUE = ( 0, 0, 0, ID0 );
+// On the first overlapping pixel,	VALUE = ( ID0, ID0, ID0, ID1 );
+// On the second overlapping pixel,	VALUE = ( ID1, ID1, ID1, ID2 );
+
+// DstAlpha = original.a
+
+Blend DstAlpha Zero, One Zero
 
 ...
-		return float4( 1, 1, 1, ID );
+return float4( 1, 1, 1, ID );
 ```
 
