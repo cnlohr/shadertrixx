@@ -367,7 +367,7 @@ uniform float3 _VRChatMirrorCameraPos;
 #if defined(USING_STEREO_MATRICES)
     float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 #else
-    float3 PlayerCenterCamera = _VRChatMirrorMode != 0 ? _VRChatMirrorCameraPos ? _WorldSpaceCameraPos.xyz;
+    float3 PlayerCenterCamera = _VRChatMirrorMode != 0 ? _VRChatMirrorCameraPos : _WorldSpaceCameraPos.xyz;
 #endif
 ```
 
