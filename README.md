@@ -359,6 +359,18 @@ Thanks, @d4rkpl4y3r
 #endif
 ```
 
+VRChat now provides a few global uniforms that we can use to make the PlayerCenterCamera work as expected in mirrors.
+```glsl
+uniform float _VRChatMirrorMode;
+uniform float3 _VRChatMirrorCameraPos;
+
+#if defined(USING_STEREO_MATRICES)
+    float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
+#else
+    float3 PlayerCenterCamera = _VRChatMirrorMode != 0 ? _VRChatMirrorCameraPos ? _WorldSpaceCameraPos.xyz;
+#endif
+```
+
 Alternatively to get the raw value (I do not know why it was originally written this way)
 
 For stereo view:
