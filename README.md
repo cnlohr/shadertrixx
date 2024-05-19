@@ -155,7 +155,7 @@ bool isMirror() { return _VRChatMirrorMode != 0; }
 For detecting eyes it is recommended to use the canonical [unity_StereoEyeIndex and related macros](https://docs.unity3d.com/Manual/SinglePassInstancing.html) for getting the correct information.
 
 A helpful comment from error.mdl on why the old `UNITY_MATRIX_P._13` method is not reliable for detecting eyes:
-> That component (UNITY_MATRIX_P._13) represents how much the projection center is shifted towards the left or right ((r + l) / (r -l)). 
+> That component (UNITY_MATRIX_P._13) represents how much the projection  is shifted towards the left or right ((r + l) / (r -l)). 
 > In most cases the projection center is always closer to the user's nose giving the widest peripheral vision, and this is what you're relying on. 
 > However for single-screen headsets like the quest 2 and rift-s, (I think?) changing the IPD to larger values 
 > shifts the center of the projection matrix outward, and for very high IPDs it could actually be inverted.
@@ -356,6 +356,18 @@ Thanks, @d4rkpl4y3r
     float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 #else
     float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
+#endif
+```
+
+VRChat now provides a few global uniforms that we can use to make the PlayerCenterCamera work as expected in mirrors.
+```glsl
+uniform float _VRChatMirrorMode;
+uniform float3 _VRChatMirrorCameraPos;
+
+#if defined(USING_STEREO_MATRICES)
+    float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
+#else
+    float3 PlayerCenterCamera = _VRChatMirrorMode != 0 ? _VRChatMirrorCameraPos ? _WorldSpaceCameraPos.xyz;
 #endif
 ```
 
