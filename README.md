@@ -1396,7 +1396,7 @@ float frag(float2 texcoord : TEXCOORD0) : SV_Target {
 }
 ```
 and
-```c
+```cs
 void Update() {
 	source.GetOutputData(samples, 0);
 	System.Array.Copy(samples, 4096-1023*4, samples0, 0, 1023);
