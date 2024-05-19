@@ -9,7 +9,7 @@ Quick links to other useful resources and infodumps. Some information may be dup
 
 ## The most important trick
 
-```glsl
+```hlsl
 #define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
 ```
 
@@ -26,35 +26,35 @@ VRChat is switching to SPS-I.  Please perform the following to test your shaders
 ### Add instancing support
 
 Add this to your appdata:
-```glsl
+```hlsl
 UNITY_VERTEX_INPUT_INSTANCE_ID;
 ```
 
 Add this to your `v2f` struct:
-```glsl
+```hlsl
 UNITY_VERTEX_OUTPUT_STEREO;
 ```
 
 Add this to your `vertex` shader:
-```glsl
+```hlsl
 UNITY_SETUP_INSTANCE_ID( v );
 UNITY_INITIALIZE_OUTPUT( v2f, o );
 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 ```
 
 In your `fragment` - or ANY other shaders that ostensibly take in the `v2f` struct, i.e. `patch`, `hull`:
-```glsl
+```hlsl
 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 ```
 
 If you are using a `domain` shader, you will need something like this:
-```glsl
+```hlsl
 UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
 ```
 
 ### Converting Camera Depth Texture
-```glsl
+```hlsl
 Was:
 	sampler2D _CameraDepthTexture;
 	float depth = LinearEyeDepth( UNITY_SAMPLE_DEPTH( tex2D( _CameraDepthTexture, screenUV ) ) );
@@ -74,7 +74,7 @@ Now:
 
 You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
 
-```glsl
+```hlsl
 #pragma warning (default : 3206) // implicit truncation
 ```
 
@@ -108,7 +108,7 @@ From @Lyuma
 ### Lyuma Beautiful Retro Pixels Technique
 
 If you want to use pixels but make the boundaries between the pixels be less ugly, use this:
-```glsl
+```hlsl
 float2 coord = i.tex.xy * _MainTex_TexelSize.zw;
 float2 fr = frac(coord + 0.5);
 float2 fw = max(abs(ddx(coord)), abs(ddy(coord)));
@@ -122,7 +122,7 @@ You should also see Pixel Standard by S-ilent. https://twitter.com/silent0264/st
 ### Are you in a mirror?
 Thanks, @Lyuma and @merlinvr for this one.
 
-```glsl
+```hlsl
 bool isMirror()
 {
 	return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
@@ -130,7 +130,7 @@ bool isMirror()
 ```
 
 Or a more succinct but confusing way from @OwenTheProgrammer
-```glsl
+```hlsl
 bool isMirror() {
 	//return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
 	return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
@@ -145,7 +145,7 @@ Which translates to:
 
 For VRChat specifically we can use the shader globals more more a reliable mirror check.
 
-```glsl
+```hlsl
 uniform float _VRChatMirrorMode;
 bool isMirror() { return _VRChatMirrorMode != 0; }
 ```
@@ -162,7 +162,7 @@ A helpful comment from error.mdl on why the old `UNITY_MATRIX_P._13` method is n
 
 With that and some additional advice from d4rkpl4y3r and vetting from techanon we get:
 
-```glsl
+```hlsl
 bool isVR() {
 	#if defined(USING_STEREO_MATRICES)
 	return true;
@@ -190,7 +190,7 @@ in order to cover situations where multiview is involved, such as Quest.
 For VRChat specifically, we can update the methods to use some shader globals to handle mirror situations more reliably.
 Desktop will have left-eye/right-eye always be respectively true/false.
 
-```glsl
+```hlsl
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
 
@@ -219,7 +219,7 @@ bool isRightEye()
 Add camera detection to the mix.  
 Thanks, @scruffyruffles for this!
 
-```glsl
+```hlsl
 bool isVRHandCamera() {
 	return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
 }
@@ -238,7 +238,7 @@ bool isPanorama() {
 
 With [vrchat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals) we can update one of the methods for more reliability.
 
-```glsl
+```hlsl
 uniform float _VRChatCameraMode;
 
 bool isVRHandCamera() {
@@ -271,7 +271,7 @@ UIMenu = auxiliary layer that can be used for avatar UI (for example, a camera p
 
 
 ### Three's Utility Functions
-```glsl
+```hlsl
 //invert function from https://answers.unity.com/questions/218333/shader-inversefloat4x4-function.html, thank you d4rk
 float4x4 inverse(float4x4 input)
 {
@@ -335,7 +335,7 @@ float4x4 clipToWorld()
 ```
 
 Determine vertical FoV.  Thanks @scruffyruffles
-```glsl
+```hlsl
 float t = unity_CameraProjection[1][1];
 float fov = degrees( atan( 1.0 / t ) );
 ```
@@ -352,7 +352,7 @@ VRChat also provides a few global uniforms that we can use to make the PlayerCen
 
 Thanks, @d4rkpl4y3r
 
-```glsl
+```hlsl
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
 
@@ -389,7 +389,7 @@ https://gist.github.com/cnlohr/c88980e560ecb403cae6c6525b05ab2f
 ## Multiply vector-by-quaterion
 
 From @axlecrusher effectively using :
-```glsl
+```hlsl
 // Rotate v by q
 float3 vector_quat_rotate( float3 v, float4 q )
 {
@@ -404,7 +404,7 @@ float3 vector_quat_unrotate( float3 v, float4 q )
 ```
 
 Create a 2x2 rotation, can be applied to a 3-vector by saying vector.xz or other swizzle.  Not sure where this one came from
-```glsl
+```hlsl
 fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
 {
 	fixed2 a = sin(fixed2(1.5707963, 0) + th);
@@ -415,7 +415,7 @@ fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
 
 Assuming to/from are normalized.
 
-```glsl
+```hlsl
 vec3 half = normalize( from + to );
 vec4 quat( cross( to, half ), dot( to, half ) );
 ```
@@ -425,7 +425,7 @@ Note that this does not do well in heavy opposition.
 
 ## Is your UV within the unit square?
 
-```glsl
+```hlsl
 any(i.uvs < 0 || i.uvs > 1)
 ```
 ```
@@ -440,7 +440,7 @@ any(i.uvs < 0 || i.uvs > 1)
 (From @d4rkpl4y3r)
 
 And the much less readable and more ambiguous on edge conditions version:
-```glsl
+```hlsl
 any(abs(i.uvs-.5)>.5)
 ```
 ```
@@ -454,7 +454,7 @@ any(abs(i.uvs-.5)>.5)
 (From @scruffyruffles)
 
 Or even more succinct, but very confusing:
-```glsl
+```hlsl
 saturate(v) == v
 ```
 ```
@@ -465,7 +465,7 @@ saturate(v) == v
 4: ret 
 ```
 But because you may not have the prototype you want you may need to add something like:
-```glsl
+```hlsl
 inline int withinUnitSquare(float2 uv) {
 	return (saturate(uv.x) == uv.x) & (saturate(uv.y) == uv.y);
 }
@@ -478,7 +478,7 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 
 This is credit to @mochie
 
-```glsl
+```hlsl
 Pass {
 	Tags {"LightMode" = "ShadowCaster"}
 	CGPROGRAM
@@ -521,18 +521,18 @@ Pass {
 To enable instancing, you must have in your shader:
  * `#pragma multi_compile_instancing` in all all passes.
  * Optionally
-```glsl
+```hlsl
 UNITY_INSTANCING_BUFFER_START(Props)
 	// put more per-instance properties here
 UNITY_INSTANCING_BUFFER_END(Props)
 ```
  * An example thing you could put there, in the middle is:
-```glsl
+```hlsl
 UNITY_DEFINE_INSTANCED_PROP( float4, _InstanceID)
 ```
  * I've found it to be super janky to try to access the variable in the fragment/surf shader, but it does seem to work in the vertex shader.
  * In your vertex shader:
-```glsl
+```hlsl
 UNITY_SETUP_INSTANCE_ID(v);
 ```
  * Access variables with `UNITY_ACCESS_INSTANCED_PROP(Props, _InstanceID).x;`
@@ -616,7 +616,7 @@ Thanks, @Pema
 
 If you want your raycaster/raytracer to work with a shadow map or other orthographic camera, you will need to consider that the ray origin is not `_WorldSpaceCameraPos`.  This neat code compiled by BenDotCom ( @bbj ) shows how you can do this computation in a vertex shader, however, the code works with trivial substitution in a geometry or fragment shader as well.
 
-```glsl
+```hlsl
 o.vertex = UnityObjectToClipPos(v.vertex);
 o.objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) );
 
@@ -637,12 +637,12 @@ o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 
 Thanks, @orels1
 
-```glsl
+```hlsl
 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 ```
 
 ## This SLERP function, found by ACiiL,
-```glsl
+```hlsl
 ////============================================================
 //// blend between two directions by %
 //// https://www.shadertoy.com/view/4sV3zt
@@ -677,7 +677,7 @@ pema notes:
 
 For completeness, in spite of brevity, here is the example the aforementioned website provides:
 
-```glsl
+```hlsl
 struct appdata
 {
 	float4 vertex : POSITION;
@@ -722,11 +722,11 @@ Use the technique here: https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4
 **WARNING**: The above code is not mobile-compliant. And may not work on Quest.  If you have a quest version please contact me.
 
 Then for instance, you could do the following to get to object space:
-```glsl
+```hlsl
 po.cppos = mul( mul( clipToViewMatrix, cp ), UNITY_MATRIX_IT_MV );
 ```
 or
-```glsl
+```hlsl
 float4 vs = ClipToViewPos( cp );
 vs /= vs.w;
 po.cppos = mul( vs, UNITY_MATRIX_IT_MV );
@@ -737,7 +737,7 @@ po.cppos = mul( vs, UNITY_MATRIX_IT_MV );
 
 Because `LinearEyeDepth` doesn't work in mirrors because it uses oblique matricies, it's recommended to use `GetLinearZFromZDepth_WorksWithMirrors`
 
-```glsl
+```hlsl
 UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 
 // Inspired by Internal_ScreenSpaceeShadow implementation.  This was adapted by lyuma.
@@ -761,7 +761,7 @@ float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV
 
 You can compute `i.screenPosition` and `i.worldPos` can come from your `vertex` shader as:
 
-```glsl
+```hlsl
 o.vertex = UnityObjectToClipPos(v.vertex);
 o.uv = v.uv;
 ...
@@ -778,7 +778,7 @@ o.screenPosition = TransformStereoScreenSpaceTex( suv+0.5*o.vertex.w, o.vertex.w
 
 In your `fragment` you will need `i.vertex` and `i.worldPos` can use it as follows:
 
-```glsl
+```hlsl
 float3 fullVectorFromEyeToGeometry = i.worldPos - _WorldSpaceCameraPos;
 float3 worldSpaceDirection = normalize( i.worldPos - _WorldSpaceCameraPos );
 
@@ -810,7 +810,7 @@ Sometimes when using surface shaders you want more than just `uv_MainTex`?  This
 
 Note: Don't forget to add `alpha` if you are using alpha!
 
-```glsl
+```hlsl
 #pragma surface surf Lambert vertex:vert
 struct Input {
 	float3 viewDir;
@@ -848,7 +848,7 @@ All you need to do is paste this on a quad.
 
 NOTE: If you need to interact with objects which use the default grabpass, you will need to use a different name for your `_GrabTexture` for instance `_GrabTextureOverlay`
 
-```glsl
+```hlsl
 Shader "Unlit/meme"
 {
 	SubShader
@@ -892,7 +892,7 @@ Shader "Unlit/meme"
 
 ERROR.mdl provides this tessellation shader:
 
-```glsl
+```hlsl
 
 Shader "Error.mdl/Single Pass Stereo Instancing Example" {
 Properties {
@@ -1077,7 +1077,7 @@ CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.d
 
 You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
 
-```glsl
+```hlsl
 Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 
 GrabPass
@@ -1091,11 +1091,11 @@ You should use the `_GrabTexture` name so that it only has to get executed once 
 You can then index into it as a sampler2D.
 
 
-```glsl
+```hlsl
 sampler2D _GrabTexture;
 ```
 ...
-```glsl
+```hlsl
 float2 grabuv = i.uv;
 #if !UNITY_UV_STARTS_AT_TOP
 grabuv.y = 1 - grabuv.y;
@@ -1106,7 +1106,7 @@ fixed4 col = tex2D(_GrabTexture, grabuv);
 NOTE: In the below we use Texture2D - but this will go away soon.  You should use `UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );` in all situations moving forward
 
 Or, alternatively, if you would like pixel-perfect operations:
-```glsl
+```hlsl
 SamplerState sampler_CameraDepthTexture;
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 	Texture2D _CameraDepthTexture;
@@ -1116,7 +1116,7 @@ SamplerState sampler_CameraDepthTexture;
 uniform float4 _CameraDepthTexture_TexelSize;
 ```
 ...
-```glsl
+```hlsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 	ScreenDepth = LinearEyeDepth(_CameraDepthTexture.Sample(sampler_CameraDepthTexture, screenPosNorm.xy));
 #else
@@ -1124,7 +1124,7 @@ uniform float4 _CameraDepthTexture_TexelSize;
 #endif
 ```
 And to check it:
-```glsl
+```hlsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 _CameraDepthTexture.GetDimensions(width, width);
 #endif
@@ -1133,11 +1133,11 @@ _CameraDepthTexture.GetDimensions(width, width);
 Or, if you want to grab into it from its place on the screen, like to do a screen-space effect, you can do this:
 
 in Vertex shader:
-```glsl
+```hlsl
 o.grabposs = ComputeGrabScreenPos( o.vertex );
 ```
 in Fragment shader:
-```glsl
+```hlsl
 col = tex2Dproj(_GrabTexture, i.grabposs );
 ```
 
@@ -1185,7 +1185,7 @@ foreach( UnityEngine.GameObject go in GameObject.FindObjectsOfType(typeof(GameOb
 
 ## Using CRTs with integer indexing:
 
-```glsl
+```hlsl
 // This changes _SelfTexture2D in 'UnityCustomRenderTexture.cginc' to Texture2D instead of sampler2D
 // Thanks Lyuma!
 #define _SelfTexture2D _JunkTexture
@@ -1329,7 +1329,7 @@ From @lox9973 This flowchart of how mono behaviors are executed and in what orde
 
 @d4rkpl4y3r notes that you can use queue < 2000 and zwrite off to exfiltrate data without horrible visual artifacts.  You can also use points to do the export instead of being limited to quads by exporting points from a geometry shader on the avatar with the following function:
 
-```glsl
+```hlsl
 float4 pixelToClipPos(float2 pixelPos)
 {
 	float4 pos = float4((pixelPos + .5) / _ScreenParams.xy, 0.5, 1);
@@ -1345,7 +1345,7 @@ float4 pixelToClipPos(float2 pixelPos)
 ## HALP The Unity compiler is emitting really bizarre assembly code.
 
 Eh, just try using a different shader model, add a 
-```glsl
+```hlsl
 #pragma target 5.0
 ```
 in your code or something.  Heck 5.0's been supported since the GeForce 400 in 2010.
@@ -1377,7 +1377,7 @@ From @lox9973
 
 BIG WARNING: After a lot of testing, we've found that this is slower than reading from a texture if doing intensive reads.  If you need to read from like 100 of these in a shader, probably best to move it into a texture first.
 
-```glsl
+```hlsl
 cbuffer SampleBuffer {
 	float _Samples[1023*4] : packoffset(c0);
 	float _Samples0[1023] : packoffset(c0);
@@ -1412,7 +1412,7 @@ void Update() {
 https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-constants
 
 CBuffers:
-```glsl
+```hlsl
 Properties {
 ...
 
@@ -1462,21 +1462,21 @@ To use a non-local keyword, use from the following list: https://pastebin.com/83
 To use a local keyword, here is an example
 
 In your properties block: 
-```glsl
+```hlsl
 [Toggle(_is_torso_local)] _is_torso_local ( "Torso (check)/Wall (uncheck)", int ) = 0
 ```
 
 In your shader block, add:
-```glsl
+```hlsl
 #pragma multi_compile_local _ _is_torso_local
 ```
 or, if you only want to build used features,
-```glsl
+```hlsl
 #pragma shader_feature_local _is_torso_local
 ```
 
 And in your shader
-```glsl
+```hlsl
 #if _is_torso_local
  // Do something
 #endif
@@ -1485,17 +1485,17 @@ And in your shader
 If you have a sort of radio button option, you can use it like the following:
 
 In your properties block:
-```glsl
+```hlsl
 [KeywordEnum(None, Simple, High Quality)] _SunDisk ("Sun", Int) = 2
 ```
 
 In your shader block:
-```glsl
+```hlsl
 #pragma multi_compile_local _SUNDISK_NONE _SUNDISK_SIMPLE _SUNDISK_HIGH_QUALITY
 ```
 
 In your code:
-```glsl
+```hlsl
 #if defined(_SUNDISK_SIMPLE)
 // Do stuff
 ```
@@ -1504,7 +1504,7 @@ In your code:
 
 If you're on an avatar you can likely ditch all these.
 
-```glsl
+```hlsl
 #pragma skip_variants DYNAMICLIGHTMAP_ON LIGHTMAP_ON LIGHTMAP_SHADOW_MIXING DIRLIGHTMAP_COMBINED
 ```
 
@@ -1742,7 +1742,7 @@ static public void UdonSharpCheckAbsent()
 ## Depth Textures & Getting Worldspace Info
 
 If you define a sampler2D the following way, you can read the per-pixel depth.
-```glsl
+```hlsl
 UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 ```
 
@@ -1751,13 +1751,13 @@ UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 **NOTE**: this `screenPosition` can also be used to access `_GrabTexture`!
 
 Struct:
-```glsl
+```hlsl
 float4 screenPosition : TEXCOORD1; // Trivially refactorable to a float2
 float3 worldDirection : TEXCOORD2;
 ```
 
 Vertex Shader:
-```glsl
+```hlsl
 // Subtract camera position from vertex position in world
 // to get a ray pointing from the camera to this vertex.
 o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
@@ -1774,7 +1774,7 @@ o.screenPosition = float4( TransformStereoScreenSpaceTex(
 ```
 
 Fragment Shader:
-```glsl
+```hlsl
 // Compute projective scaling factor...
 float perspectiveDivide = 1.0f / i.vertex.w;
 
@@ -1794,7 +1794,7 @@ float3 worldspace = direction * depth + _WorldSpaceCameraPos;
 This approach is slower by about 8-10 fragment ops, but requires no additional varying if all you want is the screenUV for depth or grab passes.  If you want world space, you will still need to compute that in the vertex shader and use one varying.  It would require multiple matrix-vector multiplies and the needed matricies are unavailable in the normal pipeline.
 
 Vertex Shader:
-```glsl
+```hlsl
 // Subtract camera position from vertex position in world
 // to get a ray pointing from the camera to this vertex.
 o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos;
@@ -1802,7 +1802,7 @@ o.worldDirection = mul(unity_ObjectToWorld, v.vertex).xyz - _WorldSpaceCameraPos
 
 Fragment Shader:
 
-```glsl
+```hlsl
 // Compute projective scaling factor...
 float perspectiveDivide = 1.0f / i.vertex.w;
 
@@ -1823,7 +1823,7 @@ screenUV = TransformStereoScreenSpaceTex( screenUV, 1.0 );
 ```
 ## Fullscreening a quad from it's UVs
 
-```glsl
+```hlsl
 v2f vert(appdata v)
 {
 	v2f o;
@@ -1842,7 +1842,7 @@ This was done to handle ball hashing with dense grids, to support up to 3 ball h
 This is from @d4rkpl4y3r.
 
 
-```glsl
+```hlsl
 BlendOp Add, Add
 Blend One SrcAlpha, One One
 
@@ -1873,7 +1873,7 @@ Please note that if you use MRT, this scales to up to 24 IDs.
 
 This is an improvement over my up-to-two IDs per cell.
 
-```glsl
+```hlsl
 // .r = original.r * Zero + new.r * DstAlpha;
 // .a = original.a * Zero + new.a * One;
 
