@@ -366,7 +366,7 @@ uniform float3 _VRChatMirrorCameraPos;
 Alternatively to get the raw value (I do not know why it was originally written this way)
 
 For stereo view:
-```
+```hlsl
 float3 PlayerCenterCamera = (
 	float3(unity_StereoCameraToWorld[0][0][3], unity_StereoCameraToWorld[0][1][3], unity_StereoCameraToWorld[0][2][3]) +
 	float3(unity_StereoCameraToWorld[1][0][3], unity_StereoCameraToWorld[1][1][3], unity_StereoCameraToWorld[1][2][3]) ) * 0.5;
@@ -566,7 +566,7 @@ public class MaterialPropertyInstanceIDIncrementer : UdonSharpBehaviour
 Are you trying to use Texture.Load with a surface shader? Does it say something like `Unexpected identifier "Texture2D". Expected one of: typedef const void inline uniform nointerpolation extern shared static volatile row_major column_major struct or a user-defined type`
 
 Just wrap your stuff in a
-```
+```hlsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
 // Do something awesome.
 #endif
@@ -661,7 +661,7 @@ float3 slerp(float3 start, float3 end, float percent)
 
 From error.mdl - This fixes issues where shaders need to get access to their local coordinates at the cost of a small amount of performance.
 
-```
+```hlsl
 Tags { "DisableBatching"="true" }
 ```
 
