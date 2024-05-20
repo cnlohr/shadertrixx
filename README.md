@@ -814,13 +814,13 @@ Note: Don't forget to add `alpha` if you are using alpha!
 #pragma surface surf Lambert vertex:vert
 struct Input {
 	float3 viewDir;
-float4 color : COLOR;
-float2 uv_MainTex;
+	float4 color : COLOR;
+	float2 uv_MainTex;
 	float2 uv_Detail;
-float2 uv_BumpMap;
+	float2 uv_BumpMap;
 	float3 worldRefl;
 	float3 worldPos;
-float4 screenPos;
+	float4 screenPos;
 	INTERNAL_DATA
 
 	// Note: Additional parameters may be added here.
