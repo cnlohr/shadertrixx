@@ -165,18 +165,18 @@ With that and some additional advice from d4rkpl4y3r and vetting from techanon w
 ```hlsl
 bool isVR() {
 	#if defined(USING_STEREO_MATRICES)
-	return true;
+		return true;
 	#else
-	return false;
+		return false;
 	#endif
 }
 
 bool isRightEye()
 {
 	#if defined(USING_STEREO_MATRICES)
-	return unity_StereoEyeIndex == 1;
+		return unity_StereoEyeIndex == 1;
 	#else
-	return false;
+		return false;
 	#endif
 }
 
@@ -200,18 +200,18 @@ bool isMirror() {
 
 bool isVR() {
 	#if defined(USING_STEREO_MATRICES)
-	return true;
+		return true;
 	#else
-	return _VRChatMirrorMode == 1;
+		return _VRChatMirrorMode == 1;
 	#endif
 }
 
 bool isRightEye()
 {
 	#if defined(USING_STEREO_MATRICES)
-	return unity_StereoEyeIndex == 1;
+		return unity_StereoEyeIndex == 1;
 	#else
-	return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
+		return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
 	#endif
 }
 ```
@@ -568,7 +568,7 @@ Are you trying to use Texture.Load with a surface shader? Does it say something 
 Just wrap your stuff in a
 ```hlsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
-// Do something awesome.
+	// Do something awesome.
 #endif
 ```
 
@@ -746,10 +746,10 @@ UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
 float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV)
 {
 	#if defined(UNITY_REVERSED_Z)
-	zDepthFromMap = 1 - zDepthFromMap;
+		zDepthFromMap = 1 - zDepthFromMap;
 
-	// When using a mirror, the far plane is whack.  This just checks for it and aborts.
-	if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
+		// When using a mirror, the far plane is whack.  This just checks for it and aborts.
+		if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
 	#endif
 
 	float4 clipPos = float4(screenUV.xy, zDepthFromMap, 1.0);
@@ -1098,7 +1098,7 @@ sampler2D _GrabTexture;
 ```hlsl
 float2 grabuv = i.uv;
 #if !UNITY_UV_STARTS_AT_TOP
-grabuv.y = 1 - grabuv.y;
+	grabuv.y = 1 - grabuv.y;
 #endif
 fixed4 col = tex2D(_GrabTexture, grabuv);
 ```
@@ -1126,7 +1126,7 @@ uniform float4 _CameraDepthTexture_TexelSize;
 And to check it:
 ```hlsl
 #ifndef SHADER_TARGET_SURFACE_ANALYSIS
-_CameraDepthTexture.GetDimensions(width, width);
+	_CameraDepthTexture.GetDimensions(width, width);
 #endif
 ```
 
@@ -1478,7 +1478,7 @@ or, if you only want to build used features,
 And in your shader
 ```hlsl
 #if _is_torso_local
- // Do something
+	// Do something
 #endif
 ```
 
@@ -1497,7 +1497,7 @@ In your shader block:
 In your code:
 ```hlsl
 #if defined(_SUNDISK_SIMPLE)
-// Do stuff
+	// Do stuff
 ```
 
 ## Variants you can ditch (thanks, Three)
