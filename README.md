@@ -131,7 +131,8 @@ bool isMirror()
 
 Or a more succinct but confusing way from @OwenTheProgrammer
 ```hlsl
-bool isMirror() {
+bool isMirror()
+{
 	//return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
 	return (asuint(unity_CameraProjection[2][0]) || asuint(unity_CameraProjection[2][1]));
 }
@@ -163,7 +164,8 @@ A helpful comment from error.mdl on why the old `UNITY_MATRIX_P._13` method is n
 With that and some additional advice from d4rkpl4y3r and vetting from techanon we get:
 
 ```hlsl
-bool isVR() {
+bool isVR()
+{
 	#if defined(USING_STEREO_MATRICES)
 		return true;
 	#else
@@ -194,11 +196,10 @@ Desktop will have left-eye/right-eye always be respectively true/false.
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
 
-bool isMirror() {
-	return _VRChatMirrorMode > 0;
-}
+bool isMirror() { return _VRChatMirrorMode > 0; }
 
-bool isVR() {
+bool isVR()
+{
 	#if defined(USING_STEREO_MATRICES)
 		return true;
 	#else
@@ -220,15 +221,18 @@ Add camera detection to the mix.
 Thanks, @scruffyruffles for this!
 
 ```hlsl
-bool isVRHandCamera() {
+bool isVRHandCamera()
+{
 	return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
 }
 
-bool isVRHandCameraPreview() {
+bool isVRHandCameraPreview()
+{
 	return isVRHandCamera() && _ScreenParams.y == 720;
 }
 
-bool isPanorama() {
+bool isPanorama()
+{
 	// Crude method
 	// FOV=90=camproj=[1][1]
 	return unity_CameraProjection[1][1] == 1 && _ScreenParams.x == 1075 && _ScreenParams.y == 1025;
@@ -241,7 +245,8 @@ With [vrchat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrc
 ```hlsl
 uniform float _VRChatCameraMode;
 
-bool isVRHandCamera() {
+bool isVRHandCamera()
+{
 	// old method
 	// return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
 	// new method using vrchat shader global
@@ -466,7 +471,8 @@ saturate(v) == v
 ```
 But because you may not have the prototype you want you may need to add something like:
 ```hlsl
-inline int withinUnitSquare(float2 uv) {
+inline int withinUnitSquare(float2 uv)
+{
 	return (saturate(uv.x) == uv.x) & (saturate(uv.y) == uv.y);
 }
 ```
@@ -479,7 +485,8 @@ Make sure to add a shadowcast to your shader, otherwise shadows will look super 
 This is credit to @mochie
 
 ```hlsl
-Pass {
+Pass
+{
 	Tags {"LightMode" = "ShadowCaster"}
 	CGPROGRAM
 	#pragma vertex vert
@@ -488,19 +495,22 @@ Pass {
 	#pragma multi_compile_shadowcaster
 	#include "UnityCG.cginc"
 
-	struct appdata {
+	struct appdata
+	{
 		float4 vertex : POSITION;
 		float3 normal : NORMAL;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
 	};
 
-	struct v2f {
+	struct v2f
+	{
 		float4 pos : SV_POSITION;
 		UNITY_VERTEX_INPUT_INSTANCE_ID 
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
 
-	v2f vert (appdata v){
+	v2f vert (appdata v)
+	{
 		v2f o = (v2f)0;
 		UNITY_SETUP_INSTANCE_ID(v);
 		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -508,7 +518,8 @@ Pass {
 		return o;
 	}
 
-	float4 frag (v2f i) : SV_Target {
+	float4 frag (v2f i) : SV_Target
+	{
 		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 		return 0;
 	}
@@ -812,7 +823,8 @@ Note: Don't forget to add `alpha` if you are using alpha!
 
 ```hlsl
 #pragma surface surf Lambert vertex:vert
-struct Input {
+struct Input
+{
 	float3 viewDir;
 	float4 color : COLOR;
 	float2 uv_MainTex;
@@ -829,13 +841,15 @@ struct Input {
 
 
 float _Amount;
-void vert (inout appdata_full v, out Input o) {
+void vert (inout appdata_full v, out Input o)
+{
 	v.vertex.xyz += v.normal * _Amount;
 	UNITY_INITIALIZE_OUTPUT(Input,o);
 	o.customColor = abs(v.normal);
 }
 sampler2D _MainTex;
-void surf (Input IN, inout SurfaceOutput o) {
+void surf (Input IN, inout SurfaceOutput o)
+{
 	o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
 }
 ```
@@ -894,19 +908,26 @@ ERROR.mdl provides this tessellation shader:
 
 ```hlsl
 
-Shader "Error.mdl/Single Pass Stereo Instancing Example" {
-Properties {
-
+Shader "Error.mdl/Single Pass Stereo Instancing Example"
+{
+Properties
+{
 	_TesselationUniform("Tesselation Factor", Float) = 1
 	_Color("Color", color) = (0,0.7,0.9,1)
 }
 
-SubShader {
-	Tags { "RenderType"="Opaque" "Queue"="Transparent+50" }
+SubShader
+{
+	Tags
+	{
+		"RenderType"="Opaque"
+		"Queue"="Transparent+50"
+	}
 	LOD 100
 	Blend SrcAlpha OneMinusSrcAlpha
 
-	Pass {
+	Pass
+	{
 		CGPROGRAM
 		#include "UnityCG.cginc"
 		#pragma vertex VertexProgram
@@ -917,14 +938,16 @@ SubShader {
 		#pragma target 5.0
 
 
-		struct appdata_t {
+		struct appdata_t
+		{
 			float4 vertex : POSITION;
 			float2 texcoord : TEXCOORD0;
 			float3 normal : NORMAL;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 		};
 
-		struct appdata_tess {
+		struct appdata_tess
+		{
 			float4 vertex : POSITION;
 			float2 texcoord : TEXCOORD0;
 			float3 normal : NORMAL;
@@ -932,7 +955,8 @@ SubShader {
 			UNITY_VERTEX_OUTPUT_STEREO
 		};
 
-		struct v2f {
+		struct v2f
+		{
 			float4 vertex : SV_POSITION;
 			float2 texcoord : TEXCOORD0;
 			float3 normal : NORMAL;
@@ -1011,8 +1035,8 @@ SubShader {
 			TesFact factors,
 			OutputPatch<appdata_tess, 3> patch,
 			float3 barycentrCoords : SV_DomainLocation,
-			uint pid : SV_PrimitiveID
-		) {
+			uint pid : SV_PrimitiveID)
+		{
 			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
 			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
 			UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[2]);
@@ -1078,7 +1102,11 @@ CamDepthBottom.SetTargetBuffers( rtDepthThrowawayColor.colorBuffer, rtBotDepth.d
 You can add a grabpass tag outside of any pass (this happens in the SubShader tag).  You should only use `_GrabTexture` on the transparent queue as to not mess with other shaders that use the `_GrabTexture`
 
 ```hlsl
-Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+Tags
+{
+	"RenderType"="Transparent"
+	"Queue"="Transparent"
+}
 
 GrabPass
 {
@@ -1378,14 +1406,16 @@ From @lox9973
 BIG WARNING: After a lot of testing, we've found that this is slower than reading from a texture if doing intensive reads.  If you need to read from like 100 of these in a shader, probably best to move it into a texture first.
 
 ```hlsl
-cbuffer SampleBuffer {
+cbuffer SampleBuffer
+{
 	float _Samples[1023*4] : packoffset(c0);
 	float _Samples0[1023] : packoffset(c0);
 	float _Samples1[1023] : packoffset(c1023);
 	float _Samples2[1023] : packoffset(c2046);
 	float _Samples3[1023] : packoffset(c3069);
 };
-float frag(float2 texcoord : TEXCOORD0) : SV_Target {
+float frag(float2 texcoord : TEXCOORD0) : SV_Target
+{
 	uint k = floor(texcoord.x * _CustomRenderTextureInfo.x);
 	float sum = 0;
 	for(uint i=k; i<4092; i++)
@@ -1397,7 +1427,8 @@ float frag(float2 texcoord : TEXCOORD0) : SV_Target {
 ```
 and
 ```cs
-void Update() {
+void Update()
+{
 	source.GetOutputData(samples, 0);
 	System.Array.Copy(samples, 4096-1023*4, samples0, 0, 1023);
 	System.Array.Copy(samples, 4096-1023*3, samples1, 0, 1023);
@@ -1413,7 +1444,8 @@ https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-con
 
 CBuffers:
 ```hlsl
-Properties {
+Properties
+{
 ...
 
 	_Spread00 ("Spine", Vector) = (40, 40, 40, 1)
@@ -1431,7 +1463,8 @@ Properties {
 
 CGPROGRAM
 ...
-cbuffer SpreadBuffer {
+cbuffer SpreadBuffer
+{
 	float4 _Spread[6][2] : packoffset(c0);
 	float4 _Spread00 : packoffset(c0);
 	float4 _Spread01 : packoffset(c1);
@@ -1439,7 +1472,8 @@ cbuffer SpreadBuffer {
 	float4 _Spread50 : packoffset(c10);
 	float4 _Spread51 : packoffset(c11);
 };
-cbuffer FingerBuffer {
+cbuffer FingerBuffer
+{
 	float4 _Finger[10] : packoffset(c0);
 	float4 _Finger00 : packoffset(c0);
 	...
