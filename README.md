@@ -240,7 +240,7 @@ bool isPanorama()
 ```
 
 
-With [vrchat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals) we can update one of the methods for more reliability.
+With the [VRChat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals) we can update one of the methods for more reliability.
 
 ```hlsl
 uniform float _VRChatCameraMode;
@@ -249,7 +249,7 @@ bool isVRHandCamera()
 {
 	// old method
 	// return !isVR() && abs(UNITY_MATRIX_V[0].y) > 0.0000005;
-	// new method using vrchat shader global
+	// new method using the VRChat shader globals
 	return _VRChatCameraMode == 1;
 }
 ```
