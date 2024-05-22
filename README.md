@@ -651,7 +651,7 @@ o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 Thanks, @orels1
 
 ```hlsl
-viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
+float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 ```
 
 ## This SLERP function, found by ACiiL,
