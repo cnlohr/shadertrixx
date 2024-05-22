@@ -98,12 +98,12 @@ CNLohr Notes:
  * Sometimes adding `#pragma enable_d3d11_debug_symbols` will get the compiler to stop misbehaving.
 
 From @Lyuma
- * [flatten] (UNITY_FLATTEN macro) to force both cases of an if statement or
- * force a branch with [branch] (UNITY_BRANCH macro);
+ * `[flatten]` (UNITY_FLATTEN macro) to force both cases of an if statement or
+ * force a branch with `[branch]` (UNITY_BRANCH macro);
  * force loop to unroll with `[unroll]` (UNITY_UNROLL) or
  * force a loop with `[loop]` (UNITY_LOOP)
  * force a jump table with `[forcecase]`
- * there's also [call] for if or switch statements I think, not sure exactly how it works.
+ * there's also `[call]` for if or switch statements I think, not sure exactly how it works.
 
 ### Lyuma Beautiful Retro Pixels Technique
 
