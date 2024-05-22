@@ -473,7 +473,7 @@ saturate(v) == v
 ```
 But because you may not have the prototype you want you may need to add something like:
 ```hlsl
-inline int withinUnitSquare(float2 uv)
+int withinUnitSquare(float2 uv)
 {
 	return (saturate(uv.x) == uv.x) & (saturate(uv.y) == uv.y);
 }
