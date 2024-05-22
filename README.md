@@ -489,7 +489,7 @@ This is credit to @mochie
 ```hlsl
 Pass
 {
-	Tags {"LightMode" = "ShadowCaster"}
+	Tags { "LightMode" = "ShadowCaster" }
 	CGPROGRAM
 	#pragma vertex vert
 	#pragma fragment frag
@@ -675,7 +675,7 @@ float3 slerp(float3 start, float3 end, float percent)
 From error.mdl - This fixes issues where shaders need to get access to their local coordinates at the cost of a small amount of performance.
 
 ```hlsl
-Tags { "DisableBatching"="true" }
+Tags { "DisableBatching" = "True" }
 ```
 
 ## Screen Space Texture with SPS-I
@@ -922,8 +922,8 @@ SubShader
 {
 	Tags
 	{
-		"RenderType"="Opaque"
-		"Queue"="Transparent+50"
+		"RenderType" = "Opaque"
+		"Queue" = "Transparent+50"
 	}
 	LOD 100
 	Blend SrcAlpha OneMinusSrcAlpha
@@ -1106,8 +1106,8 @@ You can add a grabpass tag outside of any pass (this happens in the SubShader ta
 ```hlsl
 Tags
 {
-	"RenderType"="Transparent"
-	"Queue"="Transparent"
+	"RenderType" = "Transparent"
+	"Queue" = "Transparent"
 }
 
 GrabPass
