@@ -196,7 +196,7 @@ Desktop will have left-eye/right-eye always be respectively true/false.
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
 
-bool isMirror() { return _VRChatMirrorMode > 0; }
+bool isMirror() { return _VRChatMirrorMode != 0; }
 
 bool isVR()
 {
@@ -212,7 +212,7 @@ bool isRightEye()
 	#if defined(USING_STEREO_MATRICES)
 		return unity_StereoEyeIndex == 1;
 	#else
-		return _VRChatMirrorMode == 1 && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
+		return isVR() && mul(unity_WorldToCamera, float4(_VRChatMirrorCameraPos, 1)).x < 0;
 	#endif
 }
 ```
@@ -361,10 +361,12 @@ Thanks, @d4rkpl4y3r
 uniform float _VRChatMirrorMode;
 uniform float3 _VRChatMirrorCameraPos;
 
+bool isMirror() { return _VRChatMirrorMode != 0; }
+
 #if defined(USING_STEREO_MATRICES)
 	float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 #else
-	float3 PlayerCenterCamera = _VRChatMirrorMode != 0 ? _VRChatMirrorCameraPos : _WorldSpaceCameraPos.xyz;
+	float3 PlayerCenterCamera = isMirror() ? _VRChatMirrorCameraPos : _WorldSpaceCameraPos.xyz;
 #endif
 ```
 
