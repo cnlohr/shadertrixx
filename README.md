@@ -148,6 +148,7 @@ For VRChat specifically we can use the shader globals more more a reliable mirro
 
 ```hlsl
 uniform float _VRChatMirrorMode;
+
 bool isMirror() { return _VRChatMirrorMode != 0; }
 ```
 
@@ -183,6 +184,7 @@ bool isRightEye()
 }
 
 bool isLeftEye() { return !isRightEye(); }
+
 bool isDesktop() { return !isVR() && abs(UNITY_MATRIX_V[0].y) < 0.0000005; }
 ```
 
@@ -825,6 +827,7 @@ Note: Don't forget to add `alpha` if you are using alpha!
 
 ```hlsl
 #pragma surface surf Lambert vertex:vert
+
 struct Input
 {
 	float3 viewDir;
@@ -841,15 +844,17 @@ struct Input
 	float3 customColor;
 };
 
-
 float _Amount;
+
 void vert (inout appdata_full v, out Input o)
 {
 	v.vertex.xyz += v.normal * _Amount;
 	UNITY_INITIALIZE_OUTPUT(Input,o);
 	o.customColor = abs(v.normal);
 }
+
 sampler2D _MainTex;
+
 void surf (Input IN, inout SurfaceOutput o)
 {
 	o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * IN.customColor.rgb;
@@ -939,7 +944,6 @@ SubShader
 		#pragma fragment frag
 		#pragma target 5.0
 
-
 		struct appdata_t
 		{
 			float4 vertex : POSITION;
@@ -1019,7 +1023,6 @@ SubShader
 			return o;
 		}
 
-
 		[UNITY_domain("tri")]
 		[UNITY_outputcontrolpoints(3)]
 		[UNITY_outputtopology("triangle_cw")]
@@ -1058,7 +1061,6 @@ SubShader
 			
 			return DomainVert(data);
 		}
-
 
 		[maxvertexcount(3)]
 		void GeometryProgram(triangle v2f p[3], inout LineStream<v2f> triStream)
@@ -1416,6 +1418,7 @@ cbuffer SampleBuffer
 	float _Samples2[1023] : packoffset(c2046);
 	float _Samples3[1023] : packoffset(c3069);
 };
+
 float frag(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	uint k = floor(texcoord.x * _CustomRenderTextureInfo.x);
@@ -1474,6 +1477,7 @@ cbuffer SpreadBuffer
 	float4 _Spread50 : packoffset(c10);
 	float4 _Spread51 : packoffset(c11);
 };
+
 cbuffer FingerBuffer
 {
 	float4 _Finger[10] : packoffset(c0);
@@ -1887,11 +1891,13 @@ float4 PackIndex(uint index)
 	uint3 packed = uint3(index, (index >> 7), (index >> 14)) & 0x7F;
 	return float4(packed, 256);
 }
+
 uint UnpackScalar(uint3 data)
 {
 	data = data & 0x7F;
 	return data.x | (data.y << 7) | (data.z << 14);
 }
+
 uint3 UnpackData(uint4 data)
 {
 	float4 raw = asfloat(data);
