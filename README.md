@@ -423,8 +423,8 @@ fixed2x2 mm2( fixed th ) // farbrice neyret magic number rotate 2x2
 Assuming to/from are normalized.
 
 ```hlsl
-vec3 half = normalize( from + to );
-vec4 quat( cross( to, half ), dot( to, half ) );
+float3 half = normalize( from + to );
+float4 quat = float4( cross( to, half ), dot( to, half ) );
 ```
 
 Note that this does not do well in heavy opposition.
