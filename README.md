@@ -493,10 +493,12 @@ Pass
 {
 	Tags { "LightMode" = "ShadowCaster" }
 	CGPROGRAM
-	#pragma vertex vert
-	#pragma fragment frag
 	#pragma multi_compile_instancing
 	#pragma multi_compile_shadowcaster
+
+	#pragma vertex vert
+	#pragma fragment frag
+
 	#include "UnityCG.cginc"
 
 	struct appdata
@@ -881,6 +883,7 @@ Shader "Unlit/meme"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+
 			#include "UnityCG.cginc"
 
 			struct v2f
@@ -936,13 +939,15 @@ SubShader
 	Pass
 	{
 		CGPROGRAM
-		#include "UnityCG.cginc"
+		#pragma target 5.0
+
 		#pragma vertex VertexProgram
 		#pragma hull HullProgram
 		#pragma domain DomainProgram
 		#pragma geometry GeometryProgram
 		#pragma fragment frag
-		#pragma target 5.0
+
+		#include "UnityCG.cginc"
 
 		struct appdata_t
 		{
