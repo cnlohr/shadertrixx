@@ -1138,11 +1138,14 @@ Shader "ReferencePointToGeometryShader"
 		Pass
 		{
 			CGPROGRAM
+			#pragma target 5.0
+
+			#pragma multi_compile_fog
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma geometry geo
-			#pragma multi_compile_fog
-			#pragma target 5.0
+
 			#include "UnityCG.cginc"
 
 			struct appdata
@@ -1265,13 +1268,16 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 		Pass
 		{
 			CGPROGRAM
+			#pragma target 5.0
+
+			#pragma multi_compile_fog
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma domain DomainProgram
 			#pragma hull HullProgram
 			#pragma geometry geo
-			#pragma multi_compile_fog
-			#pragma target 5.0
+
 			#include "UnityCG.cginc"
 
 			// INPUT: two-index line.
