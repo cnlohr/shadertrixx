@@ -1128,14 +1128,18 @@ Shader "ReferencePointToGeometryShader"
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		Tags
+		{
+			"RenderType"="Transparent"
+			"Queue"="Transparent"
+		}
 		Cull Off
 
 		Pass
 		{
 			CGPROGRAM
 			#pragma vertex vert
-			#pragma fragment frag			
+			#pragma fragment frag
 			#pragma geometry geo
 			#pragma multi_compile_fog
 			#pragma target 5.0
@@ -1169,15 +1173,14 @@ Shader "ReferencePointToGeometryShader"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //SPS-I
 				return o;
 			}
-			
+
 			[maxvertexcount(96)]
-			
 			[instance(32)]
-			void geo( point v2g input[1], inout TriangleStream<g2f> triStream,
+			void geo(point v2g input[1], inout TriangleStream<g2f> triStream,
 				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID /* Always 0 for points? */ )
 			{
 				float3 objectCenter = float3( geoPrimID/64, geoPrimID%64, instanceID );
-				
+
 				g2f p[3];
 
 				int vtx;
@@ -1201,11 +1204,9 @@ Shader "ReferencePointToGeometryShader"
 					objectCenter.z += 32;
 				}
 			}
-			
 
 			fixed4 frag (g2f i) : SV_Target
 			{
-			
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); //SPS-I
 
 				fixed4 col = i.uvab;
@@ -1254,7 +1255,11 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Transparet" "Queue"="Transparent" }
+		Tags
+		{
+			"RenderType"="Transparet"
+			"Queue"="Transparent"
+		}
 		Cull Off
 
 		Pass
@@ -1277,12 +1282,13 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				// Note: For 2-index line segments, SV_VertexID doesn't seem to update.
 			};
 
-			struct v2t {
+			struct v2t
+			{
 				float4 vertex : POSITION;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
-			
+
 			#define TESS_FACTORX 64
 			#define TESS_FACTORY 64
 
@@ -1297,8 +1303,6 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				uint pidX : PIDX;
 				uint pidY : PIDY;
 			};
-
-
 
 			struct g2f
 			{
@@ -1318,8 +1322,8 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				//o.iid = iid;
 				return o;
 			}
-			
-			TesFact  PatchConstFunc(InputPatch<v2t, 1> patch)
+
+			TesFact PatchConstFunc(InputPatch<v2t, 1> patch)
 			{
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
 				TesFact f;
@@ -1346,13 +1350,13 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				TesFact factors,
 				OutputPatch<v2t, 2> patch,
 				float2 barycentrCoords : SV_DomainLocation,
-				uint pid : SV_PrimitiveID
-			) {
+				uint pid : SV_PrimitiveID)
+			{
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[0]);
 				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(patch[1]);
 				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[1], data)
-				
+
 				t2g o;
 				UNITY_INITIALIZE_OUTPUT(t2g, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -1360,18 +1364,18 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				o.pidY = round( barycentrCoords.y * TESS_FACTORY);
 				return o;
 			}
-			
+
 			[maxvertexcount(128)]
 			[instance(32)]
-			void geo( point t2g input[1], inout TriangleStream<g2f> triStream,
-				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID )
+			void geo(point t2g input[1], inout TriangleStream<g2f> triStream,
+				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID)
 			{
 				uint vid = input[0].pidX;
 				uint vid2 = input[0].pidY;
 				float3 objectCenter = float3( vid, vid2, instanceID );
-				
+
 				g2f p[3];
-				
+
 				p[0].vertex = mul( UNITY_MATRIX_VP, float4( objectCenter.xyz + float3( 0.0, 0.0, 0.0 ), 1.0 ) );
 				p[1].vertex = mul( UNITY_MATRIX_VP, float4( objectCenter.xyz + float3( 0.0, 0.5, 0.0 ), 1.0 ) );
 				p[2].vertex = mul( UNITY_MATRIX_VP, float4( objectCenter.xyz + float3( 0.5, 0.0, 0.0 ), 1.0 ) );
@@ -1384,11 +1388,9 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				triStream.Append(p[1]);
 				triStream.Append(p[2]);
 			}
-			
 
 			fixed4 frag (g2f i) : SV_Target
 			{
-			
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); //SPS-I
 
 				fixed4 col = 10.0;
@@ -1400,8 +1402,6 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 	}
 }
 ```
-
-
 
 
 ## Using depth cameras on avatars.
