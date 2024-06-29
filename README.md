@@ -1130,8 +1130,8 @@ Shader "ReferencePointToGeometryShader"
 	{
 		Tags
 		{
-			"RenderType"="Transparent"
-			"Queue"="Transparent"
+			"RenderType" = "Transparent"
+			"Queue" = "Transparent"
 		}
 		Cull Off
 
@@ -1260,8 +1260,8 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 	{
 		Tags
 		{
-			"RenderType"="Transparet"
-			"Queue"="Transparent"
+			"RenderType" = "Transparet"
+			"Queue" = "Transparent"
 		}
 		Cull Off
 
@@ -1316,7 +1316,7 @@ Shader "WorldgenGeo/WorldgenGeo_TESS_DO_NOT_USE"
 				UNITY_VERTEX_OUTPUT_STEREO //SPS-I
 			};
 
-			v2t vert(appdata v )
+			v2t vert(appdata v)
 			{
 				// For some reason vid and iid can't be trusted here.
 				// We just have to trust SV_PrimitiveID in the next step.
