@@ -105,6 +105,53 @@ From @Lyuma
  * force a jump table with `[forcecase]`
  * there's also `[call]` for if or switch statements I think, not sure exactly how it works.
 
+### Treating textures as a linear array
+
+From @d4rkpl4y3r - Use the order it's stored in VRAM (or generally close to it).  You can use `MortonIndex32` to get the coordinate associated with a linear element, and `DeinterleaveWithZero32` to go from a coordinate to a linear value.
+
+```c
+// adapted from: https://lemire.me/blog/2018/01/08/how-fast-can-you-bit-interleave-32-bit-integers/
+uint InterleaveWithZero32(uint word)
+{
+    word = (word ^ (word << 8)) & 0x00ff00ff;
+    word = (word ^ (word << 4)) & 0x0f0f0f0f;
+    word = (word ^ (word << 2)) & 0x33333333;
+    word = (word ^ (word << 1)) & 0x55555555;
+    return word;
+}
+
+// adapted from: https://stackoverflow.com/questions/3137266/how-to-de-interleave-bits-unmortonizing
+uint DeinterleaveWithZero32(uint word)
+{
+    word &= 0x55555555;
+    word = (word | (word >> 1)) & 0x33333333;
+    word = (word | (word >> 2)) & 0x0f0f0f0f;
+    word = (word | (word >> 4)) & 0x00ff00ff;
+    word = (word | (word >> 8)) & 0x0000ffff;
+    return word;
+}
+
+uint2 MortonIndex32(uint index)
+{
+    return uint2(DeinterleaveWithZero32(index), DeinterleaveWithZero32(index >> 1));
+}
+
+uint DemortonIndex32(uint2 index)
+{
+    return InterleaveWithZero32(index.x) | (InterleaveWithZero32(index.y) << 1);
+}
+```
+
+And if you want to advance along without unfurling everything...
+```c
+uint2 NextMortonIndex(uint2 index)
+{
+    uint2 mask = index ^ (index + 1);
+    return index ^ uint2(mask.x & mask.y, (mask.x >> 1) & mask.y);
+}
+```
+
+
 ### Lyuma Beautiful Retro Pixels Technique
 
 If you want to use pixels but make the boundaries between the pixels be less ugly, use this:
