@@ -6,6 +6,7 @@ Quick links to other useful resources and infodumps. Some information may be dup
 - https://shaderwiki.skuld.moe/index.php/Main_Page
 - https://github.com/pema99/shader-knowledge
 - https://tips.orels.sh
+- https://hilll.dev/thoughts/unity-shaders
 
 ## The most important trick
 
