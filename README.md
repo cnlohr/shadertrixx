@@ -167,6 +167,35 @@ Note: This technique is based off of this shader here: https://gist.github.com/l
 
 You should also see Pixel Standard by S-ilent. https://twitter.com/silent0264/status/1386150307386720256
 
+There is a similar technique from Bgolus, https://www.shadertoy.com/view/ltBfRD which introduces two functions:
+```glsl
+vec2 uv_aa_linear( vec2 uv, vec2 res, float width )
+{
+    uv = uv * res;
+    vec2 uv_floor = floor(uv + 0.5);
+    uv = uv_floor + clamp( (uv - uv_floor) / fwidth(uv) / width, -0.5, 0.5);
+    return uv / res;
+}
+
+vec2 uv_aa_smoothstep( vec2 uv, vec2 res, float width )
+{
+    uv = uv * res;
+    vec2 uv_floor = floor(uv + 0.5);
+    vec2 uv_fract = fract(uv + 0.5);
+    vec2 uv_aa = fwidth(uv) * width * 0.5;
+    uv_fract = smoothstep(
+        vec2(0.5) - uv_aa,
+        vec2(0.5) + uv_aa,
+        uv_fract
+        );
+    
+    return (uv_floor + uv_fract - 0.5) / res;
+}
+```
+
+Which looks really convincing, but the technique needs to be paired with something else if you ever expect your texture pixels to take less than 1px on the screen.
+
+
 ### Are you in a mirror?
 Thanks, @Lyuma and @merlinvr for this one.
 
