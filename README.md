@@ -319,7 +319,7 @@ bool isPanorama()
 ```
 
 
-With the [VRChat shader globals](https://creators.vrchat.com/worlds/vrc-graphics/vrchat-shader-globals) we can update one of the methods for more reliability.
+With the [VRChat shader globals](https://creators.vrchat.com/worlds/udon/vrc-graphics/vrchat-shader-globals/) we can update one of the methods for more reliability.
 
 ```hlsl
 uniform float _VRChatCameraMode;
