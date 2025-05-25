@@ -2369,6 +2369,7 @@ BuildSettings bs = new BuildSettings();
 	//bs.group = 0;
 	bs.target = bt;
 	//bs.typeDB
+// This uses bs to read back buts.
 SceneDependencyInfo sdi = ContentBuildInterface.CalculatePlayerDependenciesForScene(currentScene.path, bs, buts);
 
 FieldInfo GetBuildTargetSelectionField = typeof(BuildSettings).GetField("m_Target", 
