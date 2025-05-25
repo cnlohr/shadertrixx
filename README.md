@@ -1,6 +1,6 @@
 # shadertrixx
 
-CNLohr's repo for his Unity assets and other shader notes surrounding VRChat.  This largely contains stuff made by other people but I have kind of collected.
+CNLohr's repo for his Unity assets and other shader notes surrounding VRChat, Unity and/or Basis.  This largely contains stuff made by other people but I have kind of collected.
 
 Quick links to other useful resources and infodumps. Some information may be duplicated between locations.
 - https://shaderwiki.skuld.moe/index.php/Main_Page
@@ -2332,3 +2332,61 @@ Blend DstAlpha Zero, One Zero
 return float4( 1, 1, 1, ID );
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Super Cursed Stuff
+
+### Use internal APIs to read raw shader compiled data, and create a new shader from that data.
+```cs
+BuildTarget bt = 
+	BuildTarget.StandaloneLinux64;
+	//BuildTarget.StandaloneWindows;
+	//BuildTarget.Android;
+BuildUsageTagSet buts = new BuildUsageTagSet();
+Scene currentScene = SceneManager.GetActiveScene();
+
+BuildSettings bs = new BuildSettings();
+//bs.buildFlags = 0;
+//bs.group = 0;
+bs.target = bt;
+//bs.typeDB
+SceneDependencyInfo sdi = ContentBuildInterface.CalculatePlayerDependenciesForScene(currentScene.path, bs, buts);
+
+FieldInfo GetBuildTargetSelectionField = typeof(BuildSettings).GetField("m_Target", 
+	BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+		
+object bts = GetBuildTargetSelectionField.GetValue( bs );
+
+MethodInfo dynMethodGCD = typeof(ShaderUtil).GetMethod("GetCompiledData", 
+	BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+byte[] data = (byte[])dynMethodGCD.Invoke(null, new object[] { 
+	shdExport,
+	buts, //new BuildUsageTagSet(),
+	ContentBuildInterface.GetGlobalUsageFromActiveScene(bt), //new BuildUsageTagGlobal(),
+	bts,
+	true });
+
+using (FileStream fs = File.Open("test.dat", FileMode.Create, FileAccess.Write, FileShare.None))
+{
+	fs.Write(data,0,data.Length);
+	fs.Close();
+}
+
+Debug.Log( "Data: " + data.Length + " bytes" );
+MethodInfo dynMethod = typeof(Shader).GetMethod("CreateFromCompiledData", 
+	BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+Shader[] dependencies = new Shader[0];
+matReimport.shader = (Shader)dynMethod.Invoke(null, new object[] { data, dependencies });
+```
