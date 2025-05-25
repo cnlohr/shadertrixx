@@ -2349,7 +2349,14 @@ return float4( 1, 1, 1, ID );
 # Super Cursed Stuff
 
 ### Use internal APIs to read raw shader compiled data, and create a new shader from that data.
+
+You could theoretically use this to stream shaders into a game.
+
 ```cs
+Shader shdExport;
+
+Material matReimport;
+
 BuildTarget bt = 
 	BuildTarget.StandaloneLinux64;
 	//BuildTarget.StandaloneWindows;
@@ -2358,10 +2365,10 @@ BuildUsageTagSet buts = new BuildUsageTagSet();
 Scene currentScene = SceneManager.GetActiveScene();
 
 BuildSettings bs = new BuildSettings();
-//bs.buildFlags = 0;
-//bs.group = 0;
-bs.target = bt;
-//bs.typeDB
+	//bs.buildFlags = 0;
+	//bs.group = 0;
+	bs.target = bt;
+	//bs.typeDB
 SceneDependencyInfo sdi = ContentBuildInterface.CalculatePlayerDependenciesForScene(currentScene.path, bs, buts);
 
 FieldInfo GetBuildTargetSelectionField = typeof(BuildSettings).GetField("m_Target", 
