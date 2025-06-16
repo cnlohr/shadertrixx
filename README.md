@@ -2332,7 +2332,80 @@ Blend DstAlpha Zero, One Zero
 return float4( 1, 1, 1, ID );
 ```
 
+# URP
 
+## Example URP Shader
+
+```glsl
+Shader "Unlit/MyDefaultShader"
+{
+    Properties
+    {
+        _Color ("Color", Color) = ( 1., 1., 1. ,1. )
+    }
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalRenderPipeline" }
+
+        // Used for rendering Shadowmaps
+        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
+
+        // Used for handling Depth Buffer (DBuffer) and Depth Priming
+        UsePass "Universal Render Pipeline/Lit/DepthOnly"
+        UsePass "Universal Render Pipeline/Lit/DepthNormals"
+
+        // Used for Baking GI. This pass is stripped from build.
+        UsePass "Universal Render Pipeline/Lit/Meta"
+
+        Pass
+        {
+            Tags { "LightMode"="UniversalForward" }
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+				UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+
+            CBUFFER_START(UnityPerMaterial)
+	            float4 _Color;
+            CBUFFER_END
+
+
+            v2f vert (appdata v)
+            {
+                v2f o = (v2f)0;
+				UNITY_SETUP_INSTANCE_ID( v );
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+                o.vertex = TransformObjectToHClip(v.vertex.xyz);
+                o.uv = v.uv;
+                return o;
+            }
+
+            float4 frag (v2f i) : SV_Target
+            {
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
+                return _Color;
+            }
+            ENDHLSL
+        }
+    }
+}
+```
 
 
 
