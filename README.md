@@ -8,7 +8,7 @@ Quick links to other useful resources and infodumps. Some information may be dup
 - https://tips.orels.sh
 - https://hilll.dev/thoughts/unity-shaders
 
-**See [#Alert for early 2022 - SPS-I and URP](#Alert for early 2022 - SPS-I and URP) for updated information about the modern way to write shaders**
+**See [#Alert for early 2022 - SPS-I and URP](#alert-for-early-2022---sps-i-and-urp) for updated information about the modern way to write shaders**
 
 ## The most important trick
 
