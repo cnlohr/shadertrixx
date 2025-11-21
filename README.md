@@ -8,6 +8,8 @@ Quick links to other useful resources and infodumps. Some information may be dup
 - https://tips.orels.sh
 - https://hilll.dev/thoughts/unity-shaders
 
+**See [# Alert for early 2022 - SPS-I and URP](# Alert for early 2022 - SPS-I and URP) for updated information about the modern way to write shaders**
+
 ## The most important trick
 
 ```hlsl
@@ -20,57 +22,6 @@ Also note: Using this trick in some situations actually produces smaller code th
 
 Thanks, @d4rkpl4y3r - this originally actually comes from an epic bgolus forum post: https://forum.unity.com/threads/translating-a-glsl-shader-noise-algorithm-to-hlsl-cg.485750/
 
-## Alert for early 2022
-
-VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I. Do the following: Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below.
-
-### Add instancing support
-
-Add this to your appdata:
-```hlsl
-UNITY_VERTEX_INPUT_INSTANCE_ID
-```
-
-Add this to your `v2f` struct:
-```hlsl
-UNITY_VERTEX_OUTPUT_STEREO
-```
-
-Add this to your `vertex` shader:
-```hlsl
-UNITY_SETUP_INSTANCE_ID( v );
-UNITY_INITIALIZE_OUTPUT( v2f, o );
-UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
-```
-
-In your `fragment` - or ANY other shaders that ostensibly take in the `v2f` struct, i.e. `patch`, `hull`:
-```hlsl
-UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
-```
-
-If you are using a `domain` shader, you will need something like this:
-```hlsl
-UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
-UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
-```
-
-### Converting Camera Depth Texture
-```hlsl
-Was:
-	sampler2D _CameraDepthTexture;
-	float depth = LinearEyeDepth( UNITY_SAMPLE_DEPTH( tex2D( _CameraDepthTexture, screenUV ) ) );
-
-Or:
-	Texture2D _CameraDepthTexture;
-	float depth = LinearEyeDepth( _CameraDepthTexture.Sample( sampler_CameraDepthTexture, screenUV ) );
-
-Now:
-	UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
-	float depth = LinearEyeDepth( SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV) );
-```
-
-*NOTE*: You may want to consider `GetLinearZFromZDepth_WorksWithMirrors` (see below).
-
 ## Struggling with shader type mismatches?
 
 You can put this at the top of your shader to alert you to when you forgot a `float3` and wrote `float` by accident.
@@ -78,6 +29,8 @@ You can put this at the top of your shader to alert you to when you forgot a `fl
 ```hlsl
 #pragma warning (default : 3206) // implicit truncation
 ```
+
+
 
 ## Basics of shader coding:
 
@@ -2407,18 +2360,6 @@ Shader "Unlit/MyDefaultShader"
 }
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 # Super Cursed Stuff
 
 ### Use internal APIs to read raw shader compiled data, and create a new shader from that data.
@@ -2470,4 +2411,79 @@ MethodInfo dynMethod = typeof(Shader).GetMethod("CreateFromCompiledData",
 	BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 Shader[] dependencies = new Shader[0];
 matReimport.shader = (Shader)dynMethod.Invoke(null, new object[] { data, dependencies });
+```
+
+
+
+
+
+
+# Alert for early 2022 - SPS-I and URP
+
+VRChat is switching to SPS-I.  Please perform the following to test your shaders against SPS-I. Do the following: Project Settings->Player->XR Settings: Add a mock HMD as an output and drag it to the top, then switch to single pass instanced in the dropdown below.
+
+### Add instancing support
+
+Add this to your appdata:
+```hlsl
+UNITY_VERTEX_INPUT_INSTANCE_ID
+```
+
+Add this to your `v2f` struct:
+```hlsl
+UNITY_VERTEX_OUTPUT_STEREO
+```
+
+Add this to your `vertex` shader:
+```hlsl
+UNITY_SETUP_INSTANCE_ID( v );
+UNITY_INITIALIZE_OUTPUT( v2f, o );
+UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
+```
+
+In your `fragment` - or ANY other shaders that ostensibly take in the `v2f` struct, i.e. `patch`, `hull`:
+```hlsl
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
+```
+
+If you are using a `domain` shader, you will need something like this:
+```hlsl
+UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(patch[0], data)
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(data)
+```
+
+### Converting Camera Depth Texture
+```hlsl
+Was:
+	sampler2D _CameraDepthTexture;
+	float depth = LinearEyeDepth( UNITY_SAMPLE_DEPTH( tex2D( _CameraDepthTexture, screenUV ) ) );
+
+Or:
+	Texture2D _CameraDepthTexture;
+	float depth = LinearEyeDepth( _CameraDepthTexture.Sample( sampler_CameraDepthTexture, screenUV ) );
+
+Now:
+	UNITY_DECLARE_DEPTH_TEXTURE( _CameraDepthTexture );
+	float depth = LinearEyeDepth( SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screenUV) );
+```
+
+*NOTE*: You may want to consider `GetLinearZFromZDepth_WorksWithMirrors` (see below).
+
+
+### URP Notes
+
+Newer Unity (Unity 6+) is recommending things switch to URP, so many games are switching already, and other social VR platforms like Basis.  There's a few items to note about switching to URP. 
+
+URP uses SPS-I.
+
+`unity_ObjectToWorld` is bugged in some pipeline stages.  Recommend using  `UNITY_MATRIX_M` or `UNITY_MATRIX_MV`
+
+This does not work:
+```c
+    po.bez2 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[2], 1.0 ) ) ) );
+```
+
+This does work:
+```c
+    po.bez2 = ( mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) ) );
 ```
