@@ -7,6 +7,8 @@ Quick links to other useful resources and infodumps. Some information may be dup
 - https://github.com/pema99/shader-knowledge
 - https://tips.orels.sh
 - https://hilll.dev/thoughts/unity-shaders
+- https://github.com/d4rkc0d3r/UnityAndVRChatQuirks
+  - Covers edges cases like Differences between AMD and Nvidia, Differences between Shader Constant Folding and Runtime Evaluation and Arrays, texture lookups, and vector indexing.
 
 **See [#Alert for early 2022 - SPS-I and URP](#alert-for-early-2022---sps-i-and-urp) for updated information about the modern way to write shaders**
 
