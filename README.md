@@ -4,7 +4,6 @@ CNLohr's repo for his Unity assets and other shader notes surrounding VRChat, Un
 
 Quick links to other useful resources and infodumps. Some information may be duplicated between locations.
 - [Owen the Programmer's Shader Disassembly Reference](https://github.com/OwenTheProgrammer/The-Shader-Grimoire/blob/staging/Sections/ShaderDisassemblyReference.md)
-- https://shaderwiki.skuld.moe/index.php/Main_Page
 - https://github.com/pema99/shader-knowledge
 - https://tips.orels.sh
 - https://hilll.dev/thoughts/unity-shaders
