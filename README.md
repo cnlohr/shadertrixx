@@ -681,7 +681,11 @@ float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
 float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
 o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
+o.worldPos = worldPos;
 ```
+
+NOTE: `i.rayDir` may not be useful on lower resolution meshes, and for a "correct" answer, you will need to use `normalize( i.worldPos - i.rayOrigin )` in the fragment shader.
+
 ## How to compute camera forward in object space
 
 Thanks, @orels1
