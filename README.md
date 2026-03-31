@@ -680,11 +680,284 @@ float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
 // start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
 float3 orthoCameraPos = worldPos - orthoRayDir;
 o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
-o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
+o.rayDir = lerp( cameraToVertex, orthoRayDir, howOrtho ); // Do not do normalization in vertex shader!
 o.worldPos = worldPos;
 ```
 
-NOTE: `i.rayDir` may not be useful on lower resolution meshes, and for a "correct" answer, you will need to use `normalize( i.worldPos - i.rayOrigin )` in the fragment shader.
+## Raymarching example
+
+With shadowcasting, and instancing support.  And quest compatible!
+
+Provides:
+  1. Fog
+  2. Shadowcasting
+  3. Ortho view for raycasting.
+  4. Instancing
+  5. Quest support
+			
+```hlsl
+Shader "cnlohr/ReferenceSDF"
+{
+	Properties
+	{
+		_Repeat("Repeat", integer)=4.0
+		_maxSteps("Max Steps", integer)=30
+		_SubScale("Scale Of Objects", float)=14
+	}
+	SubShader
+	{
+        Tags { "LightMode"="ForwardBase"}
+		Tags { "RenderType"="Opaque" }
+
+		CGINCLUDE
+
+			// Provides:
+			//  1. Fog
+			//  2. Shadowcasting
+			//  3. Ortho view for raycasting.
+			//  4. Instancing
+			//  5. Quest support
+
+			#pragma vertex vert
+			#pragma target 5.0
+			#pragma multi_compile_fog
+			#pragma multi_compile_instancing
+			#pragma enable_d3d11_debug_symbols
+
+			#ifdef UNITY_PASS_SHADOWCASTER
+            #pragma multi_compile_shadowcaster
+			#endif
+
+			#include "UnityCG.cginc"
+			#include "UnityStandardCore.cginc"
+
+			// Adapt from https://iquilezles.org/articles/distfunctions/
+			#include "iquilezdist.cginc"
+
+			#ifndef glsl_mod
+			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y)))) 
+			#endif
+
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float3 normal : NORMAL;
+				float3 tangent : TANGENT;
+				float2 uv : TEXCOORD0;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct v2f
+			{
+				float4 test : TEST;
+				float3 rayOriginObject : RAY_ORIGIN;
+				float3 objectPos : OBJECT_POS;
+				float3 lightDir : LIGHT_DIR;
+				float3 rayDir : RAY_DIR;
+				float3 hitNormal : HITNORMAL;
+
+				float2 uv : TEXCOORD0;
+				UNITY_FOG_COORDS(1)
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID 
+				UNITY_VERTEX_OUTPUT_STEREO
+
+				V2F_SHADOW_CASTER;
+			};
+
+			UNITY_INSTANCING_BUFFER_START(Props)
+			UNITY_DEFINE_INSTANCED_PROP( float, _SubScale );
+			UNITY_DEFINE_INSTANCED_PROP( float, _Repeat );
+			UNITY_DEFINE_INSTANCED_PROP( float, _maxSteps );
+			UNITY_INSTANCING_BUFFER_END(Props)
+
+			v2f vert (appdata v)
+			{
+				v2f o;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+				// Shadowcaster only.
+				#if UNITY_PASS_SHADOWCASTER
+					TRANSFER_SHADOW_CASTER_NORMALOFFSET(o);
+				#endif
+
+				o.pos = UnityObjectToClipPos(v.vertex);
+				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				UNITY_TRANSFER_FOG(o,o.vertex);
+
+				// https://github.com/cnlohr/shadertrixx?tab=readme-ov-file#raycasting-with-orthographic-and-normal-cameras
+				// I saw these ortho shadow substitutions in a few places, but bgolus explains them
+				// https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
+				float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+				float3 worldSpaceCameraPos = UNITY_MATRIX_I_V._m03_m13_m23; // instead of _WorldSpaceCameraPos
+				float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+				float3 cameraToVertex = worldPos - worldSpaceCameraPos;
+				float3 orthoFwd = -UNITY_MATRIX_I_V._m02_m12_m22; // often seen: -UNITY_MATRIX_V[2].xyz;
+				float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
+				// start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
+				float3 orthoCameraPos = worldPos - orthoRayDir;
+				//o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
+
+
+				o.rayOriginObject = mul( unity_WorldToObject, float4( lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho ), 1.0 ) );
+				o.objectPos = mul( unity_WorldToObject, float4( worldPos, 1.0 ) );
+				UnityLight light = MainLight();
+				o.lightDir = mul( unity_WorldToObject, float4( light.dir, 0.0 ) );
+				o.hitNormal = v.normal;
+
+				o.rayDir = mul( unity_WorldToObject, float4( lerp( cameraToVertex, orthoRayDir, howOrtho ), 0.0 ) );
+
+				o.rayOriginObject.xyz *= _SubScale;
+				o.objectPos.xyz *= _SubScale;
+
+				o.test = howOrtho;
+
+				return o;
+			}
+
+
+			float MySDF( float3 p )
+			{
+				float heartWidth = 0.5;
+				float heartHeight = 0.6;
+
+				int3 which = _Repeat*round(p/_Repeat);
+				p = p - which; // repeat
+
+				float2 sc;
+				float2 cv;
+				float3 puse;
+				float an;
+
+				sincos( _Time.y, sc.x, sc.y );
+				puse = float3( p.x * sc.y + p.y * sc.x, p.x * sc.x - p.y * sc.y, p.z );
+				an = 2.5*(0.5+0.5*sin(_Time.y*1.1+3.0));
+				cv = float2(sin(an),cos(an)); // sin/cos must be from the same root.
+				float a = sdCappedTorus( puse, cv, .2, .1 );
+
+				sincos( _Time.y*1.4, sc.x, sc.y );
+				puse = float3( p.x * sc.y + p.y * sc.x, p.x * sc.x - p.y * sc.y, p.z );
+				an = 2.5*(0.5+0.5*sin(_Time.y*0.8+3.0));
+				cv = float2(sin(an),cos(an)); // sin/cos must be from the same root.
+				float b = sdCappedTorus( puse, cv, .4, .1 );
+
+				sincos( _Time.y*0.8, sc.x, sc.y );
+				puse = float3( p.x * sc.y + p.y * sc.x, p.x * sc.x - p.y * sc.y, p.z );
+				an = 2.5*(0.5+0.5*sin(_Time.y*0.6+3.0));
+				cv = float2(sin(an),cos(an)); // sin/cos must be from the same root.
+				float c = sdCappedTorus( puse, cv, .6, .1 );
+
+				float swargle = opSmoothUnion( b, opSmoothUnion( a, c, 0.02 ), 0.02 );
+
+
+				float smoothbox = sdRoundBox( p - float3( 0.0, 0.0, 0.1 ), float3( 1, 1, 0.1 ), 0.04 );
+				float ret = opSmoothSubtraction( swargle, smoothbox, 0.03 );
+				return ret;
+			}
+
+			float4 frag (v2f i) : SV_Target
+			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
+				float4 col = 0.;
+				int step;
+
+				// functionall the same as i.objectPos - i.rayOriginObject );
+				float3 rayDir = normalize( i.rayDir );
+				float3 pos = 0.0;
+
+				float travel = 0.0;
+
+				float sdf = 0.0;
+
+				// Do not unroll. It can be almost 2x slower to unroll on Quest.
+				[loop]
+				for( step = 0; step < _maxSteps; step++ )
+				{
+					pos = i.objectPos + rayDir * travel;
+					sdf = MySDF( pos );
+
+					int3 which = _Repeat*round(pos/_Repeat);
+					float3 pCenterStep = (pos - which) * rayDir;
+					float maxStep = _Repeat * 0.6 - max( max( pCenterStep.x, pCenterStep.y ), pCenterStep.z );
+					sdf = min( sdf, maxStep );
+
+					travel += sdf;
+					if( travel < 0 ) break;
+				}
+
+#if UNITY_PASS_SHADOWCASTER
+				clip( -sdf+0.1 );
+				SHADOW_CASTER_FRAGMENT(i)
+#else
+				if( sdf < 0.02 )
+				{
+					float3 grad;
+					if( sdf < -0.01 )
+					{
+						grad = normalize(i.hitNormal);
+					}
+					else
+					{
+						grad = normalize( float3(
+							MySDF( pos + float3( 0.02, 0.0, 0.0 ) ) - sdf,
+							MySDF( pos + float3( 0.0, 0.02, 0.0 ) ) - sdf,
+							MySDF( pos + float3( 0.0, 0.0, 0.02 ) ) - sdf ) );
+					}
+
+					UnityLight light = MainLight();
+
+					//float halflambertian = dot( grad, normalize( i.lightDir ) ) + 1.0;
+					//col = float4( light.color * lambertian * 0.5, 1.0 );
+
+					float product = max( dot( grad, normalize( i.lightDir ) ), 0 );
+					col = float4( light.color * ( product + 0.1 ), 1.0 );
+
+
+
+					//col = lerp( float4( 1.0, 0.0, 0.0, 1.0 ), float4( 1.0, 0.5, 0.5, 1.0 ),  );
+				}
+#endif
+
+				UNITY_APPLY_FOG(i.fogCoord, col);
+				return col;
+			}
+		ENDCG
+
+		// Regular pass, just go normal.
+		Pass
+		{
+			Tags { "RenderType"="Opaque" }
+
+			CGPROGRAM
+			#pragma fragment frag
+
+			ENDCG
+		}
+
+		// Shadow Pass
+		Pass
+		{
+            Tags { "LightMode"="ShadowCaster"  "DisableBatching"="true"  "Queue"="AlphaTest" }
+			Cull Back
+            CGPROGRAM
+			#pragma fragment frag
+			
+			float4 fragShadowCast(v2f i) : SV_Target
+			{
+				clip( -1 );
+                return 1.0;
+			}   
+
+			ENDCG
+		}
+	}
+}
+```
+
+
 
 ## How to compute camera forward in object space
 
